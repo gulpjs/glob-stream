@@ -26,7 +26,7 @@ var gs = require('glob-stream');
 var stream = gs.create("./files/**/*.coffee", {options - read node-glob docs});
 
 stream.on('data', function(fileName){
-  # fileName == full path
+  // fileName == full path
 });
 ```
 
