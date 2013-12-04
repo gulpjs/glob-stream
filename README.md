@@ -25,9 +25,31 @@ var gs = require('glob-stream');
 
 var stream = gs.create("./files/**/*.coffee", {options - read node-glob docs});
 
-stream.on('data', function(fileName){
-  // fileName == full path
+stream.on('data', function(file){
+  // fileName == object with path and base attrs
 });
+```
+
+You can pass a single one of these (or an array with any combination). All given must match for the file to be returned.
+
+1. Function
+
+```javascript
+var stream = gs.create(["./files/**/*.coffee", function(path){
+  return path.indexOf("something") === -1;
+}]);
+```
+
+2. RegExp
+
+```javascript
+var stream = gs.create(["./files/**/*.coffee", /stuff/]);
+```
+
+3. Glob
+
+```javascript
+var stream = gs.create(["./**/*.js", "!./node_modules/**/*.*"]);
 ```
 
 ## LICENSE
