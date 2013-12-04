@@ -1,30 +1,30 @@
 {
-   "name":"glob-stream",
-   "description":"File system globs as a stream",
-   "version":"0.1.0",
-   "homepage":"http://github.com/wearefractal/glob-stream",
-   "repository":"git://github.com/wearefractal/glob-stream.git",
-   "author":"Fractal <contact@wearefractal.com> (http://wearefractal.com/)",
-   "main":"./index.js",
-   
-   "dependencies":{
-      "glob":"*",
-      "event-stream":"*"
-   },
-   "devDependencies":{
-      "mocha":"*",
-      "should":"*"
-   },
-   "scripts":{
-      "test":"mocha"
-   },
-   "engines":{
-      "node":">= 0.8"
-   },
-   "licenses":[
-      {
-         "type":"MIT",
-         "url":"http://github.com/wearefractal/glob-stream/raw/master/LICENSE"
-      }
-   ]
+  "name": "glob-stream",
+  "description": "File system globs as a stream",
+  "version": "0.2.0",
+  "homepage": "http://github.com/wearefractal/glob-stream",
+  "repository": "git://github.com/wearefractal/glob-stream.git",
+  "author": "Fractal <contact@wearefractal.com> (http://wearefractal.com/)",
+  "main": "./index.js",
+  "dependencies": {
+    "glob": "*",
+    "event-stream": "*",
+    "minimatch": "~0.2.12"
+  },
+  "devDependencies": {
+    "mocha": "*",
+    "should": "*"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "engines": {
+    "node": ">= 0.8"
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "http://github.com/wearefractal/glob-stream/raw/master/LICENSE"
+    }
+  ]
 }
