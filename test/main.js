@@ -44,6 +44,19 @@ describe('glob-stream', function() {
       });
     });
 
+    it('should not fuck up direct paths with no cwd', function(done) {
+      var stream = gs.create(join(__dirname, "./fixtures/test.coffee"));
+      should.exist(stream);
+      stream.on('error', function(err) {
+        throw err;
+      });
+      stream.on('data', function(file) {
+        should.exist(file);
+        String(file).should.equal(join(__dirname, "./fixtures/test.coffee"));
+        done();
+      });
+    });
+
     it('should return a file name stream with negation from a glob', function(done) {
       var stream = gs.create(["./fixtures/**/*.js", "!./fixtures/**/test.js"], {cwd: __dirname});
       should.exist(stream);

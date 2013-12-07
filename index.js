@@ -38,7 +38,11 @@ module.exports = us = {
       stream.end();
     });
     globber.on('match', function(filename) {
-      stream.write(path.join(opt.cwd, filename));
+      var isRoot = (filename[0] === path.sep);
+      if (!isRoot) {
+        filename = path.join(opt.cwd, filename);
+      }
+      stream.write(filename);
     });
 
     if (negatives.length === 0) return stream; // no filtering needed
