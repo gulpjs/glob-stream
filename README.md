@@ -25,8 +25,7 @@ var gs = require('glob-stream');
 
 var stream = gs.create("./files/**/*.coffee", {options - read node-glob docs});
 
-stream.on('data', function(file){
-  // fileName == object with path and base attrs
+stream.on('data', function(fileName){
 });
 ```
 

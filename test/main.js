@@ -13,10 +13,7 @@ describe('glob-stream', function() {
       });
       stream.on('data', function(file) {
         should.exist(file);
-        should.exist(file.path);
-        should.exist(file.base);
-        String(file.path).should.equal(join(__dirname, "./fixtures/whatsgoingon"));
-        String(file.base).should.equal(join(__dirname, "./fixtures"));
+        String(file).should.equal(join(__dirname, "./fixtures/whatsgoingon"));
         done();
       });
     });
@@ -29,10 +26,7 @@ describe('glob-stream', function() {
       });
       stream.on('data', function(file) {
         should.exist(file);
-        should.exist(file.path);
-        should.exist(file.base);
-        String(file.path).should.equal(join(__dirname, "./fixtures/test.coffee"));
-        String(file.base).should.equal(join(__dirname, "./fixtures"));
+        String(file).should.equal(join(__dirname, "./fixtures/test.coffee"));
         done();
       });
     });
@@ -45,10 +39,7 @@ describe('glob-stream', function() {
       });
       stream.on('data', function(file) {
         should.exist(file);
-        should.exist(file.path);
-        should.exist(file.base);
-        String(file.path).should.equal(join(__dirname, "./fixtures/test.coffee"));
-        String(file.base).should.equal(join(__dirname, "./fixtures"));
+        String(file).should.equal(join(__dirname, "./fixtures/test.coffee"));
         done();
       });
     });
