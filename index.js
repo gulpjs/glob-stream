@@ -4,8 +4,8 @@ var minimatch = require('minimatch');
 var path = require('path');
 
 var isMatch = function(file, pattern) {
-  if (typeof pattern === 'string') return minimatch(file.path, pattern);
-  if (pattern instanceof RegExp) return pattern.test(file.path);
+  if (typeof pattern === 'string') return minimatch(file, pattern);
+  if (pattern instanceof RegExp) return pattern.test(file);
   return true; // unknown glob type?
 };
 
@@ -38,10 +38,7 @@ module.exports = us = {
       stream.end();
     });
     globber.on('match', function(filename) {
-      stream.write({
-        base: path.join(opt.cwd, path.dirname(filename)),
-        path: path.join(opt.cwd, filename)
-      });
+      stream.write(path.join(opt.cwd, filename));
     });
 
     if (negatives.length === 0) return stream; // no filtering needed
