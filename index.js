@@ -4,8 +4,8 @@ var minimatch = require('minimatch');
 var path = require('path');
 
 var isMatch = function(file, pattern) {
-  if (typeof pattern === 'string') return minimatch(file, pattern);
-  if (pattern instanceof RegExp) return pattern.test(file);
+  if (typeof pattern === 'string') return minimatch(file.path, pattern);
+  if (pattern instanceof RegExp) return pattern.test(file.path);
   return true; // unknown glob type?
 };
 
@@ -17,6 +17,16 @@ var isNegative = function(pattern) {
 
 var isPositive = function(pattern) {
   return !isNegative(pattern);
+};
+
+var flatten2d = function(arr){
+  return arr.map(function(s, idx) {
+    if (typeof s === 'string' && idx !== arr.length-1) {
+      return s;
+    } else {
+      return '';
+    }
+  });
 };
 
 module.exports = us = {
@@ -31,6 +41,10 @@ module.exports = us = {
     // create globbing stuff
     var globber = new glob.Glob(ourGlob, opt);
 
+    // extract base path because we are too lazy lol
+    var rules = globber.minimatch.set[0];
+    var basePath = path.normalize(flatten2d(rules).join(path.sep));
+
     // create stream and map events from globber to it
     var stream = es.pause();
     globber.on('error', stream.emit.bind(stream, 'error'));
@@ -42,7 +56,11 @@ module.exports = us = {
       if (!isRoot) {
         filename = path.join(opt.cwd, filename);
       }
-      stream.write(filename);
+      stream.write({
+        cwd: opt.cwd,
+        base: basePath,
+        path: filename
+      });
     });
 
     if (negatives.length === 0) return stream; // no filtering needed
