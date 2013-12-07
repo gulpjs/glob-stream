@@ -13,7 +13,12 @@ describe('glob-stream', function() {
       });
       stream.on('data', function(file) {
         should.exist(file);
-        String(file).should.equal(join(__dirname, "./fixtures/whatsgoingon"));
+        should.exist(file.path);
+        should.exist(file.base);
+        should.exist(file.cwd);
+        String(file.cwd).should.equal(__dirname);
+        String(file.base).should.equal("fixtures/");
+        String(file.path).should.equal(join(__dirname, "./fixtures/whatsgoingon"));
         done();
       });
     });
@@ -26,7 +31,12 @@ describe('glob-stream', function() {
       });
       stream.on('data', function(file) {
         should.exist(file);
-        String(file).should.equal(join(__dirname, "./fixtures/test.coffee"));
+        should.exist(file.path);
+        should.exist(file.base);
+        should.exist(file.cwd);
+        String(file.cwd).should.equal(__dirname);
+        String(file.base).should.equal("fixtures/");
+        String(file.path).should.equal(join(__dirname, "./fixtures/test.coffee"));
         done();
       });
     });
@@ -39,7 +49,12 @@ describe('glob-stream', function() {
       });
       stream.on('data', function(file) {
         should.exist(file);
-        String(file).should.equal(join(__dirname, "./fixtures/test.coffee"));
+        should.exist(file.path);
+        should.exist(file.base);
+        should.exist(file.cwd);
+        String(file.cwd).should.equal(__dirname);
+        String(file.base).should.equal("fixtures/");
+        String(file.path).should.equal(join(__dirname, "./fixtures/test.coffee"));
         done();
       });
     });
@@ -52,7 +67,12 @@ describe('glob-stream', function() {
       });
       stream.on('data', function(file) {
         should.exist(file);
-        String(file).should.equal(join(__dirname, "./fixtures/test.coffee"));
+        should.exist(file.path);
+        should.exist(file.base);
+        should.exist(file.cwd);
+        String(file.cwd).should.equal(process.cwd());
+        String(file.base).should.equal(join(__dirname, "./fixtures/"));
+        String(file.path).should.equal(join(__dirname, "./fixtures/test.coffee"));
         done();
       });
     });
