@@ -5,8 +5,24 @@ var join = require('path').join;
 
 describe('glob-stream', function() {
   describe('create()', function() {
+    it('should return a folder name stream from a glob', function(done) {
+      var stream = gs.create("./fixtures/whatsgoingon", {cwd: __dirname});
+      should.exist(stream);
+      stream.on('error', function(err) {
+        throw err;
+      });
+      stream.on('data', function(file) {
+        should.exist(file);
+        should.exist(file.path);
+        should.exist(file.base);
+        String(file.path).should.equal(join(__dirname, "./fixtures/whatsgoingon"));
+        String(file.base).should.equal(join(__dirname, "./fixtures"));
+        done();
+      });
+    });
+
     it('should return a file name stream from a glob', function(done) {
-      var stream = gs.create(join(__dirname, "./fixtures/*.coffee"));
+      var stream = gs.create("./fixtures/*.coffee", {cwd: __dirname});
       should.exist(stream);
       stream.on('error', function(err) {
         throw err;
@@ -16,77 +32,13 @@ describe('glob-stream', function() {
         should.exist(file.path);
         should.exist(file.base);
         String(file.path).should.equal(join(__dirname, "./fixtures/test.coffee"));
-        String(file.base).should.equal(join(__dirname, "./fixtures/"));
-      });
-      stream.on('end', function() {
-        done();
-      });
-    });
-
-    it('should return a file name stream from a deep glob', function(done) {
-      var stream = gs.create(join(__dirname, "./fixtures/**/*.js"));
-      should.exist(stream);
-      stream.on('error', function(err) {
-        throw err;
-      });
-      stream.on('data', function(file) {
-        should.exist(file);
-        should.exist(file.path);
-        should.exist(file.base);
-        String(file.path).should.equal(join(__dirname, "./fixtures/whatsgoingon/test.js"));
-        String(file.base).should.equal(join(__dirname, "./fixtures/"));
-      });
-      stream.on('end', function() {
-        done();
-      });
-    });
-
-    it('should return a file name stream with negation from a glob', function(done) {
-      var stream = gs.create([join(__dirname, "./fixtures/**/*.js"), "!"+join(__dirname, "./fixtures/**/test.js")]);
-      should.exist(stream);
-      stream.on('error', function(err) {
-        throw err;
-      });
-      stream.on('data', function(file) {
-        throw "file should have been negated";
-      });
-      stream.on('end', function() {
-        done();
-      });
-    });
-
-    it('should return a file name stream with negation from a regex', function(done) {
-      var stream = gs.create([join(__dirname, "./fixtures/**/*.js"), /nomatch.js/]);
-      should.exist(stream);
-      stream.on('error', function(err) {
-        throw err;
-      });
-      stream.on('data', function(file) {
-        throw "file should have been negated";
-      });
-      stream.on('end', function() {
-        done();
-      });
-    });
-
-    it('should return a file name stream with negation from a regex', function(done) {
-      var stream = gs.create([join(__dirname, "./fixtures/**/*.js"), function(){
-        return false;
-      }]);
-      should.exist(stream);
-      stream.on('error', function(err) {
-        throw err;
-      });
-      stream.on('data', function(file) {
-        throw "file should have been negated";
-      });
-      stream.on('end', function() {
+        String(file.base).should.equal(join(__dirname, "./fixtures"));
         done();
       });
     });
 
     it('should return a file name stream from a direct path', function(done) {
-      var stream = gs.create(join(__dirname, "./fixtures/test.coffee"));
+      var stream = gs.create("./fixtures/test.coffee", {cwd: __dirname});
       should.exist(stream);
       stream.on('error', function(err) {
         throw err;
@@ -96,7 +48,19 @@ describe('glob-stream', function() {
         should.exist(file.path);
         should.exist(file.base);
         String(file.path).should.equal(join(__dirname, "./fixtures/test.coffee"));
-        String(file.base).should.equal(join(__dirname, "./fixtures/"));
+        String(file.base).should.equal(join(__dirname, "./fixtures"));
+        done();
+      });
+    });
+
+    it('should return a file name stream with negation from a glob', function(done) {
+      var stream = gs.create(["./fixtures/**/*.js", "!./fixtures/**/test.js"], {cwd: __dirname});
+      should.exist(stream);
+      stream.on('error', function(err) {
+        throw err;
+      });
+      stream.on('data', function(file) {
+        throw "file should have been negated";
       });
       stream.on('end', function() {
         done();

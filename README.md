@@ -30,21 +30,7 @@ stream.on('data', function(file){
 });
 ```
 
-You can pass a single one of these (or an array with any combination). All given must match for the file to be returned. Optional options argument is passed directly to [node-glob](https://github.com/isaacs/node-glob)
-
-#### Function
-
-```javascript
-var stream = gs.create(["./files/**/*.coffee", function(path){
-  return path.indexOf("something") === -1;
-}]);
-```
-
-#### RegExp
-
-```javascript
-var stream = gs.create(["./files/**/*.coffee", /stuff/]);
-```
+You can pass any combination of globs. One caveat is that you can not only pass a glob negation, you must give it at least one positive glob so it knows where to start. All given must match for the file to be returned. Optional options argument is passed directly to [node-glob](https://github.com/isaacs/node-glob)
 
 #### Glob
 
