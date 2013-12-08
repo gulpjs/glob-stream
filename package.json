@@ -9,7 +9,8 @@
   "dependencies": {
     "glob": "~3.2.7",
     "event-stream": "~3.0.18",
-    "minimatch": "~0.2.12"
+    "minimatch": "~0.2.12",
+    "stream-combiner": "0.0.2"
   },
   "devDependencies": {
     "mocha": "*",

@@ -91,5 +91,23 @@ describe('glob-stream', function() {
       });
     });
 
+    it('should return a file name stream from two globs and a negative', function(done) {
+      var stream = gs.create(["./fixtures/*.coffee", "./fixtures/whatsgoingon/*.coffee"], {cwd: __dirname});
+      should.exist(stream);
+      stream.on('error', function(err) {
+        throw err;
+      });
+      stream.on('data', function(file) {
+        should.exist(file);
+        should.exist(file.path);
+        should.exist(file.base);
+        should.exist(file.cwd);
+        String(file.cwd).should.equal(__dirname);
+        String(file.base).should.equal("fixtures/");
+        String(file.path).should.equal(join(__dirname, "./fixtures/test.coffee"));
+        done();
+      });
+    });
+
   });
 });
