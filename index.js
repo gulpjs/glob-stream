@@ -2,6 +2,7 @@ var es = require('event-stream');
 var glob = require('glob');
 var minimatch = require('minimatch');
 var path = require('path');
+var Combine = require('stream-combiner');
 
 var isMatch = function(file, pattern) {
   if (typeof pattern === 'string') return minimatch(file.path, pattern);
@@ -96,10 +97,7 @@ module.exports = us = {
     });
       
     // then just pipe them to a single stream and return it
-    var aggregate = es.pause();
-    streams.forEach(function(gStream){
-      gStream.pipe(aggregate);
-    });
+    var aggregate = Combine.apply(streams);
     return aggregate;
   }
 };
