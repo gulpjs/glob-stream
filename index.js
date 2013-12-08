@@ -1,8 +1,8 @@
 var es = require('event-stream');
+var Combine = require('stream-combiner');
 var glob = require('glob');
 var minimatch = require('minimatch');
 var path = require('path');
-var Combine = require('stream-combiner');
 
 var isMatch = function(file, pattern) {
   if (typeof pattern === 'string') return minimatch(file.path, pattern);
@@ -68,9 +68,7 @@ module.exports = us = {
 
     // stream to check against negatives
     var filterStream = es.map(function(filename, cb) {
-      var matcha = function(pattern) {
-        return isMatch(filename, pattern);
-      };
+      var matcha = isMatch.bind(null, filename);
       if (!negatives.every(matcha)) return cb(null, filename); // pass
       cb(); // ignore
     });
@@ -97,7 +95,7 @@ module.exports = us = {
     });
       
     // then just pipe them to a single stream and return it
-    var aggregate = Combine.apply(streams);
+    var aggregate = Combine.apply(null, streams);
     return aggregate;
   }
 };
