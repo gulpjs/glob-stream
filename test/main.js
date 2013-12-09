@@ -1,7 +1,10 @@
 var gs = require('../');
 var should = require('should');
 require('mocha');
-var join = require('path').join;
+var path = require('path');
+var join = path.join;
+
+var sep = path.sep;
 
 describe('glob-stream', function() {
   describe('create()', function() {
@@ -17,8 +20,8 @@ describe('glob-stream', function() {
         should.exist(file.base);
         should.exist(file.cwd);
         String(file.cwd).should.equal(__dirname);
-        String(file.base).should.equal("fixtures/");
-        String(file.path).should.equal(join(__dirname, "./fixtures/whatsgoingon"));
+        String(file.base).should.equal("fixtures"+sep);
+        String(join(file.path,'')).should.equal(join(__dirname, "./fixtures/whatsgoingon"));
         done();
       });
     });
@@ -35,8 +38,8 @@ describe('glob-stream', function() {
         should.exist(file.base);
         should.exist(file.cwd);
         String(file.cwd).should.equal(__dirname);
-        String(file.base).should.equal("fixtures/");
-        String(file.path).should.equal(join(__dirname, "./fixtures/test.coffee"));
+        String(file.base).should.equal("fixtures"+sep);
+        String(join(file.path,'')).should.equal(join(__dirname, "./fixtures/test.coffee"));
         done();
       });
     });
@@ -53,7 +56,7 @@ describe('glob-stream', function() {
         should.exist(file.base);
         should.exist(file.cwd);
         String(file.cwd).should.equal(__dirname);
-        String(file.base).should.equal("fixtures/");
+        String(file.base).should.equal("fixtures"+sep);
         String(file.path).should.equal(join(__dirname, "./fixtures/test.coffee"));
         done();
       });
@@ -72,7 +75,7 @@ describe('glob-stream', function() {
         should.exist(file.cwd);
         String(file.cwd).should.equal(process.cwd());
         String(file.base).should.equal(join(__dirname, "./fixtures/"));
-        String(file.path).should.equal(join(__dirname, "./fixtures/test.coffee"));
+        String(join(file.path,'')).should.equal(join(__dirname, "./fixtures/test.coffee"));
         done();
       });
     });
@@ -103,8 +106,8 @@ describe('glob-stream', function() {
         should.exist(file.base);
         should.exist(file.cwd);
         String(file.cwd).should.equal(__dirname);
-        String(file.base).should.equal("fixtures/");
-        String(file.path).should.equal(join(__dirname, "./fixtures/test.coffee"));
+        String(file.base).should.equal("fixtures"+sep);
+        String(join(file.path,'')).should.equal(join(__dirname, "./fixtures/test.coffee"));
         done();
       });
     });

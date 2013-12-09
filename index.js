@@ -53,14 +53,10 @@ module.exports = us = {
       stream.end();
     });
     globber.on('match', function(filename) {
-      var isRoot = (filename[0] === path.sep);
-      if (!isRoot) {
-        filename = path.join(opt.cwd, filename);
-      }
       stream.write({
         cwd: opt.cwd,
         base: basePath,
-        path: filename
+        path: path.resolve(opt.cwd, filename)
       });
     });
 
