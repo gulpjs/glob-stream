@@ -8,9 +8,9 @@
   "main": "./index.js",
   "dependencies": {
     "glob": "~3.2.7",
-    "event-stream": "~3.0.18",
+    "event-stream": "~3.0.20",
     "minimatch": "~0.2.12",
-    "stream-combiner": "0.0.2"
+    "combine-stream": "0.0.4"
   },
   "devDependencies": {
     "mocha": "*",
