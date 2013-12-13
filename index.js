@@ -1,5 +1,5 @@
 var es = require('event-stream');
-var Combine = require('stream-combiner');
+var Combine = require('combine-stream');
 var glob = require('glob');
 var minimatch = require('minimatch');
 var path = require('path');
@@ -28,6 +28,10 @@ var flatten2d = function(arr){
       return '';
     }
   });
+};
+
+var comparator = function(a,b) {
+  return a.path == b.path;
 };
 
 module.exports = us = {
@@ -91,7 +95,12 @@ module.exports = us = {
     });
       
     // then just pipe them to a single stream and return it
-    var aggregate = Combine.apply(null, streams);
+    var aggregateOpt = {
+      recordDuplicates: true,
+      comparator: comparator,
+      streams: streams
+    };
+    var aggregate = new Combine(aggregateOpt);
     return aggregate;
   }
 };
