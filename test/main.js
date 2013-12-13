@@ -80,6 +80,29 @@ describe('glob-stream', function() {
       });
     });
 
+    it('should return a correctly ordered file name stream for two globs', function(done) {
+      var globArray = [
+        join(__dirname, "./fixtures/whatsgoingon/key/isaidhey/whatsgoingon/test.txt"),
+        join(__dirname, "./fixtures/test.coffee"),
+        join(__dirname, "./fixtures/whatsgoingon/test.js")
+      ];
+      var stream = gs.create(globArray, {cwd: __dirname});
+
+      var files = [];
+      stream.on('error', done);
+      stream.on('data', function(file) {
+        should.exist(file);
+        should.exist(file.path);
+        files.push(file);
+      });
+      stream.on('end', function() {
+        files.length.should.equal(2);
+        files[0].path.should.equal(globArray[0]);
+        files[1].path.should.equal(globArray[1]);
+        done();
+      });
+    });
+
     it('should return a file name stream with negation from a glob', function(done) {
       var stream = gs.create(["./fixtures/**/*.js", "!./fixtures/**/test.js"], {cwd: __dirname});
       should.exist(stream);
