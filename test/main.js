@@ -20,7 +20,7 @@ describe('glob-stream', function() {
         should.exist(file.base);
         should.exist(file.cwd);
         String(file.cwd).should.equal(__dirname);
-        String(file.base).should.equal("fixtures"+sep);
+        String(file.base).should.equal(join(__dirname, "fixtures"+sep));
         String(join(file.path,'')).should.equal(join(__dirname, "./fixtures/whatsgoingon"));
         done();
       });
@@ -38,7 +38,7 @@ describe('glob-stream', function() {
         should.exist(file.base);
         should.exist(file.cwd);
         String(file.cwd).should.equal(__dirname);
-        String(file.base).should.equal("fixtures"+sep);
+        String(file.base).should.equal(join(__dirname, "fixtures"+sep));
         String(join(file.path,'')).should.equal(join(__dirname, "./fixtures/test.coffee"));
         done();
       });
@@ -56,10 +56,32 @@ describe('glob-stream', function() {
         should.exist(file.base);
         should.exist(file.cwd);
         String(file.cwd).should.equal(__dirname);
-        String(file.base).should.equal("fixtures"+sep);
+        String(file.base).should.equal(join(__dirname, "fixtures"+sep));
         String(file.path).should.equal(join(__dirname, "./fixtures/test.coffee"));
         done();
       });
+    });
+
+    it('should return a file name stream from a direct path and buffer contents', function(done) {
+      var stream = gs.create("./fixtures/test.coffee", {cwd: __dirname});
+      should.exist(stream);
+      stream.on('error', function(err) {
+        throw err;
+      });
+      stream.on('data', function(file) {
+        should.exist(file);
+        should.exist(file.path);
+        should.exist(file.base);
+        should.exist(file.cwd);
+        String(file.cwd).should.equal(__dirname);
+        String(file.base).should.equal(join(__dirname, "fixtures"+sep));
+        String(file.path).should.equal(join(__dirname, "./fixtures/test.coffee"));
+        done();
+      });
+      stream.pause();
+      setTimeout(function(){
+        stream.resume();
+      }, 1000);
     });
 
     it('should not fuck up direct paths with no cwd', function(done) {
@@ -103,7 +125,7 @@ describe('glob-stream', function() {
       });
     });
 
-    it('should return a input stream for multiple globs, with negation', function(done) {
+    it('should return a input stream for multiple globs, with negation (globbing)', function(done) {
       var expectedPath = join(__dirname, "./fixtures/stuff/run.dmc");
       var globArray = [
         join(__dirname, "./fixtures/stuff/*.dmc"),
@@ -125,7 +147,7 @@ describe('glob-stream', function() {
       });
     });
 
-    it('should return a input stream for multiple globs, with negation', function(done) {
+    it('should return a input stream for multiple globs, with negation (direct)', function(done) {
       var expectedPath = join(__dirname, "./fixtures/stuff/run.dmc");
       var globArray = [
         join(__dirname, "./fixtures/stuff/run.dmc"),
@@ -148,13 +170,13 @@ describe('glob-stream', function() {
     });
 
     it('should return a file name stream with negation from a glob', function(done) {
-      var stream = gs.create(["./fixtures/**/*.js", "!./fixtures/**/test.js"], {cwd: __dirname});
+      var stream = gs.create(["./fixtures/**/*.js", "!./**/test.js"], {cwd: __dirname});
       should.exist(stream);
       stream.on('error', function(err) {
         throw err;
       });
       stream.on('data', function(file) {
-        throw "file should have been negated";
+        throw new Error("file "+file.path+" should have been negated");
       });
       stream.on('end', function() {
         done();
@@ -173,7 +195,7 @@ describe('glob-stream', function() {
         should.exist(file.base);
         should.exist(file.cwd);
         String(file.cwd).should.equal(__dirname);
-        String(file.base).should.equal("fixtures"+sep);
+        String(file.base).should.equal(join(__dirname, "fixtures"+sep));
         String(join(file.path,'')).should.equal(join(__dirname, "./fixtures/test.coffee"));
         done();
       });
