@@ -135,7 +135,7 @@ module.exports = us = {
     var aggregate = new Combine(aggregateOpt);
 
     // set up streaming queue so items come in order
-    streamSeries(streams);
+    //streamSeries(streams);
 
     return aggregate;
   }
