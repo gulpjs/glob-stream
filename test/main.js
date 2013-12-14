@@ -103,6 +103,50 @@ describe('glob-stream', function() {
       });
     });
 
+    it('should return a input stream for multiple globs, with negation', function(done) {
+      var expectedPath = join(__dirname, "./fixtures/stuff/run.dmc");
+      var globArray = [
+        join(__dirname, "./fixtures/stuff/*.dmc"),
+        '!' + join(__dirname, "./fixtures/stuff/test.dmc"),
+      ];
+      var stream = gs.create(globArray);
+
+      var files = [];
+      stream.on('error', done);
+      stream.on('data', function(file) {
+        should.exist(file);
+        should.exist(file.path);
+        files.push(file);
+      });
+      stream.on('end', function() {
+        files.length.should.equal(1);
+        files[0].path.should.equal(expectedPath);
+        done();
+      });
+    });
+
+    it('should return a input stream for multiple globs, with negation', function(done) {
+      var expectedPath = join(__dirname, "./fixtures/stuff/run.dmc");
+      var globArray = [
+        join(__dirname, "./fixtures/stuff/run.dmc"),
+        '!' + join(__dirname, "./fixtures/stuff/test.dmc"),
+      ];
+      var stream = gs.create(globArray);
+
+      var files = [];
+      stream.on('error', done);
+      stream.on('data', function(file) {
+        should.exist(file);
+        should.exist(file.path);
+        files.push(file);
+      });
+      stream.on('end', function() {
+        files.length.should.equal(1);
+        files[0].path.should.equal(expectedPath);
+        done();
+      });
+    });
+
     it('should return a file name stream with negation from a glob', function(done) {
       var stream = gs.create(["./fixtures/**/*.js", "!./fixtures/**/test.js"], {cwd: __dirname});
       should.exist(stream);
