@@ -34,6 +34,32 @@ var comparator = function(a,b) {
   return a.path == b.path;
 };
 
+var unrelative = function(cwd, glob) {
+  var mod = '';
+  if (glob[0] === '!') {
+    mod = glob[0];
+    glob = glob.slice(1);
+  }
+  return mod+path.resolve(cwd, glob);
+};
+
+// pause all streams
+// then resume them one by one
+// until they are all done
+var streamSeries = function(streams) {
+  var currentStream = -1;
+  streams.forEach(function(stream){
+    stream.pause();
+  });
+  var next = function(){
+    var stream = streams[++currentStream];
+    if (!stream) return; // done
+    stream.once('end', next);
+    stream.resume();
+  };
+  next();
+};
+
 module.exports = us = {
   // creates a stream for a single glob or filter
   createStream: function(ourGlob, negatives, opt) {
@@ -42,6 +68,10 @@ module.exports = us = {
     if (typeof opt.cwd !== 'string') opt.cwd = process.cwd();
     if (typeof opt.silent !== 'boolean') opt.silent = true;
     if (typeof opt.nonull !== 'boolean') opt.nonull = false;
+
+    // remove path relativity to make globs make sense
+    ourGlob = unrelative(opt.cwd, ourGlob);
+    negatives = negatives.map(unrelative.bind(null, opt.cwd));
 
     // create globbing stuff
     var globber = new glob.Glob(ourGlob, opt);
@@ -69,7 +99,7 @@ module.exports = us = {
     // stream to check against negatives
     var filterStream = es.map(function(filename, cb) {
       var matcha = isMatch.bind(null, filename);
-      if (!negatives.every(matcha)) return cb(null, filename); // pass
+      if (negatives.every(matcha)) return cb(null, filename); // pass
       cb(); // ignore
     });
 
@@ -78,6 +108,8 @@ module.exports = us = {
 
   // creates a stream for multiple globs or filters
   create: function(globs, opt) {
+    if (!opt) opt = {};
+
     // only one glob no need to aggregate
     if (!Array.isArray(globs)) return us.createStream(globs, null, opt);
 
@@ -93,7 +125,7 @@ module.exports = us = {
     var streams = positives.map(function(glob){
       return us.createStream(glob, negatives, opt);
     });
-      
+
     // then just pipe them to a single stream and return it
     var aggregateOpt = {
       recordDuplicates: true,
@@ -101,6 +133,10 @@ module.exports = us = {
       streams: streams
     };
     var aggregate = new Combine(aggregateOpt);
+
+    // set up streaming queue so items come in order
+    streamSeries(streams);
+
     return aggregate;
   }
 };
