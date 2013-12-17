@@ -2,6 +2,7 @@ var es = require('event-stream');
 var Combine = require('combine-stream');
 var glob = require('glob');
 var minimatch = require('minimatch');
+var glob2base = require('glob2base');
 var path = require('path');
 
 var isMatch = function(file, pattern) {
@@ -20,16 +21,6 @@ var isPositive = function(pattern) {
   return !isNegative(pattern);
 };
 
-var flatten2d = function(arr){
-  return arr.map(function(s, idx) {
-    if (typeof s === 'string' && idx !== arr.length-1) {
-      return s;
-    } else {
-      return '';
-    }
-  });
-};
-
 var comparator = function(a,b) {
   return a.path == b.path;
 };
@@ -41,23 +32,6 @@ var unrelative = function(cwd, glob) {
     glob = glob.slice(1);
   }
   return mod+path.resolve(cwd, glob);
-};
-
-// pause all streams
-// then resume them one by one
-// until they are all done
-var streamSeries = function(streams) {
-  var currentStream = -1;
-  streams.forEach(function(stream){
-    stream.pause();
-  });
-  var next = function(){
-    var stream = streams[++currentStream];
-    if (!stream) return; // done
-    stream.once('end', next);
-    stream.resume();
-  };
-  next();
 };
 
 module.exports = us = {
@@ -77,8 +51,7 @@ module.exports = us = {
     var globber = new glob.Glob(ourGlob, opt);
 
     // extract base path because we are too lazy lol
-    var rules = globber.minimatch.set[0];
-    var basePath = path.normalize(flatten2d(rules).join(path.sep));
+    var basePath = glob2base(globber);
 
     // create stream and map events from globber to it
     var stream = es.pause();
@@ -134,8 +107,7 @@ module.exports = us = {
     };
     var aggregate = new Combine(aggregateOpt);
 
-    // set up streaming queue so items come in order
-    //streamSeries(streams);
+    // TODO: set up streaming queue so items come in order
 
     return aggregate;
   }
