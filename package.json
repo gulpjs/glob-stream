@@ -11,7 +11,8 @@
     "event-stream": "~3.0.20",
     "minimatch": "~0.2.12",
     "combine-stream": "0.0.4",
-    "glob2base": "0.0.2"
+    "glob2base": "0.0.2",
+    "unique-stream": "0.0.3"
   },
   "devDependencies": {
     "mocha": "*",
