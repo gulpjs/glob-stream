@@ -44,6 +44,28 @@ describe('glob-stream', function() {
       });
     });
 
+    it('should return a correctly ordered file name stream for two globs and fullBase', function(done) {
+        var baseDir = join(__dirname, "./fixtures");
+        
+        var globArray = [
+          "./whatsgoingon/key/isaidhey/whatsgoingon/test.txt",
+          "./test.coffee",
+          "./whatsgoingon/test.js"
+        ];
+        var stream = gs.create(globArray, {cwd: baseDir, fullBase: true});
+
+        var files = [];
+        stream.on('error', done);
+        stream.on('data', function(file) {
+          should.exist(file);
+          should.exist(file.base);
+          file.base.should.equal(baseDir);
+        });
+        stream.on('end', function() {
+          done();
+        });
+      });
+
     it('should return a file name stream that does not duplicate', function(done) {
       var stream = gs.create(["./fixtures/test.coffee", "./fixtures/test.coffee"], {cwd: __dirname});
       should.exist(stream);

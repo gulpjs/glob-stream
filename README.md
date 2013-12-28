@@ -23,14 +23,22 @@ This is a simple wrapper around node-glob to make it streamy.
 ```javascript
 var gs = require('glob-stream');
 
-var stream = gs.create("./files/**/*.coffee", {options - read node-glob docs});
+var stream = gs.create("./files/**/*.coffee", {options});
 
 stream.on('data', function(file){
   // file has path, base, and cwd attrs
 });
 ```
 
-You can pass any combination of globs. One caveat is that you can not only pass a glob negation, you must give it at least one positive glob so it knows where to start. All given must match for the file to be returned. Optional options argument is passed directly to [node-glob](https://github.com/isaacs/node-glob)
+You can pass any combination of globs. One caveat is that you can not only pass a glob negation, you must give it at least one positive glob so it knows where to start. All given must match for the file to be returned.
+
+### Options
+
+- fullBase
+  - Default is `false`
+  - When true it will make file.base relative to the cwd instead of the lowest glob expression
+
+This argument is passed directly to [node-glob](https://github.com/isaacs/node-glob)
 
 #### Glob
 
