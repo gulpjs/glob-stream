@@ -2,6 +2,8 @@
 
 var es = require('event-stream');
 var Combine = require('combine-stream');
+var unique = require('unique-stream');
+
 var glob = require('glob');
 var minimatch = require('minimatch');
 var glob2base = require('glob2base');
@@ -21,10 +23,6 @@ var isNegative = function(pattern) {
 
 var isPositive = function(pattern) {
   return !isNegative(pattern);
-};
-
-var comparator = function(a,b) {
-  return a.path == b.path;
 };
 
 var unrelative = function(cwd, glob) {
@@ -103,15 +101,11 @@ var us = module.exports = {
     });
 
     // then just pipe them to a single stream and return it
-    var aggregateOpt = {
-      recordDuplicates: true,
-      comparator: comparator,
-      streams: streams
-    };
-    var aggregate = new Combine(aggregateOpt);
+    var uniqueStream = unique('path');
+    var aggregate = new Combine(streams);
 
     // TODO: set up streaming queue so items come in order
 
-    return aggregate;
+    return aggregate.pipe(uniqueStream);
   }
 };
