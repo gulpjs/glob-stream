@@ -119,11 +119,33 @@ describe('glob-stream', function() {
       });
       stream.on('end', function() {
         files.length.should.equal(2);
-        files[0].path.should.equal(globArray[0]);
-        files[1].path.should.equal(globArray[1]);
+        files[0].path.should.equal(globArray[1]);
+        files[1].path.should.equal(globArray[2]);
         done();
       });
     });
+    
+    it('should return a correctly ordered file name stream for two globs and custom base', function(done) {
+        var baseDir = join(__dirname, "./fixtures");
+        
+        var globArray = [
+          "./whatsgoingon/key/isaidhey/whatsgoingon/test.txt",
+          "./test.coffee",
+          "./whatsgoingon/test.js"
+        ];
+        var stream = gs.create(globArray, {cwd: baseDir, cwdbase: true});
+
+        var files = [];
+        stream.on('error', done);
+        stream.on('data', function(file) {
+          should.exist(file);
+          should.exist(file.base);
+          file.base.should.equal(baseDir);
+        });
+        stream.on('end', function() {
+          done();
+        });
+      });
 
     it('should return a input stream for multiple globs, with negation (globbing)', function(done) {
       var expectedPath = join(__dirname, "./fixtures/stuff/run.dmc");
