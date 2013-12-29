@@ -34,11 +34,10 @@ You can pass any combination of globs. One caveat is that you can not only pass 
 
 ### Options
 
-- fullBase
-  - Default is `false`
-  - When true it will make file.base relative to the cwd instead of the lowest glob expression
+- base
+  - Default is everything before a glob starts
 
-This argument is passed directly to [node-glob](https://github.com/isaacs/node-glob)
+This argument is passed directly to [node-glob](https://github.com/isaacs/node-glob) so check there for more options
 
 #### Glob
 
