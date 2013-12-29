@@ -34,8 +34,13 @@ You can pass any combination of globs. One caveat is that you can not only pass 
 
 ### Options
 
+- cwd
+  - Default is `process.cwd()`
 - base
-  - Default is everything before a glob starts
+  - Default is everything before a glob starts (see [glob2base]](https://github.com/wearefractal/glob2base))
+- cwdbase
+  - Default is `false`
+  - When true it is the same as saying opt.base = opt.cwd
 
 This argument is passed directly to [node-glob](https://github.com/isaacs/node-glob) so check there for more options
 
