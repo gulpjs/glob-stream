@@ -40,7 +40,9 @@ module.exports = us = {
     if (typeof opt.cwd !== 'string') opt.cwd = process.cwd();
     if (typeof opt.silent !== 'boolean') opt.silent = true;
     if (typeof opt.nonull !== 'boolean') opt.nonull = false;
-
+    if (typeof opt.cwdbase !== 'boolean') opt.cwdbase = false;
+    if (opt.cwdbase) opt.base = opt.cwd;
+    
     // remove path relativity to make globs make sense
     ourGlob = unrelative(opt.cwd, ourGlob);
     negatives = negatives.map(unrelative.bind(null, opt.cwd));
