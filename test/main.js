@@ -44,7 +44,7 @@ describe('glob-stream', function() {
       });
     });
 
-    it('should return a correctly ordered file name stream for two globs and fullBase', function(done) {
+    it('should return a correctly ordered file name stream for two globs and specified base', function(done) {
         var baseDir = join(__dirname, "./fixtures");
         
         var globArray = [
@@ -52,7 +52,7 @@ describe('glob-stream', function() {
           "./test.coffee",
           "./whatsgoingon/test.js"
         ];
-        var stream = gs.create(globArray, {cwd: baseDir, fullBase: true});
+        var stream = gs.create(globArray, {cwd: baseDir, base: baseDir});
 
         var files = [];
         stream.on('error', done);

@@ -51,7 +51,7 @@ var us = module.exports = {
     var globber = new glob.Glob(ourGlob, opt);
 
     // extract base path from glob
-    var basePath = opt.fullBase ? opt.cwd : glob2base(globber);
+    var basePath = opt.base ? opt.base : glob2base(globber);
 
     // create stream and map events from globber to it
     var stream = es.pause();
