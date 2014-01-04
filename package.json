@@ -1,7 +1,7 @@
 {
   "name": "glob-stream",
   "description": "File system globs as a stream",
-  "version": "3.1.0",
+  "version": "3.1.1",
   "homepage": "http://github.com/wearefractal/glob-stream",
   "repository": "git://github.com/wearefractal/glob-stream.git",
   "author": "Fractal <contact@wearefractal.com> (http://wearefractal.com/)",
@@ -16,10 +16,11 @@
   },
   "devDependencies": {
     "mocha": "*",
-    "should": "*"
+    "should": "*",
+    "jshint": "*"
   },
   "scripts": {
-    "test": "mocha"
+    "test": "mocha && jshint"
   },
   "engines": {
     "node": ">= 0.9"
