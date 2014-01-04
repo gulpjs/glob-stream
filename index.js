@@ -1,3 +1,5 @@
+'use strict';
+
 var es = require('event-stream');
 var Combine = require('combine-stream');
 var unique = require('unique-stream');
@@ -32,7 +34,7 @@ var unrelative = function(cwd, glob) {
   return mod+path.resolve(cwd, glob);
 };
 
-module.exports = us = {
+var us = module.exports = {
   // creates a stream for a single glob or filter
   createStream: function(ourGlob, negatives, opt) {
     if (!negatives) negatives = [];
