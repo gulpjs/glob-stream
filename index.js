@@ -2,6 +2,8 @@
 
 var es = require('event-stream');
 var Combine = require('combine-stream');
+var unique = require('unique-stream');
+
 var glob = require('glob');
 var minimatch = require('minimatch');
 var glob2base = require('glob2base');
@@ -23,10 +25,6 @@ var isPositive = function(pattern) {
   return !isNegative(pattern);
 };
 
-var comparator = function(a,b) {
-  return a.path == b.path;
-};
-
 var unrelative = function(cwd, glob) {
   var mod = '';
   if (glob[0] === '!') {
@@ -44,7 +42,9 @@ var us = module.exports = {
     if (typeof opt.cwd !== 'string') opt.cwd = process.cwd();
     if (typeof opt.silent !== 'boolean') opt.silent = true;
     if (typeof opt.nonull !== 'boolean') opt.nonull = false;
-
+    if (typeof opt.cwdbase !== 'boolean') opt.cwdbase = false;
+    if (opt.cwdbase) opt.base = opt.cwd;
+    
     // remove path relativity to make globs make sense
     ourGlob = unrelative(opt.cwd, ourGlob);
     negatives = negatives.map(unrelative.bind(null, opt.cwd));
@@ -52,9 +52,8 @@ var us = module.exports = {
     // create globbing stuff
     var globber = new glob.Glob(ourGlob, opt);
 
-    // use cwd as base path if opt.cwdbase = true, otherwise extract 
-    // base path because we are too lazy lol
-    var basePath = opt.cwdbase ? opt.cwd : glob2base(globber);
+    // extract base path from glob
+    var basePath = opt.base ? opt.base : glob2base(globber);
 
     // create stream and map events from globber to it
     var stream = es.pause();
@@ -103,15 +102,11 @@ var us = module.exports = {
     });
 
     // then just pipe them to a single stream and return it
-    var aggregateOpt = {
-      recordDuplicates: true,
-      comparator: comparator,
-      streams: streams
-    };
-    var aggregate = new Combine(aggregateOpt);
+    var uniqueStream = unique('path');
+    var aggregate = new Combine(streams);
 
     // TODO: set up streaming queue so items come in order
 
-    return aggregate;
+    return aggregate.pipe(uniqueStream);
   }
 };

@@ -44,6 +44,68 @@ describe('glob-stream', function() {
       });
     });
 
+    it('should return a correctly ordered file name stream for two globs and specified base', function(done) {
+      var baseDir = join(__dirname, "./fixtures");
+      
+      var globArray = [
+        "./whatsgoingon/key/isaidhey/whatsgoingon/test.txt",
+        "./test.coffee",
+        "./whatsgoingon/test.js"
+      ];
+      var stream = gs.create(globArray, {cwd: baseDir, base: baseDir});
+
+      var files = [];
+      stream.on('error', done);
+      stream.on('data', function(file) {
+        should.exist(file);
+        should.exist(file.base);
+        file.base.should.equal(baseDir);
+      });
+      stream.on('end', function() {
+        done();
+      });
+    });
+
+    it('should return a correctly ordered file name stream for two globs and cwdbase', function(done) {
+      var baseDir = join(__dirname, "./fixtures");
+      
+      var globArray = [
+        "./whatsgoingon/key/isaidhey/whatsgoingon/test.txt",
+        "./test.coffee",
+        "./whatsgoingon/test.js"
+      ];
+      var stream = gs.create(globArray, {cwd: baseDir, cwdbase: true});
+
+      var files = [];
+      stream.on('error', done);
+      stream.on('data', function(file) {
+        should.exist(file);
+        should.exist(file.base);
+        file.base.should.equal(baseDir);
+      });
+      stream.on('end', function() {
+        done();
+      });
+    });
+
+    it('should return a file name stream that does not duplicate', function(done) {
+      var stream = gs.create(["./fixtures/test.coffee", "./fixtures/test.coffee"], {cwd: __dirname});
+      should.exist(stream);
+      stream.on('error', function(err) {
+        throw err;
+      });
+      stream.on('data', function(file) {
+        should.exist(file);
+        should.exist(file.path);
+        should.exist(file.base);
+        should.exist(file.cwd);
+        String(file.cwd).should.equal(__dirname);
+        String(file.base).should.equal(join(__dirname, "fixtures"+sep));
+        String(file.path).should.equal(join(__dirname, "./fixtures/test.coffee"));
+        done();
+      });
+    });
+
     it('should return a file name stream from a direct path', function(done) {
       var stream = gs.create("./fixtures/test.coffee", {cwd: __dirname});
       should.exist(stream);
@@ -104,7 +166,7 @@ describe('glob-stream', function() {
 
     it('should return a correctly ordered file name stream for two globs', function(done) {
       var globArray = [
-        join(__dirname, "./fixtures/whatsgoingon/key/isaidhey/whatsgoingon/test.txt"),
+        join(__dirname, "./fixtures/whatsgoingon/hey/isaidhey/whatsgoingon/test.txt"),
         join(__dirname, "./fixtures/test.coffee"),
         join(__dirname, "./fixtures/whatsgoingon/test.js")
       ];
@@ -118,9 +180,10 @@ describe('glob-stream', function() {
         files.push(file);
       });
       stream.on('end', function() {
-        files.length.should.equal(2);
+        files.length.should.equal(3);
         files[0].path.should.equal(globArray[1]);
         files[1].path.should.equal(globArray[2]);
+        files[2].path.should.equal(globArray[2]);
         done();
       });
     });
