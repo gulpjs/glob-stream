@@ -181,8 +181,8 @@ describe('glob-stream', function() {
       });
       stream.on('end', function() {
         files.length.should.equal(3);
-        files[0].path.should.equal(globArray[1]);
-        files[1].path.should.equal(globArray[2]);
+        files[0].path.should.equal(globArray[0]);
+        files[1].path.should.equal(globArray[1]);
         files[2].path.should.equal(globArray[2]);
         done();
       });
