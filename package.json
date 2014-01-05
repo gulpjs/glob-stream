@@ -1,7 +1,7 @@
 {
   "name": "glob-stream",
   "description": "File system globs as a stream",
-  "version": "3.1.1",
+  "version": "3.1.2",
   "homepage": "http://github.com/wearefractal/glob-stream",
   "repository": "git://github.com/wearefractal/glob-stream.git",
   "author": "Fractal <contact@wearefractal.com> (http://wearefractal.com/)",
@@ -11,8 +11,8 @@
     "event-stream": "~3.0.20",
     "minimatch": "~0.2.12",
     "combine-stream": "0.0.4",
-    "glob2base": "0.0.2",
-    "unique-stream": "0.0.3"
+    "glob2base": "~0.0.4",
+    "unique-stream": "~0.0.3"
   },
   "devDependencies": {
     "mocha": "*",
