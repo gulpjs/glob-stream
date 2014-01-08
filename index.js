@@ -1,6 +1,7 @@
 'use strict';
 
-var es = require('event-stream');
+var through = require('through');
+var map = require('map-stream')
 var Combine = require('combine-stream');
 var unique = require('unique-stream');
 
@@ -34,7 +35,7 @@ var unrelative = function(cwd, glob) {
   return mod+path.resolve(cwd, glob);
 };
 
-var us = module.exports = {
+var gs = {
   // creates a stream for a single glob or filter
   createStream: function(ourGlob, negatives, opt) {
     if (!negatives) negatives = [];
@@ -56,7 +57,7 @@ var us = module.exports = {
     var basePath = opt.base ? opt.base : glob2base(globber);
 
     // create stream and map events from globber to it
-    var stream = es.pause();
+    var stream = through();
     globber.on('error', stream.emit.bind(stream, 'error'));
     globber.on('end', function(){
       stream.end();
@@ -72,7 +73,7 @@ var us = module.exports = {
     if (negatives.length === 0) return stream; // no filtering needed
 
     // stream to check against negatives
-    var filterStream = es.map(function(filename, cb) {
+    var filterStream = map(function(filename, cb) {
       var matcha = isMatch.bind(null, filename);
       if (negatives.every(matcha)) return cb(null, filename); // pass
       cb(); // ignore
@@ -86,7 +87,7 @@ var us = module.exports = {
     if (!opt) opt = {};
 
     // only one glob no need to aggregate
-    if (!Array.isArray(globs)) return us.createStream(globs, null, opt);
+    if (!Array.isArray(globs)) return gs.createStream(globs, null, opt);
 
     var positives = globs.filter(isPositive);
     var negatives = globs.filter(isNegative);
@@ -94,11 +95,11 @@ var us = module.exports = {
     if (positives.length === 0) throw new Error("Missing positive glob");
 
     // only one positive glob no need to aggregate
-    if (positives.length === 1) return us.createStream(positives[0], negatives, opt);
+    if (positives.length === 1) return gs.createStream(positives[0], negatives, opt);
 
     // create all individual streams
     var streams = positives.map(function(glob){
-      return us.createStream(glob, negatives, opt);
+      return gs.createStream(glob, negatives, opt);
     });
 
     // then just pipe them to a single stream and return it
@@ -110,3 +111,5 @@ var us = module.exports = {
     return aggregate.pipe(uniqueStream);
   }
 };
+
+module.exports = gs;

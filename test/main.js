@@ -106,6 +106,28 @@ describe('glob-stream', function() {
       });
     });
 
+    it('should return a file name stream that does not duplicate when piped twice', function(done) {
+      var stream = gs.create("./fixtures/test.coffee", {cwd: __dirname});
+      var stream2 = gs.create("./fixtures/test.coffee", {cwd: __dirname});
+      stream2.pipe(stream);
+
+      should.exist(stream);
+      stream.on('error', function(err) {
+        throw err;
+      });
+      stream.on('data', function(file) {
+        should.exist(file);
+        should.exist(file.path);
+        should.exist(file.base);
+        should.exist(file.cwd);
+        String(file.cwd).should.equal(__dirname);
+        String(file.base).should.equal(join(__dirname, "fixtures"+sep));
+        String(file.path).should.equal(join(__dirname, "./fixtures/test.coffee"));
+        done();
+      });
+    });
+
+
     it('should return a file name stream from a direct path', function(done) {
       var stream = gs.create("./fixtures/test.coffee", {cwd: __dirname});
       should.exist(stream);
@@ -124,7 +146,7 @@ describe('glob-stream', function() {
       });
     });
 
-    it('should return a file name stream from a direct path and buffer contents', function(done) {
+    it('should return a file name stream from a direct path and pause/buffer items', function(done) {
       var stream = gs.create("./fixtures/test.coffee", {cwd: __dirname});
       should.exist(stream);
       stream.on('error', function(err) {
@@ -250,6 +272,25 @@ describe('glob-stream', function() {
       stream.on('end', function() {
         files.length.should.equal(1);
         files[0].path.should.equal(expectedPath);
+        done();
+      });
+    });
+
+    it('should return a input stream that can be piped to other input streams and remove duplicates', function(done) {
+      var stream = gs.create(join(__dirname, "./fixtures/stuff/*.dmc"));
+      var stream2 = gs.create(join(__dirname, "./fixtures/stuff/*.dmc"));
+
+      stream2.pipe(stream);
+
+      var files = [];
+      stream.on('error', done);
+      stream.on('data', function(file) {
+        should.exist(file);
+        should.exist(file.path);
+        files.push(file);
+      });
+      stream.on('end', function() {
+        files.length.should.equal(2);
         done();
       });
     });

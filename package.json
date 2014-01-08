@@ -8,11 +8,12 @@
   "main": "./index.js",
   "dependencies": {
     "glob": "~3.2.7",
-    "event-stream": "~3.0.20",
     "minimatch": "~0.2.12",
     "combine-stream": "0.0.4",
     "glob2base": "~0.0.4",
-    "unique-stream": "~0.0.3"
+    "unique-stream": "~0.0.3",
+    "through": "~2.3.4",
+    "map-stream": "0.0.4"
   },
   "devDependencies": {
     "mocha": "*",
