@@ -1,9 +1,9 @@
 var gs = require('../');
+var through = require('through');
 var should = require('should');
 require('mocha');
 var path = require('path');
 var join = path.join;
-
 var sep = path.sep;
 
 describe('glob-stream', function() {
@@ -40,6 +40,29 @@ describe('glob-stream', function() {
         String(file.cwd).should.equal(__dirname);
         String(file.base).should.equal(join(__dirname, "fixtures"+sep));
         String(join(file.path,'')).should.equal(join(__dirname, "./fixtures/test.coffee"));
+        done();
+      });
+    });
+
+    it('should return a file name stream from a glob', function(done) {
+      var stream = gs.create("./fixtures/*.coffee", {cwd: __dirname});
+      var wrapper = stream.pipe(through(function(data){
+        setTimeout(function(){
+          this.queue(data);
+        }.bind(this), 1000);
+      }));
+
+      var called = false;
+
+      should.exist(stream);
+      stream.on('error', function(err) {
+        throw err;
+      });
+      wrapper.on('data', function(file) {
+        called = true;
+      });
+      wrapper.on('end', function(){
+        called.should.equal(true);
         done();
       });
     });
