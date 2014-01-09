@@ -63,7 +63,7 @@ var gs = {
       stream.end();
     });
     globber.on('match', function(filename) {
-      stream.write({
+      stream.queue({
         cwd: opt.cwd,
         base: basePath,
         path: path.resolve(opt.cwd, filename)
