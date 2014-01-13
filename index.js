@@ -1,7 +1,9 @@
+/*jslint node: true */
+
 'use strict';
 
 var through = require('through');
-var map = require('map-stream')
+var map = require('map-stream');
 var Combine = require('combine-stream');
 var unique = require('unique-stream');
 
@@ -58,12 +60,13 @@ var gs = {
 
     // create stream and map events from globber to it
     var stream = through();
+
     globber.on('error', stream.emit.bind(stream, 'error'));
     globber.on('end', function(){
       stream.end();
     });
     globber.on('match', function(filename) {
-      stream.queue({
+      stream.write({
         cwd: opt.cwd,
         base: basePath,
         path: path.resolve(opt.cwd, filename)
@@ -102,9 +105,9 @@ var gs = {
       return gs.createStream(glob, negatives, opt);
     });
 
-    // then just pipe them to a single stream and return it
-    var uniqueStream = unique('path');
+    // then just pipe them to a single unique stream and return it
     var aggregate = new Combine(streams);
+    var uniqueStream = unique('path');
 
     // TODO: set up streaming queue so items come in order
 
