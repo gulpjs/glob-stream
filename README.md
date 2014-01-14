@@ -37,7 +37,7 @@ You can pass any combination of globs. One caveat is that you can not only pass 
 - cwd
   - Default is `process.cwd()`
 - base
-  - Default is everything before a glob starts (see [glob2base]](https://github.com/wearefractal/glob2base))
+  - Default is everything before a glob starts (see [glob2base](https://github.com/wearefractal/glob2base))
 - cwdbase
   - Default is `false`
   - When true it is the same as saying opt.base = opt.cwd
