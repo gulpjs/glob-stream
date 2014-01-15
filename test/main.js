@@ -212,6 +212,30 @@ describe('glob-stream', function() {
       });
     });
 
+    it('should return a correctly ordered file name stream for three globs with globstars', function(done) {
+      var globArray = [
+        join(__dirname, "./fixtures/**/test.txt"),
+        join(__dirname, "./fixtures/**/test.coffee"),
+        join(__dirname, "./fixtures/**/test.js")
+      ];
+      var stream = gs.create(globArray, {cwd: __dirname});
+
+      var files = [];
+      stream.on('error', done);
+      stream.on('data', function(file) {
+        should.exist(file);
+        should.exist(file.path);
+        files.push(file);
+      });
+      stream.on('end', function() {
+        files.length.should.equal(3);
+        path.basename(files[0].path).should.equal('test.txt');
+        path.basename(files[1].path).should.equal('test.coffee');
+        path.basename(files[2].path).should.equal('test.js');
+        done();
+      });
+    });
+
     it('should return a correctly ordered file name stream for two globs', function(done) {
       var globArray = [
         join(__dirname, "./fixtures/whatsgoingon/hey/isaidhey/whatsgoingon/test.txt"),

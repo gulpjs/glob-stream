@@ -4,7 +4,7 @@
 
 var through = require('through');
 var map = require('map-stream');
-var Combine = require('combine-stream');
+var Combine = require('ordered-read-streams');
 var unique = require('unique-stream');
 
 var glob = require('glob');
