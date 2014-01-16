@@ -13,7 +13,7 @@
     "glob2base": "~0.0.4",
     "unique-stream": "~0.0.3",
     "through": "~2.3.4",
-    "map-stream": "0.0.4"
+    "map-stream": "~0.1.0"
   },
   "devDependencies": {
     "mocha": "*",
