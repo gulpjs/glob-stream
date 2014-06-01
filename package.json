@@ -7,22 +7,22 @@
   "author": "Fractal <contact@wearefractal.com> (http://wearefractal.com/)",
   "main": "./index.js",
   "dependencies": {
-    "glob": "~3.2.7",
-    "minimatch": "~0.2.12",
-    "ordered-read-streams": "~0.0.3",
-    "glob2base": "~0.0.4",
-    "unique-stream": "~0.0.3",
-    "through": "~2.3.4",
-    "map-stream": "~0.1.0"
+    "glob": "^4.0.0",
+    "minimatch": "^0.3.0",
+    "ordered-read-streams": "^0.0.7",
+    "glob2base": "^0.0.8",
+    "unique-stream": "^1.0.0",
+    "through": "^2.3.4",
+    "map-stream": "^0.1.0"
   },
   "devDependencies": {
-    "mocha": "~1.17.0",
-    "should": "~2.1.1",
+    "mocha": "^1.17.0",
+    "should": "^4.0.0",
     "mocha-lcov-reporter": "0.0.1",
-    "coveralls": "~2.6.1",
-    "istanbul": "~0.2.3",
-    "rimraf": "~2.2.5",
-    "jshint": "~2.4.1"
+    "coveralls": "^2.6.1",
+    "istanbul": "^0.2.3",
+    "rimraf": "^2.2.5",
+    "jshint": "^2.4.1"
   },
   "scripts": {
     "test": "mocha --reporter spec && jshint",
