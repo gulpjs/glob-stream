@@ -12,8 +12,8 @@ var minimatch = require('minimatch');
 var glob2base = require('glob2base');
 var path = require('path');
 
-var isMatch = function(file, pattern) {
-  if (typeof pattern === 'string') return minimatch(file.path, pattern);
+var isMatch = function(file, opt, pattern) {
+  if (typeof pattern === 'string') return minimatch(file.path, pattern, opt);
   if (pattern instanceof RegExp) return pattern.test(file.path);
   return true; // unknown glob type?
 };
@@ -43,11 +43,12 @@ var gs = {
     if (!negatives) negatives = [];
     if (!opt) opt = {};
     if (typeof opt.cwd !== 'string') opt.cwd = process.cwd();
+    if (typeof opt.dot !== 'boolean') opt.dot = false;
     if (typeof opt.silent !== 'boolean') opt.silent = true;
     if (typeof opt.nonull !== 'boolean') opt.nonull = false;
     if (typeof opt.cwdbase !== 'boolean') opt.cwdbase = false;
     if (opt.cwdbase) opt.base = opt.cwd;
-    
+
     // remove path relativity to make globs make sense
     ourGlob = unrelative(opt.cwd, ourGlob);
     negatives = negatives.map(unrelative.bind(null, opt.cwd));
@@ -77,7 +78,7 @@ var gs = {
 
     // stream to check against negatives
     var filterStream = map(function(filename, cb) {
-      var matcha = isMatch.bind(null, filename);
+      var matcha = isMatch.bind(null, filename, opt);
       if (negatives.every(matcha)) return cb(null, filename); // pass
       cb(); // ignore
     });
