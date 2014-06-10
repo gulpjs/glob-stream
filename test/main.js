@@ -203,7 +203,7 @@ describe('glob-stream', function() {
     });
 
     it('should return a file name stream with dotfiles negated', function(done) {
-      var stream = gs.create(['./fixtures/*swag', '!./fixtures/.*'], {cwd: __dirname, dot: true});
+      var stream = gs.create(['./fixtures/*swag', '!./fixtures/**'], {cwd: __dirname, dot: true});
       should.exist(stream);
       stream.on('error', function(err) {
         throw err;
