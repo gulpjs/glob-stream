@@ -48,9 +48,12 @@ describe('glob-stream', function() {
       var stream = gs.create('./fixtures/stuff/*.dmc', {cwd: __dirname});
       var wrapper = stream.pipe(through2.obj(function(data, enc, cb){
 
+        this.pause();
         setTimeout(function(){
-          cb(null, data);
-        }, 500);
+          this.push(data);
+          cb();
+          this.resume();
+        }.bind(this), 500);
 
       }));
 
