@@ -2,8 +2,7 @@
 
 'use strict';
 
-var through = require('through');
-var map = require('map-stream');
+var through2 = require('through2');
 var Combine = require('ordered-read-streams');
 var unique = require('unique-stream');
 
@@ -59,11 +58,27 @@ var gs = {
     // extract base path from glob
     var basePath = opt.base ? opt.base : glob2base(globber);
 
+    // constructor args for through2.obj, passing null transform function
+    // will pass through everything, which is what we want
+    var ctorArgs = [/* use default noop */];
+
+    // needed filtering, check against negatives
+    if (negatives.length !== 0) {
+      ctorArgs[0] = function(filename, enc, cb) {
+        var matcha = isMatch.bind(null, filename, opt);
+        if (negatives.every(matcha)) {
+          cb(null, filename); // pass
+        } else {
+          cb(); // ignore
+        }
+      };
+    }
+
     // create stream and map events from globber to it
-    var stream = through();
+    var stream = through2.obj.apply(through2.obj, ctorArgs);
 
     globber.on('error', stream.emit.bind(stream, 'error'));
-    globber.on('end', function(){
+    globber.on('end', function(/* some args here so can't use bind directly */){
       stream.end();
     });
     globber.on('match', function(filename) {
@@ -74,16 +89,7 @@ var gs = {
       });
     });
 
-    if (negatives.length === 0) return stream; // no filtering needed
-
-    // stream to check against negatives
-    var filterStream = map(function(filename, cb) {
-      var matcha = isMatch.bind(null, filename, opt);
-      if (negatives.every(matcha)) return cb(null, filename); // pass
-      cb(); // ignore
-    });
-
-    return stream.pipe(filterStream);
+    return stream;
   },
 
   // creates a stream for multiple globs or filters
