@@ -58,24 +58,18 @@ var gs = {
     // extract base path from glob
     var basePath = opt.base ? opt.base : glob2base(globber);
 
-    // constructor args for through2.obj, passing null transform function
-    // will pass through everything, which is what we want
-    var ctorArgs = [/* use default noop */];
-
     // needed filtering, check against negatives
-    if (negatives.length !== 0) {
-      ctorArgs[0] = function(filename, enc, cb) {
-        var matcha = isMatch.bind(null, filename, opt);
-        if (negatives.every(matcha)) {
-          cb(null, filename); // pass
-        } else {
-          cb(); // ignore
-        }
-      };
-    }
+    function filterNegatives (filename, enc, cb) {
+      var matcha = isMatch.bind(null, filename, opt);
+      if (negatives.every(matcha)) {
+        cb(null, filename); // pass
+      } else {
+        cb(); // ignore
+      }
+    };
 
     // create stream and map events from globber to it
-    var stream = through2.obj.apply(through2.obj, ctorArgs);
+    var stream = through2.obj(negatives.length !== 0 ? filterNegatives : undefined);
 
     globber.on('error', stream.emit.bind(stream, 'error'));
     globber.on('end', function(/* some args here so can't use bind directly */){
