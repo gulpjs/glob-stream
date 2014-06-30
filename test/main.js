@@ -1,5 +1,5 @@
 var gs = require('../');
-var through = require('through');
+var through2 = require('through2');
 var should = require('should');
 require('mocha');
 var path = require('path');
@@ -46,13 +46,15 @@ describe('glob-stream', function() {
 
     it('should return a file name stream from a glob and respect state', function(done) {
       var stream = gs.create('./fixtures/stuff/*.dmc', {cwd: __dirname});
-      var wrapper = stream.pipe(through(function(data){
-        this.pause();
+      var wrapper = stream.pipe(through2.obj(function(data, enc, cb){
 
+        this.pause();
         setTimeout(function(){
-          this.queue(data);
+          this.push(data);
+          cb();
           this.resume();
         }.bind(this), 500);
+
       }));
 
       var count = 0;
