@@ -9,7 +9,7 @@
   "dependencies": {
     "glob": "^4.0.0",
     "minimatch": "^0.3.0",
-    "ordered-read-streams": "^0.0.7",
+    "ordered-read-streams": "0.0.8",
     "glob2base": "^0.0.9",
     "unique-stream": "^1.0.0",
     "through2": "^0.5.1"
