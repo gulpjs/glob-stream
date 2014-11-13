@@ -6,6 +6,10 @@
   "repository": "git://github.com/wearefractal/glob-stream.git",
   "author": "Fractal <contact@wearefractal.com> (http://wearefractal.com/)",
   "main": "./index.js",
+  "files": [
+    "index.js",
+    "lib"
+  ],
   "dependencies": {
     "glob": "^4.0.0",
     "minimatch": "^1.0.0",
