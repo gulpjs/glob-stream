@@ -1,7 +1,6 @@
 var gs = require('../');
 var through2 = require('through2');
 var should = require('should');
-require('mocha');
 var path = require('path');
 var join = path.join;
 var sep = path.sep;
@@ -417,6 +416,42 @@ describe('glob-stream', function() {
         String(file.cwd).should.equal(__dirname);
         String(file.base).should.equal(join(__dirname, 'fixtures'+sep));
         String(join(file.path,'')).should.equal(join(__dirname, './fixtures/test.coffee'));
+        done();
+      });
+    });
+
+    it('should respect the globs array order', function(done) {
+      var stream = gs.create(['./fixtures/stuff/*', '!./fixtures/stuff/*.dmc', './fixtures/stuff/run.dmc'], {cwd: __dirname});
+      should.exist(stream);
+      stream.on('error', function(err) {
+        throw err;
+      });
+      stream.on('data', function(file) {
+        should.exist(file);
+        should.exist(file.path);
+        should.exist(file.base);
+        should.exist(file.cwd);
+        String(file.cwd).should.equal(__dirname);
+        String(file.base).should.equal(join(__dirname, 'fixtures', 'stuff'+sep));
+        String(join(file.path,'')).should.equal(join(__dirname, './fixtures/stuff/run.dmc'));
+        done();
+      });
+    });
+
+    it('should ignore leading negative globs', function(done) {
+      var stream = gs.create(['!./fixtures/stuff/*.dmc', './fixtures/stuff/run.dmc'], {cwd: __dirname});
+      should.exist(stream);
+      stream.on('error', function(err) {
+        throw err;
+      });
+      stream.on('data', function(file) {
+        should.exist(file);
+        should.exist(file.path);
+        should.exist(file.base);
+        should.exist(file.cwd);
+        String(file.cwd).should.equal(__dirname);
+        String(file.base).should.equal(join(__dirname, 'fixtures', 'stuff'+sep));
+        String(join(file.path,'')).should.equal(join(__dirname, './fixtures/stuff/run.dmc'));
         done();
       });
     });
