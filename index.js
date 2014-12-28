@@ -67,17 +67,29 @@ var gs = {
     // only one glob no need to aggregate
     if (!Array.isArray(globs)) return gs.createStream(globs, null, opt);
 
-    var positives = globs.filter(isPositive);
-    var negatives = globs.filter(isNegative);
+    var positives = [];
+    var negatives = [];
+
+    globs.forEach(function(glob, index) {
+      var globArray = isNegative(glob) ? negatives : positives;
+      globArray.push({
+        index: index,
+        glob: glob
+      });
+    });
 
     if (positives.length === 0) throw new Error("Missing positive glob");
 
     // only one positive glob no need to aggregate
-    if (positives.length === 1) return gs.createStream(positives[0], negatives, opt);
+    if (positives.length === 1) {
+      var negativeGlobs = negatives.filter(indexGreaterThan(positives[0].index)).map(toGlob);
+      return gs.createStream(positives[0].glob, negativeGlobs, opt);
+    }
 
     // create all individual streams
-    var streams = positives.map(function(glob){
-      return gs.createStream(glob, negatives, opt);
+    var streams = positives.map(function(positive) {
+      var negativeGlobs = negatives.filter(indexGreaterThan(positive.index)).map(toGlob);
+      return gs.createStream(positive.glob, negativeGlobs, opt);
     });
 
     // then just pipe them to a single unique stream and return it
@@ -100,10 +112,6 @@ function isNegative(pattern) {
   return false;
 }
 
-function isPositive(pattern) {
-  return !isNegative(pattern);
-}
-
 function unrelative(cwd, glob) {
   var mod = '';
   if (glob[0] === '!') {
@@ -113,5 +121,14 @@ function unrelative(cwd, glob) {
   return mod+path.resolve(cwd, glob);
 }
 
+function indexGreaterThan(index) {
+  return function(obj) {
+    return obj.index > index;
+  };
+}
+
+function toGlob(obj) {
+  return obj.glob;
+}
 
 module.exports = gs;
