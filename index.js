@@ -81,22 +81,21 @@ var gs = {
     if (positives.length === 0) throw new Error("Missing positive glob");
 
     // only one positive glob no need to aggregate
-    if (positives.length === 1) {
-      var negativeGlobs = negatives.filter(indexGreaterThan(positives[0].index)).map(toGlob);
-      return gs.createStream(positives[0].glob, negativeGlobs, opt);
-    }
+    if (positives.length === 1) return streamFromPositive(positives[0]);
 
     // create all individual streams
-    var streams = positives.map(function(positive) {
-      var negativeGlobs = negatives.filter(indexGreaterThan(positive.index)).map(toGlob);
-      return gs.createStream(positive.glob, negativeGlobs, opt);
-    });
+    var streams = positives.map(streamFromPositive);
 
     // then just pipe them to a single unique stream and return it
     var aggregate = new Combine(streams);
     var uniqueStream = unique('path');
 
     return aggregate.pipe(uniqueStream);
+
+    function streamFromPositive(positive) {
+      var negativeGlobs = negatives.filter(indexGreaterThan(positive.index)).map(toGlob);
+      return gs.createStream(positive.glob, negativeGlobs, opt);
+    }
   }
 };
 
