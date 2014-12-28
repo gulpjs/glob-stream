@@ -24,7 +24,7 @@ This is a simple wrapper around node-glob to make it streamy.
 ```javascript
 var gs = require('glob-stream');
 
-var stream = gs.create("./files/**/*.coffee", {options});
+var stream = gs.create('./files/**/*.coffee', {options});
 
 stream.on('data', function(file){
   // file has path, base, and cwd attrs
@@ -47,8 +47,20 @@ This argument is passed directly to [node-glob](https://github.com/isaacs/node-g
 
 #### Glob
 
-```javascript
-var stream = gs.create(["./**/*.js", "!./node_modules/**/*.*"]);
+```js
+var stream = gs.create(['./**/*.js', '!./node_modules/**/*']);
+```
+
+Globs are executed in order, so negations should follow positive globs. For example:
+
+```js
+gulp.src(['!b*.js', '*.js'])
+```
+
+would not exclude any files, but this would
+
+```js
+gulp.src(['*.js', '!b*.js'])
 ```
 
 [npm-url]: https://npmjs.org/package/glob-stream
