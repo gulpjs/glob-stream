@@ -7,7 +7,7 @@ var Combine = require('ordered-read-streams');
 var unique = require('unique-stream');
 
 var glob = require('glob');
-var minimatch = require('minimatch');
+var Minimatch = require('minimatch').Minimatch;
 var glob2base = require('glob2base');
 var path = require('path');
 
@@ -25,7 +25,7 @@ var gs = {
 
     // remove path relativity to make globs make sense
     ourGlob = unrelative(opt.cwd, ourGlob);
-    negatives = negatives.map(unrelative.bind(null, opt.cwd));
+    negatives = negatives.map(unrelative.bind(null, opt.cwd)).map(toMatcher.bind(null, opt));
 
     // create globbing stuff
     var globber = new glob.Glob(ourGlob, opt);
@@ -51,7 +51,7 @@ var gs = {
     return stream;
 
     function filterNegatives(filename, enc, cb) {
-      var matcha = isMatch.bind(null, filename, opt);
+      var matcha = isMatch.bind(null, filename);
       if (negatives.every(matcha)) {
         cb(null, filename); // pass
       } else {
@@ -99,9 +99,9 @@ var gs = {
   }
 };
 
-function isMatch(file, opt, pattern) {
-  if (typeof pattern === 'string') return minimatch(file.path, pattern, opt);
-  if (pattern instanceof RegExp) return pattern.test(file.path);
+function isMatch(file, matcher) {
+  if (matcher instanceof Minimatch) return matcher.match(file.path);
+  if (matcher instanceof RegExp) return matcher.test(file.path);
   return true; // unknown glob type?
 }
 
@@ -112,6 +112,7 @@ function isNegative(pattern) {
 }
 
 function unrelative(cwd, glob) {
+  if (typeof glob !== 'string') return glob;
   var mod = '';
   if (glob[0] === '!') {
     mod = glob[0];
@@ -128,6 +129,11 @@ function indexGreaterThan(index) {
 
 function toGlob(obj) {
   return obj.glob;
+}
+
+function toMatcher(opt, glob) {
+  if (typeof glob === 'string') return new Minimatch(glob, opt);
+  return glob;
 }
 
 module.exports = gs;
