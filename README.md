@@ -4,7 +4,7 @@
 ## Information
 
 <table>
-<tr> 
+<tr>
 <td>Package</td><td>glob-stream</td>
 </tr>
 <tr>
@@ -62,6 +62,11 @@ would not exclude any files, but this would
 ```js
 gulp.src(['*.js', '!b*.js'])
 ```
+
+#### Related
+
+- [globby](https://github.com/sindresorhus/globby) - Non-streaming `glob` wrapper with support for multiple patterns.
+
 
 [npm-url]: https://npmjs.org/package/glob-stream
 [npm-image]: https://badge.fury.io/js/glob-stream.png
