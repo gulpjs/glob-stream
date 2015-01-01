@@ -14,24 +14,14 @@ var path = require('path');
 var gs = {
   // creates a stream for a single glob or filter
   createStream: function(ourGlob, negatives, opt) {
-    if (!negatives) negatives = [];
-    if (!opt) opt = {};
-    if (typeof opt.cwd !== 'string') opt.cwd = process.cwd();
-    if (typeof opt.dot !== 'boolean') opt.dot = false;
-    if (typeof opt.silent !== 'boolean') opt.silent = true;
-    if (typeof opt.nonull !== 'boolean') opt.nonull = false;
-    if (typeof opt.cwdbase !== 'boolean') opt.cwdbase = false;
-    if (opt.cwdbase) opt.base = opt.cwd;
-
     // remove path relativity to make globs make sense
     ourGlob = unrelative(opt.cwd, ourGlob);
-    negatives = negatives.map(unrelative.bind(null, opt.cwd)).map(toMatcher.bind(null, opt));
 
     // create globbing stuff
     var globber = new glob.Glob(ourGlob, opt);
 
     // extract base path from glob
-    var basePath = opt.base ? opt.base : glob2base(globber);
+    var basePath = opt.base || glob2base(globber);
 
     // create stream and map events from globber to it
     var stream = through2.obj(negatives.length ? filterNegatives : undefined);
@@ -63,22 +53,34 @@ var gs = {
   // creates a stream for multiple globs or filters
   create: function(globs, opt) {
     if (!opt) opt = {};
+    if (typeof opt.cwd !== 'string') opt.cwd = process.cwd();
+    if (typeof opt.dot !== 'boolean') opt.dot = false;
+    if (typeof opt.silent !== 'boolean') opt.silent = true;
+    if (typeof opt.nonull !== 'boolean') opt.nonull = false;
+    if (typeof opt.cwdbase !== 'boolean') opt.cwdbase = false;
+    if (opt.cwdbase) opt.base = opt.cwd;
 
     // only one glob no need to aggregate
-    if (!Array.isArray(globs)) return gs.createStream(globs, null, opt);
+    if (!Array.isArray(globs)) return gs.createStream(globs, [], opt);
 
     var positives = [];
     var negatives = [];
 
     globs.forEach(function(glob, index) {
       var globArray = isNegative(glob) ? negatives : positives;
+
+      // create Minimatch instances for negative glob patterns
+      if (globArray === negatives && typeof glob === 'string') {
+        glob = new Minimatch(unrelative(opt.cwd, glob), opt);
+      }
+
       globArray.push({
         index: index,
         glob: glob
       });
     });
 
-    if (positives.length === 0) throw new Error("Missing positive glob");
+    if (positives.length === 0) throw new Error('Missing positive glob');
 
     // only one positive glob no need to aggregate
     if (positives.length === 1) return streamFromPositive(positives[0]);
@@ -112,7 +114,6 @@ function isNegative(pattern) {
 }
 
 function unrelative(cwd, glob) {
-  if (typeof glob !== 'string') return glob;
   var mod = '';
   if (glob[0] === '!') {
     mod = glob[0];
@@ -129,11 +130,6 @@ function indexGreaterThan(index) {
 
 function toGlob(obj) {
   return obj.glob;
-}
-
-function toMatcher(opt, glob) {
-  if (typeof glob === 'string') return new Minimatch(glob, opt);
-  return glob;
 }
 
 module.exports = gs;
