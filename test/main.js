@@ -474,5 +474,15 @@ describe('glob-stream', function() {
       });
     });
 
+    it('should throw on invalid glob argument', function() {
+      gs.create.bind(gs, 42, {cwd: __dirname}).should.throw(/Invalid glob .* 0/);
+      gs.create.bind(gs, ['.', 42], {cwd: __dirname}).should.throw(/Invalid glob .* 1/);
+    });
+
+    it('should throw on missing positive glob', function() {
+      gs.create.bind(gs, '!c', {cwd: __dirname}).should.throw(/Missing positive glob/);
+      gs.create.bind(gs, ['!a', '!b'], {cwd: __dirname}).should.throw(/Missing positive glob/);
+    });
+
   });
 });
