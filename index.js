@@ -61,12 +61,16 @@ var gs = {
     if (opt.cwdbase) opt.base = opt.cwd;
 
     // only one glob no need to aggregate
-    if (!Array.isArray(globs)) return gs.createStream(globs, [], opt);
+    if (!Array.isArray(globs)) globs = [globs];
 
     var positives = [];
     var negatives = [];
 
     globs.forEach(function(glob, index) {
+      if (typeof glob !== 'string' && !(glob instanceof RegExp)) {
+        throw new Error('Invalid glob at index ' + index);
+      }
+
       var globArray = isNegative(glob) ? negatives : positives;
 
       // create Minimatch instances for negative glob patterns
@@ -104,13 +108,11 @@ var gs = {
 function isMatch(file, matcher) {
   if (matcher instanceof Minimatch) return matcher.match(file.path);
   if (matcher instanceof RegExp) return matcher.test(file.path);
-  return true; // unknown glob type?
 }
 
 function isNegative(pattern) {
-  if (typeof pattern !== 'string') return true;
-  if (pattern[0] === '!') return true;
-  return false;
+  if (typeof pattern === 'string') return pattern[0] === '!';
+  if (pattern instanceof RegExp) return true;
 }
 
 function unrelative(cwd, glob) {
