@@ -68,17 +68,14 @@ gulp.src(['*.js', '!b*.js'])
 - [globby](https://github.com/sindresorhus/globby) - Non-streaming `glob` wrapper with support for multiple patterns.
 
 
-[npm-url]: https://npmjs.org/package/glob-stream
-[npm-image]: https://badge.fury.io/js/glob-stream.png
+[npm-url]: https://www.npmjs.com/package/glob-stream
+[npm-image]: https://badge.fury.io/js/glob-stream.svg
 
 [travis-url]: https://travis-ci.org/wearefractal/glob-stream
-[travis-image]: https://travis-ci.org/wearefractal/glob-stream.png?branch=master
+[travis-image]: https://travis-ci.org/wearefractal/glob-stream.svg?branch=master
 
 [coveralls-url]: https://coveralls.io/r/wearefractal/glob-stream
-[coveralls-image]: https://coveralls.io/repos/wearefractal/glob-stream/badge.png
-
-[depstat-url]: https://david-dm.org/wearefractal/glob-stream
-[depstat-image]: https://david-dm.org/wearefractal/glob-stream.png
+[coveralls-image]: https://coveralls.io/repos/wearefractal/glob-stream/badge.svg
 
 [david-url]: https://david-dm.org/wearefractal/glob-stream
-[david-image]: https://david-dm.org/wearefractal/glob-stream.png?theme=shields.io
+[david-image]: https://david-dm.org/wearefractal/glob-stream.svg
