@@ -10,15 +10,19 @@ var glob = require('glob');
 var Minimatch = require('minimatch').Minimatch;
 var glob2base = require('glob2base');
 var path = require('path');
+var extend = require('extend');
 
 var gs = {
   // creates a stream for a single glob or filter
   createStream: function(ourGlob, negatives, opt) {
+
     // remove path relativity to make globs make sense
-    ourGlob = unrelative(opt.cwd, ourGlob);
+    ourGlob = resolveGlob(ourGlob, opt);
+    var ourOpt = extend({}, opt);
+    delete ourOpt.root;
 
     // create globbing stuff
-    var globber = new glob.Glob(ourGlob, opt);
+    var globber = new glob.Glob(ourGlob, ourOpt);
 
     // extract base path from glob
     var basePath = opt.base || glob2base(globber);
@@ -74,6 +78,9 @@ var gs = {
     var positives = [];
     var negatives = [];
 
+    var ourOpt = extend({}, opt);
+    delete ourOpt.root;
+    
     globs.forEach(function(glob, index) {
       if (typeof glob !== 'string' && !(glob instanceof RegExp)) {
         throw new Error('Invalid glob at index ' + index);
@@ -83,7 +90,8 @@ var gs = {
 
       // create Minimatch instances for negative glob patterns
       if (globArray === negatives && typeof glob === 'string') {
-        glob = new Minimatch(unrelative(opt.cwd, glob), opt);
+        var ourGlob = resolveGlob(glob, opt);
+        glob = new Minimatch(ourGlob, ourOpt);
       }
 
       globArray.push({
@@ -128,13 +136,18 @@ function isNegative(pattern) {
   if (pattern instanceof RegExp) return true;
 }
 
-function unrelative(cwd, glob) {
+function resolveGlob(glob, opt) {
   var mod = '';
   if (glob[0] === '!') {
     mod = glob[0];
     glob = glob.slice(1);
   }
-  return mod+path.resolve(cwd, glob);
+  if (opt.root && glob[0] === '/') {
+    glob = path.resolve(opt.root, '.'+glob);
+  } else {
+    glob = path.resolve(opt.cwd, glob);
+  }
+  return mod+glob;
 }
 
 function indexGreaterThan(index) {

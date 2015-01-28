@@ -502,6 +502,42 @@ describe('glob-stream', function() {
       });
     });
 
+    it('should resolve relative paths when root option is given', function(done) {
+      var stream = gs.create('./fixtures/test.coffee', {cwd: __dirname, root: __dirname + '/fixtures'});
+      should.exist(stream);
+      stream.on('error', function(err) {
+        throw err;
+      });
+      stream.on('data', function(file) {
+        should.exist(file);
+        should.exist(file.path);
+        should.exist(file.base);
+        should.exist(file.cwd);
+        String(file.cwd).should.equal(__dirname);
+        String(file.base).should.equal(join(__dirname, 'fixtures'+sep));
+        String(join(file.path,'')).should.equal(join(__dirname, './fixtures/test.coffee'));
+        done();
+      });
+    });
+
+    it('should resolve absolute paths when root option is given', function(done) {
+      var stream = gs.create('/test.coffee', {cwd: __dirname, root: __dirname + '/fixtures'});
+      should.exist(stream);
+      stream.on('error', function(err) {
+        throw err;
+      });
+      stream.on('data', function(file) {
+        should.exist(file);
+        should.exist(file.path);
+        should.exist(file.base);
+        should.exist(file.cwd);
+        String(file.cwd).should.equal(__dirname);
+        String(file.base).should.equal(join(__dirname, 'fixtures'+sep));
+        String(join(file.path,'')).should.equal(join(__dirname, './fixtures/test.coffee'));
+        done();
+      });
+    });
+
     it('should not emit error on glob containing {} when not found', function(done) {
       var stream = gs.create('notfound{a,b}');
       should.exist(stream);
