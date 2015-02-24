@@ -5,7 +5,7 @@
 var through2 = require('through2');
 var Combine = require('ordered-read-streams');
 var unique = require('unique-stream');
-var assign = require('object-assign');
+var clone = require('lodash.clone');
 
 var glob = require('glob');
 var glob2base = require('glob2base');
@@ -14,13 +14,10 @@ var path = require('path');
 var gs = {
   // creates a stream for a single glob or filter
   createStream: function(ourGlob, negatives, opt) {
-    // remove path relativity to make globs make sense
-    ourGlob = unrelative(opt.cwd, ourGlob);
-
     if (negatives.length) {
       // Do not mutate the options object which may be used
       // in multiple `gs.createStream()` calls.
-      opt = assign({}, opt);
+      opt = clone(opt);
       opt.ignore = (opt.ignore || []).concat(negatives);
     }
 
@@ -71,9 +68,17 @@ var gs = {
 
       var globArray = isNegative(glob) ? negatives : positives;
 
+      // remove leading "!" from negative globs to pass them to glob's `ignore` option
+      if (globArray === negatives) {
+        glob = glob.slice(1);
+      }
+
+      // remove path relativity to make globs make sense
+      glob = unrelative(opt.cwd, glob);
+
       globArray.push({
         index: index,
-        glob: globArray === negatives ? glob.slice(1) : glob
+        glob: glob
       });
     });
 
@@ -99,17 +104,11 @@ var gs = {
 };
 
 function isNegative(pattern) {
-  if (typeof pattern === 'string') return pattern[0] === '!';
-  if (pattern instanceof RegExp) return true;
+  return pattern[0] === '!';
 }
 
 function unrelative(cwd, glob) {
-  var mod = '';
-  if (glob[0] === '!') {
-    mod = glob[0];
-    glob = glob.slice(1);
-  }
-  return mod+path.resolve(cwd, glob);
+  return path.resolve(cwd, glob);
 }
 
 function indexGreaterThan(index) {
