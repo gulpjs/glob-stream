@@ -5,9 +5,9 @@
 var through2 = require('through2');
 var Combine = require('ordered-read-streams');
 var unique = require('unique-stream');
+var assign = require('object-assign');
 
 var glob = require('glob');
-var Minimatch = require('minimatch').Minimatch;
 var glob2base = require('glob2base');
 var path = require('path');
 
@@ -17,6 +17,23 @@ var gs = {
     // remove path relativity to make globs make sense
     ourGlob = unrelative(opt.cwd, ourGlob);
 
+    var negativeGlobs = [];
+    var negativeRegExps = [];
+
+    negatives.forEach(function(negative) {
+      // negatives can only be String or RegExp, otherwise an error would have been
+      // thrown in the `gs.create()` entry point.
+      var negativeArray = typeof negative === 'string' ? negativeGlobs : negativeRegExps;
+      negativeArray.push(negative);
+    });
+
+    if (negativeGlobs.length) {
+      // Do not mutate the options object which may be used
+      // in multiple `gs.createStream()` calls.
+      opt = assign({}, opt);
+      opt.ignore = (opt.ignore || []).concat(negativeGlobs);
+    }
+
     // create globbing stuff
     var globber = new glob.Glob(ourGlob, opt);
 
@@ -24,7 +41,7 @@ var gs = {
     var basePath = opt.base || glob2base(globber);
 
     // create stream and map events from globber to it
-    var stream = through2.obj(negatives.length ? filterNegatives : undefined);
+    var stream = through2.obj(negativeRegExps.length ? filterNegatives : undefined);
 
     globber.on('error', stream.emit.bind(stream, 'error'));
     globber.on('end', function(/* some args here so can't use bind directly */){
@@ -41,8 +58,8 @@ var gs = {
     return stream;
 
     function filterNegatives(filename, enc, cb) {
-      var matcha = isMatch.bind(null, filename);
-      if (negatives.every(matcha)) {
+      var matcha = isRegExpMatch.bind(null, filename);
+      if (negativeRegExps.every(matcha)) {
         cb(null, filename); // pass
       } else {
         cb(); // ignore
@@ -67,20 +84,16 @@ var gs = {
     var negatives = [];
 
     globs.forEach(function(glob, index) {
-      if (typeof glob !== 'string' && !(glob instanceof RegExp)) {
+      var isGlobString = typeof glob === 'string';
+      if (!isGlobString && !(glob instanceof RegExp)) {
         throw new Error('Invalid glob at index ' + index);
       }
 
       var globArray = isNegative(glob) ? negatives : positives;
 
-      // create Minimatch instances for negative glob patterns
-      if (globArray === negatives && typeof glob === 'string') {
-        glob = new Minimatch(unrelative(opt.cwd, glob), opt);
-      }
-
       globArray.push({
         index: index,
-        glob: glob
+        glob: globArray === negatives && isGlobString ? glob.slice(1) : glob
       });
     });
 
@@ -105,9 +118,8 @@ var gs = {
   }
 };
 
-function isMatch(file, matcher) {
-  if (matcher instanceof Minimatch) return matcher.match(file.path);
-  if (matcher instanceof RegExp) return matcher.test(file.path);
+function isRegExpMatch(file, pattern) {
+  return pattern.test(file.path);
 }
 
 function isNegative(pattern) {
