@@ -66,16 +66,17 @@ var gs = {
         throw new Error('Invalid glob at index ' + index);
       }
 
-      var globArray = isNegative(glob) ? negatives : positives;
+      var isNegativeGlob = isNegative(glob);
 
       // remove leading "!" from negative globs to pass them to glob's `ignore` option
-      if (globArray === negatives) {
+      if (isNegativeGlob) {
         glob = glob.slice(1);
       }
 
       // remove path relativity to make globs make sense
       glob = unrelative(opt.cwd, glob);
 
+      var globArray = isNegativeGlob ? negatives : positives;
       globArray.push({
         index: index,
         glob: glob
