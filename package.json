@@ -8,7 +8,7 @@
     "index.js"
   ],
   "dependencies": {
-    "glob": "^4.4.0",
+    "glob": "UltCombo/node-glob#fix-166",
     "glob2base": "^0.0.12",
     "lodash.clone": "^3.0.1",
     "ordered-read-streams": "^0.1.0",
