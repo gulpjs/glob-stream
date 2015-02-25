@@ -8,12 +8,12 @@
     "index.js"
   ],
   "dependencies": {
-    "glob": "^4.3.1",
-    "minimatch": "^2.0.1",
-    "ordered-read-streams": "^0.1.0",
+    "glob": "UltCombo/node-glob#fix-166",
     "glob2base": "^0.0.12",
-    "unique-stream": "^2.0.2",
-    "through2": "^0.6.1"
+    "lodash.clone": "^3.0.1",
+    "ordered-read-streams": "^0.1.0",
+    "through2": "^0.6.1",
+    "unique-stream": "^2.0.2"
   },
   "devDependencies": {
     "coveralls": "^2.11.2",
