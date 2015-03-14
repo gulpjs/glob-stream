@@ -153,11 +153,9 @@ function globIsSingular(glob) {
     return false;
   }
 
-  return globSet[0].every(isString);
-}
-
-function isString(value) {
-  return typeof value === 'string';
+  return globSet[0].every(function isString(value) {
+    return typeof value === 'string';
+  });
 }
 
 module.exports = gs;
