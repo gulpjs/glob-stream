@@ -75,7 +75,7 @@ describe('glob-stream', function() {
       var baseDir = join(__dirname, './fixtures');
 
       var globArray = [
-        './whatsgoingon/key/isaidhey/whatsgoingon/test.txt',
+        './whatsgoingon/hey/isaidhey/whatsgoingon/test.txt',
         './test.coffee',
         './whatsgoingon/test.js'
       ];
@@ -97,7 +97,7 @@ describe('glob-stream', function() {
       var baseDir = join(__dirname, './fixtures');
 
       var globArray = [
-        './whatsgoingon/key/isaidhey/whatsgoingon/test.txt',
+        './whatsgoingon/hey/isaidhey/whatsgoingon/test.txt',
         './test.coffee',
         './whatsgoingon/test.js'
       ];
@@ -307,7 +307,7 @@ describe('glob-stream', function() {
         var baseDir = join(__dirname, './fixtures');
 
         var globArray = [
-          './whatsgoingon/key/isaidhey/whatsgoingon/test.txt',
+          './whatsgoingon/hey/isaidhey/whatsgoingon/test.txt',
           './test.coffee',
           './whatsgoingon/test.js'
         ];
@@ -482,6 +482,46 @@ describe('glob-stream', function() {
     it('should throw on missing positive glob', function() {
       gs.create.bind(gs, '!c', {cwd: __dirname}).should.throw(/Missing positive glob/);
       gs.create.bind(gs, ['!a', '!b'], {cwd: __dirname}).should.throw(/Missing positive glob/);
+    });
+
+    it('should emit error on singular glob when file not found', function(done) {
+      var stream = gs.create('notfound');
+      should.exist(stream);
+      stream.on('error', function(err) {
+        err.should.match(/File not found with singular glob/);
+        done();
+      });
+    });
+
+    it('should emit error when a glob in multiple globs not found', function(done) {
+      var stream = gs.create(['notfound', './fixtures/whatsgoingon'], {cwd: __dirname});
+      should.exist(stream);
+      stream.on('error', function(err) {
+        err.should.match(/File not found with singular glob/);
+        done();
+      });
+    });
+
+    it('should not emit error on glob containing {} when not found', function(done) {
+      var stream = gs.create('notfound{a,b}');
+      should.exist(stream);
+      stream.on('error', function() {
+        throw new Error('Error was emitted');
+      });
+
+      stream.resume();
+      stream.once('end', done);
+    });
+
+    it('should not emit error on singular glob when allowEmpty is true', function(done) {
+      var stream = gs.create('notfound', { allowEmpty: true });
+      should.exist(stream);
+      stream.on('error', function() {
+        throw new Error('Error was emitted');
+      });
+
+      stream.resume();
+      stream.once('end', done);
     });
 
   });
