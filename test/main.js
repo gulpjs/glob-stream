@@ -484,5 +484,37 @@ describe('glob-stream', function() {
       gs.create.bind(gs, ['!a', '!b'], {cwd: __dirname}).should.throw(/Missing positive glob/);
     });
 
+    it('should emit error on singular glob when file not found', function(done) {
+      var stream = gs.create('notfound');
+      should.exist(stream);
+      stream.on('error', function(err) {
+        err.should.match(/File not found with singular glob/);
+        done();
+      });
+    });
+
+    it('should not emit error when multiple globs not found', function(done) {
+      var stream = gs.create(['notfound', 'alsonotfound']);
+      should.exist(stream);
+      stream.on('error', function() {
+        should.fail();
+      });
+
+      // For some reason `end` isn't called unless `data` is first?
+      stream.on('data', function(){});
+      stream.once('end', done);
+    });
+
+    it('should not emit error on singular glob when allowEmpty is true', function(done) {
+      var stream = gs.create('notfound', { allowEmpty: true });
+      should.exist(stream);
+      stream.on('error', function() {
+        should.fail();
+      });
+
+      stream.on('data', function(){});
+      stream.once('end', done);
+    });
+
   });
 });

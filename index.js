@@ -26,11 +26,19 @@ var gs = {
     // create stream and map events from globber to it
     var stream = through2.obj(negatives.length ? filterNegatives : undefined);
 
+    var found = false;
+
     globber.on('error', stream.emit.bind(stream, 'error'));
-    globber.on('end', function(/* some args here so can't use bind directly */){
+    globber.on('end', function(){
+      if (opt.allowEmpty !== true && !found && globIsSingular(globber)) {
+        stream.emit('error', new Error('File not found with singular glob'));
+      }
+
       stream.end();
     });
     globber.on('match', function(filename) {
+      found = true;
+
       stream.write({
         cwd: opt.cwd,
         base: basePath,
@@ -87,7 +95,11 @@ var gs = {
     if (positives.length === 0) throw new Error('Missing positive glob');
 
     // only one positive glob no need to aggregate
-    if (positives.length === 1) return streamFromPositive(positives[0]);
+    if (positives.length === 1) {
+      return streamFromPositive(positives[0]);
+    } else {
+      opt.allowEmpty = true;
+    }
 
     // create all individual streams
     var streams = positives.map(streamFromPositive);
@@ -132,6 +144,20 @@ function indexGreaterThan(index) {
 
 function toGlob(obj) {
   return obj.glob;
+}
+
+function globIsSingular(glob) {
+  var globSet = glob.minimatch.set;
+
+  if (globSet.length !== 1) {
+    return false;
+  }
+
+  return globSet[0].every(isString);
+}
+
+function isString(value) {
+  return typeof value === 'string';
 }
 
 module.exports = gs;
