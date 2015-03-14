@@ -505,6 +505,18 @@ describe('glob-stream', function() {
       stream.once('end', done);
     });
 
+    it('should not emit error on glob containing {} when not found', function(done) {
+      var stream = gs.create('notfound{a,b}');
+      should.exist(stream);
+      stream.on('error', function() {
+        should.fail();
+      });
+
+      // For some reason `end` isn't called unless `data` is first?
+      stream.on('data', function(){});
+      stream.once('end', done);
+    });
+
     it('should not emit error on singular glob when allowEmpty is true', function(done) {
       var stream = gs.create('notfound', { allowEmpty: true });
       should.exist(stream);
