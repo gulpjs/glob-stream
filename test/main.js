@@ -500,8 +500,7 @@ describe('glob-stream', function() {
         should.fail();
       });
 
-      // For some reason `end` isn't called unless `data` is first?
-      stream.on('data', function(){});
+      stream.resume();
       stream.once('end', done);
     });
 
