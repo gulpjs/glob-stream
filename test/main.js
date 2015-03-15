@@ -509,11 +509,10 @@ describe('glob-stream', function() {
       var stream = gs.create('notfound{a,b}');
       should.exist(stream);
       stream.on('error', function() {
-        should.fail();
+        throw new Error('Error was emitted');
       });
 
-      // For some reason `end` isn't called unless `data` is first?
-      stream.on('data', function(){});
+      stream.resume();
       stream.once('end', done);
     });
 
@@ -521,10 +520,10 @@ describe('glob-stream', function() {
       var stream = gs.create('notfound', { allowEmpty: true });
       should.exist(stream);
       stream.on('error', function() {
-        should.fail();
+        throw new Error('Error was emitted');
       });
 
-      stream.on('data', function(){});
+      stream.resume();
       stream.once('end', done);
     });
 
