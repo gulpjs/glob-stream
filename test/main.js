@@ -75,7 +75,7 @@ describe('glob-stream', function() {
       var baseDir = join(__dirname, './fixtures');
 
       var globArray = [
-        './whatsgoingon/key/isaidhey/whatsgoingon/test.txt',
+        './whatsgoingon/hey/isaidhey/whatsgoingon/test.txt',
         './test.coffee',
         './whatsgoingon/test.js'
       ];
@@ -97,7 +97,7 @@ describe('glob-stream', function() {
       var baseDir = join(__dirname, './fixtures');
 
       var globArray = [
-        './whatsgoingon/key/isaidhey/whatsgoingon/test.txt',
+        './whatsgoingon/hey/isaidhey/whatsgoingon/test.txt',
         './test.coffee',
         './whatsgoingon/test.js'
       ];
@@ -307,7 +307,7 @@ describe('glob-stream', function() {
         var baseDir = join(__dirname, './fixtures');
 
         var globArray = [
-          './whatsgoingon/key/isaidhey/whatsgoingon/test.txt',
+          './whatsgoingon/hey/isaidhey/whatsgoingon/test.txt',
           './test.coffee',
           './whatsgoingon/test.js'
         ];
@@ -493,15 +493,13 @@ describe('glob-stream', function() {
       });
     });
 
-    it('should not emit error when multiple globs not found', function(done) {
-      var stream = gs.create(['notfound', 'alsonotfound']);
+    it('should emit error when a glob in multiple globs not found', function(done) {
+      var stream = gs.create(['notfound', './fixtures/whatsgoingon'], {cwd: __dirname});
       should.exist(stream);
-      stream.on('error', function() {
-        should.fail();
+      stream.on('error', function(err) {
+        err.should.match(/File not found with singular glob/);
+        done();
       });
-
-      stream.resume();
-      stream.once('end', done);
     });
 
     it('should not emit error on glob containing {} when not found', function(done) {

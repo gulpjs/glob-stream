@@ -95,11 +95,7 @@ var gs = {
     if (positives.length === 0) throw new Error('Missing positive glob');
 
     // only one positive glob no need to aggregate
-    if (positives.length === 1) {
-      return streamFromPositive(positives[0]);
-    } else {
-      opt.allowEmpty = true;
-    }
+    if (positives.length === 1) return streamFromPositive(positives[0]);
 
     // create all individual streams
     var streams = positives.map(streamFromPositive);
@@ -107,8 +103,13 @@ var gs = {
     // then just pipe them to a single unique stream and return it
     var aggregate = new Combine(streams);
     var uniqueStream = unique('path');
+    var returnStream = aggregate.pipe(uniqueStream);
 
-    return aggregate.pipe(uniqueStream);
+    aggregate.on('error', function (err) {
+      returnStream.emit('error', err);
+    });
+
+    return returnStream;
 
     function streamFromPositive(positive) {
       var negativeGlobs = negatives.filter(indexGreaterThan(positive.index)).map(toGlob);
