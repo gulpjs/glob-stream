@@ -29,7 +29,7 @@ var gs = {
     var found = false;
 
     globber.on('error', stream.emit.bind(stream, 'error'));
-    globber.on('end', function(){
+    globber.once('end', function(){
       if (opt.allowEmpty !== true && !found && globIsSingular(globber)) {
         stream.emit('error', new Error('File not found with singular glob'));
       }
