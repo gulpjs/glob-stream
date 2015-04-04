@@ -8,6 +8,7 @@
     "index.js"
   ],
   "dependencies": {
+    "extend": "^2.0.0",
     "glob": "^5.0.3",
     "minimatch": "^2.0.1",
     "ordered-read-streams": "^0.2.0",
