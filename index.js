@@ -35,7 +35,7 @@ var gs = {
     globber.on('error', stream.emit.bind(stream, 'error'));
     globber.once('end', function(){
       if (opt.allowEmpty !== true && !found && globIsSingular(globber)) {
-        stream.emit('error', new Error('File not found with singular glob'));
+        stream.emit('error', new Error('File not found with singular glob: ' + ourGlob));
       }
 
       stream.end();
@@ -80,7 +80,7 @@ var gs = {
 
     var ourOpt = extend({}, opt);
     delete ourOpt.root;
-    
+
     globs.forEach(function(glob, index) {
       if (typeof glob !== 'string' && !(glob instanceof RegExp)) {
         throw new Error('Invalid glob at index ' + index);
