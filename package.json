@@ -8,13 +8,13 @@
     "index.js"
   ],
   "dependencies": {
-    "extend": "^2.0.0",
+    "extend": "^3.0.0",
     "glob": "^5.0.3",
     "minimatch": "^2.0.1",
-    "ordered-read-streams": "^0.2.0",
+    "ordered-read-streams": "^0.3.0",
     "glob2base": "^0.0.12",
     "unique-stream": "^2.0.2",
-    "through2": "^0.6.1"
+    "through2": "^0.6.0"
   },
   "devDependencies": {
     "coveralls": "^2.11.2",
@@ -24,7 +24,8 @@
     "mocha": "^2.0.0",
     "mocha-lcov-reporter": "0.0.2",
     "rimraf": "^2.2.5",
-    "should": "^6.0.0"
+    "should": "^7.1.0",
+    "stream-sink": "^1.2.0"
   },
   "scripts": {
     "test": "jshint && mocha",
