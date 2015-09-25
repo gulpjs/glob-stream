@@ -8,24 +8,24 @@
     "index.js"
   ],
   "dependencies": {
-    "extend": "^3.0.0",
-    "glob": "^5.0.3",
-    "minimatch": "^2.0.1",
-    "ordered-read-streams": "^0.3.0",
-    "glob2base": "^0.0.12",
-    "unique-stream": "^2.0.2",
-    "through2": "^0.6.0"
+    "extend": "3.0.0",
+    "glob": "5.0.14",
+    "minimatch": "2.0.10",
+    "ordered-read-streams": "0.3.0",
+    "glob2base": "0.0.12",
+    "unique-stream": "2.2.0",
+    "through2": "0.6.5"
   },
   "devDependencies": {
-    "coveralls": "^2.11.2",
-    "istanbul": "^0.3.0",
-    "istanbul-coveralls": "^1.0.1",
-    "jshint": "^2.5.10",
-    "mocha": "^2.0.0",
+    "coveralls": "2.11.4",
+    "istanbul": "0.3.21",
+    "istanbul-coveralls": "1.0.3",
+    "jshint": "2.8.0",
+    "mocha": "2.3.3",
     "mocha-lcov-reporter": "0.0.2",
-    "rimraf": "^2.2.5",
-    "should": "^7.1.0",
-    "stream-sink": "^1.2.0"
+    "rimraf": "2.4.3",
+    "should": "7.1.0",
+    "stream-sink": "1.2.0"
   },
   "scripts": {
     "test": "jshint && mocha",
