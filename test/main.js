@@ -560,5 +560,14 @@ describe('glob-stream', function() {
       stream.once('end', done);
     });
 
+    it('should pass options to through2',function(done){
+      var stream = gs.create(['./fixtures/stuff/run.dmc'], {cwd: __dirname, objectMode: false});
+      should.exist(stream);
+      stream.on('error', function(err) {
+        err.should.match(/Invalid non-string\/buffer chunk/);
+        done();
+      });
+    });
+
   });
 });
