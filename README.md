@@ -45,7 +45,7 @@ You can pass any combination of globs. One caveat is that you can not only pass 
 - allowEmpty
   - Default is `false`
   - If true, won't emit an error when a glob pointing at a single file fails to match
-
+- Any through2 related options are documented in [through2](https://github.com/rvagg/through2)
 This argument is passed directly to [node-glob](https://github.com/isaacs/node-glob) so check there for more options
 
 #### Glob
