@@ -560,5 +560,18 @@ describe('glob-stream', function() {
       stream.once('end', done);
     });
 
+    it('should emit error when incorrect options passed to through2 via create()',function(done){
+      var stream = gs.create(['./fixtures/stuff/run.dmc'], {cwd: __dirname, objectMode: false});
+      should.exist(stream);
+      stream.on('error', function(err) {
+        should.exist(err);
+        err.should.match(/Invalid non-string\/buffer chunk/);
+        done();
+      });
+      stream.on('end', function() {
+        done(new Error("Options not passed to through2"));
+      });
+    });
+
   });
 });
