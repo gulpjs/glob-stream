@@ -28,7 +28,7 @@ var gs = {
     var basePath = opt.base || glob2base(globber);
 
     // create stream and map events from globber to it
-    var stream = through2.obj(negatives.length ? filterNegatives : undefined);
+    var stream = through2.obj(opt, negatives.length ? filterNegatives : undefined);
 
     var found = false;
 
