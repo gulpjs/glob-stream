@@ -1,5 +1,3 @@
-/*jslint node: true */
-
 'use strict';
 
 var through2 = require('through2');
@@ -13,27 +11,27 @@ var path = require('path');
 var extend = require('extend');
 
 var gs = {
-  // creates a stream for a single glob or filter
+  // Creates a stream for a single glob or filter
   createStream: function(ourGlob, negatives, opt) {
 
-    // remove path relativity to make globs make sense
+    // Remove path relativity to make globs make sense
     ourGlob = resolveGlob(ourGlob, opt);
     var ourOpt = extend({}, opt);
     delete ourOpt.root;
 
-    // create globbing stuff
+    // Create globbing stuff
     var globber = new glob.Glob(ourGlob, ourOpt);
 
-    // extract base path from glob
+    // Extract base path from glob
     var basePath = opt.base || glob2base(globber);
 
-    // create stream and map events from globber to it
+    // Create stream and map events from globber to it
     var stream = through2.obj(opt, negatives.length ? filterNegatives : undefined);
 
     var found = false;
 
     globber.on('error', stream.emit.bind(stream, 'error'));
-    globber.once('end', function(){
+    globber.once('end', function() {
       if (opt.allowEmpty !== true && !found && globIsSingular(globber)) {
         stream.emit('error', new Error('File not found with singular glob: ' + ourGlob));
       }
@@ -46,7 +44,7 @@ var gs = {
       stream.write({
         cwd: opt.cwd,
         base: basePath,
-        path: path.resolve(opt.cwd, filename)
+        path: path.resolve(opt.cwd, filename),
       });
     });
 
@@ -55,25 +53,41 @@ var gs = {
     function filterNegatives(filename, enc, cb) {
       var matcha = isMatch.bind(null, filename);
       if (negatives.every(matcha)) {
-        cb(null, filename); // pass
+        cb(null, filename); // Pass
       } else {
-        cb(); // ignore
+        cb(); // Ignore
       }
     }
   },
 
-  // creates a stream for multiple globs or filters
+  // Creates a stream for multiple globs or filters
   create: function(globs, opt) {
-    if (!opt) opt = {};
-    if (typeof opt.cwd !== 'string') opt.cwd = process.cwd();
-    if (typeof opt.dot !== 'boolean') opt.dot = false;
-    if (typeof opt.silent !== 'boolean') opt.silent = true;
-    if (typeof opt.nonull !== 'boolean') opt.nonull = false;
-    if (typeof opt.cwdbase !== 'boolean') opt.cwdbase = false;
-    if (opt.cwdbase) opt.base = opt.cwd;
+    if (!opt) {
+      opt = {};
+    }
+    if (typeof opt.cwd !== 'string') {
+      opt.cwd = process.cwd();
+    }
+    if (typeof opt.dot !== 'boolean') {
+      opt.dot = false;
+    }
+    if (typeof opt.silent !== 'boolean') {
+      opt.silent = true;
+    }
+    if (typeof opt.nonull !== 'boolean') {
+      opt.nonull = false;
+    }
+    if (typeof opt.cwdbase !== 'boolean') {
+      opt.cwdbase = false;
+    }
+    if (opt.cwdbase) {
+      opt.base = opt.cwd;
+    }
 
-    // only one glob no need to aggregate
-    if (!Array.isArray(globs)) globs = [globs];
+    // Only one glob no need to aggregate
+    if (!Array.isArray(globs)) {
+      globs = [globs];
+    }
 
     var positives = [];
     var negatives = [];
@@ -88,7 +102,7 @@ var gs = {
 
       var globArray = isNegative(glob) ? negatives : positives;
 
-      // create Minimatch instances for negative glob patterns
+      // Create Minimatch instances for negative glob patterns
       if (globArray === negatives && typeof glob === 'string') {
         var ourGlob = resolveGlob(glob, opt);
         glob = new Minimatch(ourGlob, ourOpt);
@@ -96,24 +110,28 @@ var gs = {
 
       globArray.push({
         index: index,
-        glob: glob
+        glob: glob,
       });
     });
 
-    if (positives.length === 0) throw new Error('Missing positive glob');
+    if (positives.length === 0) {
+      throw new Error('Missing positive glob');
+    }
 
-    // only one positive glob no need to aggregate
-    if (positives.length === 1) return streamFromPositive(positives[0]);
+    // Only one positive glob no need to aggregate
+    if (positives.length === 1) {
+      return streamFromPositive(positives[0]);
+    }
 
-    // create all individual streams
+    // Create all individual streams
     var streams = positives.map(streamFromPositive);
 
-    // then just pipe them to a single unique stream and return it
+    // Then just pipe them to a single unique stream and return it
     var aggregate = new Combine(streams);
     var uniqueStream = unique('path');
     var returnStream = aggregate.pipe(uniqueStream);
 
-    aggregate.on('error', function (err) {
+    aggregate.on('error', function(err) {
       returnStream.emit('error', err);
     });
 
@@ -123,17 +141,25 @@ var gs = {
       var negativeGlobs = negatives.filter(indexGreaterThan(positive.index)).map(toGlob);
       return gs.createStream(positive.glob, negativeGlobs, opt);
     }
-  }
+  },
 };
 
 function isMatch(file, matcher) {
-  if (matcher instanceof Minimatch) return matcher.match(file.path);
-  if (matcher instanceof RegExp) return matcher.test(file.path);
+  if (matcher instanceof Minimatch) {
+    return matcher.match(file.path);
+  }
+  if (matcher instanceof RegExp) {
+    return matcher.test(file.path);
+  }
 }
 
 function isNegative(pattern) {
-  if (typeof pattern === 'string') return pattern[0] === '!';
-  if (pattern instanceof RegExp) return true;
+  if (typeof pattern === 'string') {
+    return pattern[0] === '!';
+  }
+  if (pattern instanceof RegExp) {
+    return true;
+  }
 }
 
 function resolveGlob(glob, opt) {
@@ -143,11 +169,11 @@ function resolveGlob(glob, opt) {
     glob = glob.slice(1);
   }
   if (opt.root && glob[0] === '/') {
-    glob = path.resolve(opt.root, '.'+glob);
+    glob = path.resolve(opt.root, '.' + glob);
   } else {
     glob = path.resolve(opt.cwd, glob);
   }
-  return mod+glob;
+  return mod + glob;
 }
 
 function indexGreaterThan(index) {

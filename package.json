@@ -18,26 +18,26 @@
   },
   "devDependencies": {
     "coveralls": "^2.11.2",
+    "eslint": "^1.7.3",
+    "eslint-config-gulp": "^2.0.0",
     "istanbul": "^0.3.0",
     "istanbul-coveralls": "^1.0.1",
-    "jshint": "^2.5.10",
+    "jscs": "^2.3.5",
+    "jscs-preset-gulp": "^1.0.0",
     "mocha": "^2.0.0",
-    "mocha-lcov-reporter": "0.0.2",
+    "mocha-lcov-reporter": "^0.0.2",
     "rimraf": "^2.2.5",
     "should": "^7.1.0",
     "stream-sink": "^1.2.0"
   },
   "scripts": {
-    "test": "jshint && mocha",
+    "lint": "eslint . && jscs *.js test/",
+    "pretest": "npm run lint",
+    "test": "mocha",
     "coveralls": "istanbul cover _mocha --report lcovonly && istanbul-coveralls"
   },
   "engines": {
     "node": ">= 0.9"
   },
-  "licenses": [
-    {
-      "type": "MIT",
-      "url": "http://github.com/wearefractal/glob-stream/raw/master/LICENSE"
-    }
-  ]
+  "license": "MIT"
 }
