@@ -8,7 +8,7 @@ var sep = path.sep;
 describe('glob-stream', function() {
   describe('create()', function() {
     it('should return a folder name stream from a glob', function(done) {
-      var stream = gs.create('./fixtures/whatsgoingon', {cwd: __dirname});
+      var stream = gs.create('./fixtures/whatsgoingon', { cwd: __dirname });
       should.exist(stream);
       stream.on('error', function(err) {
         throw err;
@@ -26,7 +26,7 @@ describe('glob-stream', function() {
     });
 
     it('should return a file name stream from a glob', function(done) {
-      var stream = gs.create('./fixtures/*.coffee', {cwd: __dirname});
+      var stream = gs.create('./fixtures/*.coffee', { cwd: __dirname });
       should.exist(stream);
       stream.on('error', function(err) {
         throw err;
@@ -44,7 +44,7 @@ describe('glob-stream', function() {
     });
 
     it('should return a file name stream from a glob and respect state', function(done) {
-      var stream = gs.create('./fixtures/stuff/*.dmc', {cwd: __dirname});
+      var stream = gs.create('./fixtures/stuff/*.dmc', { cwd: __dirname });
       var wrapper = stream.pipe(through2.obj(function(data, enc, cb) {
         this.pause();
         setTimeout(function() {
@@ -77,7 +77,7 @@ describe('glob-stream', function() {
         './test.coffee',
         './whatsgoingon/test.js',
       ];
-      var stream = gs.create(globArray, {cwd: baseDir, base: baseDir});
+      var stream = gs.create(globArray, { cwd: baseDir, base: baseDir });
 
       var files = [];
       stream.on('error', done);
@@ -99,7 +99,7 @@ describe('glob-stream', function() {
         './test.coffee',
         './whatsgoingon/test.js',
       ];
-      var stream = gs.create(globArray, {cwd: baseDir, cwdbase: true});
+      var stream = gs.create(globArray, { cwd: baseDir, cwdbase: true });
 
       var files = [];
       stream.on('error', done);
@@ -114,7 +114,7 @@ describe('glob-stream', function() {
     });
 
     it('should return a file name stream that does not duplicate', function(done) {
-      var stream = gs.create(['./fixtures/test.coffee', './fixtures/test.coffee'], {cwd: __dirname});
+      var stream = gs.create(['./fixtures/test.coffee', './fixtures/test.coffee'], { cwd: __dirname });
       should.exist(stream);
       stream.on('error', function(err) {
         throw err;
@@ -132,8 +132,8 @@ describe('glob-stream', function() {
     });
 
     it('should return a file name stream that does not duplicate when piped twice', function(done) {
-      var stream = gs.create('./fixtures/test.coffee', {cwd: __dirname});
-      var stream2 = gs.create('./fixtures/test.coffee', {cwd: __dirname});
+      var stream = gs.create('./fixtures/test.coffee', { cwd: __dirname });
+      var stream2 = gs.create('./fixtures/test.coffee', { cwd: __dirname });
       stream2.pipe(stream);
 
       should.exist(stream);
@@ -154,7 +154,7 @@ describe('glob-stream', function() {
 
 
     it('should return a file name stream from a direct path', function(done) {
-      var stream = gs.create('./fixtures/test.coffee', {cwd: __dirname});
+      var stream = gs.create('./fixtures/test.coffee', { cwd: __dirname });
       should.exist(stream);
       stream.on('error', function(err) {
         throw err;
@@ -172,7 +172,7 @@ describe('glob-stream', function() {
     });
 
     it('should not return a file name stream with dotfiles without dot option', function(done) {
-      var stream = gs.create('./fixtures/*swag', {cwd: __dirname});
+      var stream = gs.create('./fixtures/*swag', { cwd: __dirname });
       should.exist(stream);
       stream.on('error', function(err) {
         throw err;
@@ -184,7 +184,7 @@ describe('glob-stream', function() {
     });
 
     it('should return a file name stream with dotfiles with dot option', function(done) {
-      var stream = gs.create('./fixtures/*swag', {cwd: __dirname, dot: true});
+      var stream = gs.create('./fixtures/*swag', { cwd: __dirname, dot: true });
       should.exist(stream);
       stream.on('error', function(err) {
         throw err;
@@ -202,7 +202,7 @@ describe('glob-stream', function() {
     });
 
     it('should return a file name stream with dotfiles negated', function(done) {
-      var stream = gs.create(['./fixtures/*swag', '!./fixtures/**'], {cwd: __dirname, dot: true});
+      var stream = gs.create(['./fixtures/*swag', '!./fixtures/**'], { cwd: __dirname, dot: true });
       should.exist(stream);
       stream.on('error', function(err) {
         throw err;
@@ -214,7 +214,7 @@ describe('glob-stream', function() {
     });
 
     it('should return a file name stream from a direct path and pause/buffer items', function(done) {
-      var stream = gs.create('./fixtures/test.coffee', {cwd: __dirname});
+      var stream = gs.create('./fixtures/test.coffee', { cwd: __dirname });
       should.exist(stream);
       stream.on('error', function(err) {
         throw err;
@@ -259,7 +259,7 @@ describe('glob-stream', function() {
         join(__dirname, './fixtures/**/test.coffee'),
         join(__dirname, './fixtures/**/test.js'),
       ];
-      var stream = gs.create(globArray, {cwd: __dirname});
+      var stream = gs.create(globArray, { cwd: __dirname });
 
       var files = [];
       stream.on('error', done);
@@ -283,7 +283,7 @@ describe('glob-stream', function() {
         join(__dirname, './fixtures/test.coffee'),
         join(__dirname, './fixtures/whatsgoingon/test.js'),
       ];
-      var stream = gs.create(globArray, {cwd: __dirname});
+      var stream = gs.create(globArray, { cwd: __dirname });
 
       var files = [];
       stream.on('error', done);
@@ -309,7 +309,7 @@ describe('glob-stream', function() {
           './test.coffee',
           './whatsgoingon/test.js',
         ];
-        var stream = gs.create(globArray, {cwd: baseDir, cwdbase: true});
+        var stream = gs.create(globArray, { cwd: baseDir, cwdbase: true });
 
         var files = [];
         stream.on('error', done);
@@ -387,7 +387,7 @@ describe('glob-stream', function() {
     });
 
     it('should return a file name stream with negation from a glob', function(done) {
-      var stream = gs.create(['./fixtures/**/*.js', '!./**/test.js'], {cwd: __dirname});
+      var stream = gs.create(['./fixtures/**/*.js', '!./**/test.js'], { cwd: __dirname });
       should.exist(stream);
       stream.on('error', function(err) {
         throw err;
@@ -401,7 +401,7 @@ describe('glob-stream', function() {
     });
 
     it('should return a file name stream from two globs and a negative', function(done) {
-      var stream = gs.create(['./fixtures/*.coffee', './fixtures/whatsgoingon/*.coffee'], {cwd: __dirname});
+      var stream = gs.create(['./fixtures/*.coffee', './fixtures/whatsgoingon/*.coffee'], { cwd: __dirname });
       should.exist(stream);
       stream.on('error', function(err) {
         throw err;
@@ -419,7 +419,7 @@ describe('glob-stream', function() {
     });
 
     it('should respect the globs array order', function(done) {
-      var stream = gs.create(['./fixtures/stuff/*', '!./fixtures/stuff/*.dmc', './fixtures/stuff/run.dmc'], {cwd: __dirname});
+      var stream = gs.create(['./fixtures/stuff/*', '!./fixtures/stuff/*.dmc', './fixtures/stuff/run.dmc'], { cwd: __dirname });
       should.exist(stream);
       stream.on('error', function(err) {
         throw err;
@@ -437,7 +437,7 @@ describe('glob-stream', function() {
     });
 
     it('should ignore leading negative globs', function(done) {
-      var stream = gs.create(['!./fixtures/stuff/*.dmc', './fixtures/stuff/run.dmc'], {cwd: __dirname});
+      var stream = gs.create(['!./fixtures/stuff/*.dmc', './fixtures/stuff/run.dmc'], { cwd: __dirname });
       should.exist(stream);
       stream.on('error', function(err) {
         throw err;
@@ -455,7 +455,7 @@ describe('glob-stream', function() {
     });
 
     it('should handle RegExps as negative matchers', function(done) {
-      var stream = gs.create(['./fixtures/stuff/*.dmc', /run/], {cwd: __dirname});
+      var stream = gs.create(['./fixtures/stuff/*.dmc', /run/], { cwd: __dirname });
       should.exist(stream);
       stream.on('error', function(err) {
         throw err;
@@ -473,13 +473,13 @@ describe('glob-stream', function() {
     });
 
     it('should throw on invalid glob argument', function() {
-      gs.create.bind(gs, 42, {cwd: __dirname}).should.throw(/Invalid glob .* 0/);
-      gs.create.bind(gs, ['.', 42], {cwd: __dirname}).should.throw(/Invalid glob .* 1/);
+      gs.create.bind(gs, 42, { cwd: __dirname }).should.throw(/Invalid glob .* 0/);
+      gs.create.bind(gs, ['.', 42], { cwd: __dirname }).should.throw(/Invalid glob .* 1/);
     });
 
     it('should throw on missing positive glob', function() {
-      gs.create.bind(gs, '!c', {cwd: __dirname}).should.throw(/Missing positive glob/);
-      gs.create.bind(gs, ['!a', '!b'], {cwd: __dirname}).should.throw(/Missing positive glob/);
+      gs.create.bind(gs, '!c', { cwd: __dirname }).should.throw(/Missing positive glob/);
+      gs.create.bind(gs, ['!a', '!b'], { cwd: __dirname }).should.throw(/Missing positive glob/);
     });
 
     it('should emit error on singular glob when file not found', function(done) {
@@ -492,7 +492,7 @@ describe('glob-stream', function() {
     });
 
     it('should emit error when a glob in multiple globs not found', function(done) {
-      var stream = gs.create(['notfound', './fixtures/whatsgoingon'], {cwd: __dirname});
+      var stream = gs.create(['notfound', './fixtures/whatsgoingon'], { cwd: __dirname });
       should.exist(stream);
       stream.on('error', function(err) {
         err.should.match(/File not found with singular glob/);
@@ -501,7 +501,7 @@ describe('glob-stream', function() {
     });
 
     it('should resolve relative paths when root option is given', function(done) {
-      var stream = gs.create('./fixtures/test.coffee', {cwd: __dirname, root: __dirname + '/fixtures'});
+      var stream = gs.create('./fixtures/test.coffee', { cwd: __dirname, root: __dirname + '/fixtures' });
       should.exist(stream);
       stream.on('error', function(err) {
         throw err;
@@ -519,7 +519,7 @@ describe('glob-stream', function() {
     });
 
     it('should resolve absolute paths when root option is given', function(done) {
-      var stream = gs.create('/test.coffee', {cwd: __dirname, root: __dirname + '/fixtures'});
+      var stream = gs.create('/test.coffee', { cwd: __dirname, root: __dirname + '/fixtures' });
       should.exist(stream);
       stream.on('error', function(err) {
         throw err;
@@ -548,7 +548,7 @@ describe('glob-stream', function() {
     });
 
     it('should not emit error on singular glob when allowEmpty is true', function(done) {
-      var stream = gs.create('notfound', {allowEmpty: true});
+      var stream = gs.create('notfound', { allowEmpty: true });
       should.exist(stream);
       stream.on('error', function() {
         throw new Error('Error was emitted');
@@ -559,7 +559,7 @@ describe('glob-stream', function() {
     });
 
     it('should pass options to through2',function(done) {
-      var stream = gs.create(['./fixtures/stuff/run.dmc'], {cwd: __dirname, objectMode: false});
+      var stream = gs.create(['./fixtures/stuff/run.dmc'], { cwd: __dirname, objectMode: false });
       should.exist(stream);
       stream.on('error', function(err) {
         err.should.match(/Invalid non-string\/buffer chunk/);
