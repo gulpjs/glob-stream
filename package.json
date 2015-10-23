@@ -19,7 +19,7 @@
   "devDependencies": {
     "coveralls": "^2.11.2",
     "eslint": "^1.7.3",
-    "eslint-config-gulp": "^1.1.0",
+    "eslint-config-gulp": "^2.0.0",
     "istanbul": "^0.3.0",
     "istanbul-coveralls": "^1.0.1",
     "jscs": "^2.3.5",
