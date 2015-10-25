@@ -75,11 +75,11 @@ gulp.src(['*.js', '!b*.js'])
 [npm-url]: https://www.npmjs.com/package/glob-stream
 [npm-image]: https://badge.fury.io/js/glob-stream.svg
 
-[travis-url]: https://travis-ci.org/wearefractal/glob-stream
-[travis-image]: https://travis-ci.org/wearefractal/glob-stream.svg?branch=master
+[travis-url]: https://travis-ci.org/gulpjs/glob-stream
+[travis-image]: https://travis-ci.org/gulpjs/glob-stream.svg?branch=master
 
-[coveralls-url]: https://coveralls.io/r/wearefractal/glob-stream
-[coveralls-image]: https://coveralls.io/repos/wearefractal/glob-stream/badge.svg
+[coveralls-url]: https://coveralls.io/r/gulpjs/glob-stream
+[coveralls-image]: https://coveralls.io/repos/gulpjs/glob-stream/badge.svg
 
-[david-url]: https://david-dm.org/wearefractal/glob-stream
-[david-image]: https://david-dm.org/wearefractal/glob-stream.svg
+[david-url]: https://david-dm.org/gulpjs/glob-stream
+[david-image]: https://david-dm.org/gulpjs/glob-stream.svg
