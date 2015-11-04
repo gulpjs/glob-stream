@@ -44,7 +44,9 @@ var gs = {
       stream.write({
         cwd: opt.cwd,
         base: basePath,
-        path: restoreSlash(filename, path.resolve(opt.cwd, filename)),
+        path: path.isAbsolute(filename) ?
+          path.normalize(filename) :
+          path.normalize(opt.cwd + '/' + filename),
       });
     });
 
@@ -163,31 +165,19 @@ function isNegative(pattern) {
 }
 
 function resolveGlob(glob, opt) {
-  var originalGlob = glob;
   var mod = '';
   if (glob[0] === '!') {
     mod = glob[0];
     glob = glob.slice(1);
   }
   if (opt.root && glob[0] === '/') {
-    glob = path.resolve(opt.root, '.' + glob);
+    glob = path.normalize(opt.root + '/.' + glob);
   } else {
-    glob = path.resolve(opt.cwd, glob);
+    glob = path.isAbsolute(glob) ?
+      path.normalize(glob) :
+      path.normalize(opt.cwd + '/' + glob);
   }
-  return restoreSlash(originalGlob, mod + glob);
-}
-
-/*
- * Restores trailing slash that is removed from calls to path.resolve.
- */
-function restoreSlash(originalGlob, newGlob) {
-  if (newGlob === '/') {
-    return newGlob;
-  }
-  if (originalGlob[originalGlob.length - 1] === '/') {
-    return newGlob + '/';
-  }
-  return newGlob;
+  return mod + glob;
 }
 
 function indexGreaterThan(index) {
