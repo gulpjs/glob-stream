@@ -44,7 +44,7 @@ var gs = {
       stream.write({
         cwd: opt.cwd,
         base: basePath,
-        path: path.isAbsolute(filename) ?
+        path: isAbsolutePath(filename) ?
           path.normalize(filename) :
           path.normalize(opt.cwd + '/' + filename),
       });
@@ -173,11 +173,25 @@ function resolveGlob(glob, opt) {
   if (opt.root && glob[0] === '/') {
     glob = path.normalize(opt.root + '/.' + glob);
   } else {
-    glob = path.isAbsolute(glob) ?
+    glob = isAbsolutePath(glob) ?
       path.normalize(glob) :
       path.normalize(opt.cwd + '/' + glob);
   }
   return mod + glob;
+}
+
+function isAbsolutePath(p) {
+  if (path.isAbsolute) {
+    return path.isAbsolute(p);
+  } else {
+    if (process.platform === 'win32') {
+      return p[0] === '/' ||
+             p[0] === '\\' ||
+             (p.length > 1 && p[1] === ':' && process.platform === 'win32');
+    } else {
+      return p[0] === '/';
+    }
+  }
 }
 
 function indexGreaterThan(index) {
