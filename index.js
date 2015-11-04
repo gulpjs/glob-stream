@@ -187,7 +187,7 @@ function isAbsolutePath(p) {
     if (process.platform === 'win32') {
       return p[0] === '/' ||
              p[0] === '\\' ||
-             (p.length > 1 && p[1] === ':' && process.platform === 'win32');
+             (p.length > 1 && p[1] === ':');
     } else {
       return p[0] === '/';
     }
