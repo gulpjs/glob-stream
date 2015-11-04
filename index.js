@@ -40,12 +40,11 @@ var gs = {
     });
     globber.on('match', function(filename) {
       found = true;
-      var trailingSlash = (filename[filename.length - 1] === '/') ? '/' : '';
 
       stream.write({
         cwd: opt.cwd,
         base: basePath,
-        path: path.resolve(opt.cwd, filename) + trailingSlash,
+        path: restoreSlash(filename, path.resolve(opt.cwd, filename)),
       });
     });
 
@@ -164,8 +163,8 @@ function isNegative(pattern) {
 }
 
 function resolveGlob(glob, opt) {
+  var originalGlob = glob;
   var mod = '';
-  var trailingSlash = (glob[glob.length - 1] === '/') ? '/' : '';
   if (glob[0] === '!') {
     mod = glob[0];
     glob = glob.slice(1);
@@ -175,7 +174,20 @@ function resolveGlob(glob, opt) {
   } else {
     glob = path.resolve(opt.cwd, glob);
   }
-  return mod + glob + trailingSlash;
+  return restoreSlash(originalGlob, mod + glob);
+}
+
+/*
+ * Restores trailing slash that is removed from calls to path.resolve.
+ */
+function restoreSlash(originalGlob, newGlob) {
+  if (newGlob === '/') {
+    return newGlob;
+  }
+  if (originalGlob[originalGlob.length - 1] === '/') {
+    return newGlob + '/';
+  }
+  return newGlob;
 }
 
 function indexGreaterThan(index) {
