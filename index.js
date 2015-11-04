@@ -40,11 +40,12 @@ var gs = {
     });
     globber.on('match', function(filename) {
       found = true;
+      var trailingSlash = (filename[filename.length - 1] === '/') ? '/' : '';
 
       stream.write({
         cwd: opt.cwd,
         base: basePath,
-        path: path.resolve(opt.cwd, filename),
+        path: path.resolve(opt.cwd, filename) + trailingSlash,
       });
     });
 
@@ -164,6 +165,7 @@ function isNegative(pattern) {
 
 function resolveGlob(glob, opt) {
   var mod = '';
+  var trailingSlash = (glob[glob.length - 1] === '/') ? '/' : '';
   if (glob[0] === '!') {
     mod = glob[0];
     glob = glob.slice(1);
@@ -173,7 +175,7 @@ function resolveGlob(glob, opt) {
   } else {
     glob = path.resolve(opt.cwd, glob);
   }
-  return mod + glob;
+  return mod + glob + trailingSlash;
 }
 
 function indexGreaterThan(index) {
