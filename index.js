@@ -26,14 +26,16 @@ var gs = {
     var basePath = opt.base || glob2base(globber);
 
     // Create stream and map events from globber to it
-    var stream = through2.obj(opt, negatives.length ? filterNegatives : undefined);
+    var stream = through2.obj(opt,
+      negatives.length ? filterNegatives : undefined);
 
     var found = false;
 
     globber.on('error', stream.emit.bind(stream, 'error'));
     globber.once('end', function() {
       if (opt.allowEmpty !== true && !found && globIsSingular(globber)) {
-        stream.emit('error', new Error('File not found with singular glob: ' + ourGlob));
+        stream.emit('error',
+          new Error('File not found with singular glob: ' + ourGlob));
       }
 
       stream.end();
@@ -138,7 +140,8 @@ var gs = {
     return returnStream;
 
     function streamFromPositive(positive) {
-      var negativeGlobs = negatives.filter(indexGreaterThan(positive.index)).map(toGlob);
+      var negativeGlobs = negatives.filter(indexGreaterThan(positive.index))
+        .map(toGlob);
       return gs.createStream(positive.glob, negativeGlobs, opt);
     }
   },
