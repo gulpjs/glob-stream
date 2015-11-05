@@ -60,7 +60,7 @@ describe('glob-stream', function() {
       stream.on('error', function(err) {
         throw err;
       });
-      wrapper.on('data', function(file) {
+      wrapper.on('data', function() {
         count++;
       });
       wrapper.on('end', function() {
@@ -79,7 +79,6 @@ describe('glob-stream', function() {
       ];
       var stream = gs.create(globArray, { cwd: baseDir, base: baseDir });
 
-      var files = [];
       stream.on('error', done);
       stream.on('data', function(file) {
         should.exist(file);
@@ -101,7 +100,6 @@ describe('glob-stream', function() {
       ];
       var stream = gs.create(globArray, { cwd: baseDir, cwdbase: true });
 
-      var files = [];
       stream.on('error', done);
       stream.on('data', function(file) {
         should.exist(file);
@@ -177,7 +175,7 @@ describe('glob-stream', function() {
       stream.on('error', function(err) {
         throw err;
       });
-      stream.once('data', function(file) {
+      stream.once('data', function() {
         throw new Error('It matched!');
       });
       stream.once('end', done);
@@ -207,7 +205,7 @@ describe('glob-stream', function() {
       stream.on('error', function(err) {
         throw err;
       });
-      stream.once('data', function(file) {
+      stream.once('data', function() {
         throw new Error('It matched!');
       });
       stream.once('end', done);
@@ -311,7 +309,6 @@ describe('glob-stream', function() {
         ];
         var stream = gs.create(globArray, { cwd: baseDir, cwdbase: true });
 
-        var files = [];
         stream.on('error', done);
         stream.on('data', function(file) {
           should.exist(file);
