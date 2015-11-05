@@ -6,6 +6,7 @@ var unique = require('unique-stream');
 
 var glob = require('glob');
 var Minimatch = require('minimatch').Minimatch;
+var resolveGlob = require('to-absolute-glob');
 var glob2base = require('glob2base');
 var path = require('path');
 var extend = require('extend');
@@ -46,7 +47,7 @@ var gs = {
       stream.write({
         cwd: opt.cwd,
         base: basePath,
-        path: path.resolve(opt.cwd, filename),
+        path: filename,
       });
     });
 
@@ -163,20 +164,6 @@ function isNegative(pattern) {
   if (pattern instanceof RegExp) {
     return true;
   }
-}
-
-function resolveGlob(glob, opt) {
-  var mod = '';
-  if (glob[0] === '!') {
-    mod = glob[0];
-    glob = glob.slice(1);
-  }
-  if (opt.root && glob[0] === '/') {
-    glob = path.resolve(opt.root, '.' + glob);
-  } else {
-    glob = path.resolve(opt.cwd, glob);
-  }
-  return mod + glob;
 }
 
 function indexGreaterThan(index) {
