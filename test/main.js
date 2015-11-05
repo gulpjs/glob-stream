@@ -25,6 +25,24 @@ describe('glob-stream', function() {
       });
     });
 
+    it('should return only folder name stream from a glob', function(done) {
+      var folderCount = 0;
+      var stream = gs.create('./fixtures/whatsgoingon/*/', { cwd: __dirname });
+      stream.on('error', function(err) {
+        throw err;
+      });
+      stream.on('data', function(file) {
+        should.exist(file);
+        should.exist(file.path);
+        String(join(file.path, '')).should.equal(join(__dirname, './fixtures/whatsgoingon/hey/'));
+        folderCount++;
+      });
+      stream.on('end', function() {
+        folderCount.should.equal(1);
+        done();
+      });
+    });
+
     it('should return a file name stream from a glob', function(done) {
       var stream = gs.create('./fixtures/*.coffee', { cwd: __dirname });
       should.exist(stream);
