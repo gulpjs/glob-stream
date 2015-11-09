@@ -5,10 +5,9 @@ var Combine = require('ordered-read-streams');
 var unique = require('unique-stream');
 
 var glob = require('glob');
-var Minimatch = require('minimatch').Minimatch;
+var micromatch = require('micromatch');
 var resolveGlob = require('to-absolute-glob');
-var glob2base = require('glob2base');
-var path = require('path');
+var globParent = require('glob-parent');
 var extend = require('extend');
 
 var gs = {
@@ -24,7 +23,7 @@ var gs = {
     var globber = new glob.Glob(ourGlob, ourOpt);
 
     // Extract base path from glob
-    var basePath = opt.base || glob2base(globber);
+    var basePath = opt.base || globParent(ourGlob) + '/';
 
     // Create stream and map events from globber to it
     var stream = through2.obj(opt,
@@ -108,7 +107,7 @@ var gs = {
       // Create Minimatch instances for negative glob patterns
       if (globArray === negatives && typeof glob === 'string') {
         var ourGlob = resolveGlob(glob, opt);
-        glob = new Minimatch(ourGlob, ourOpt);
+        glob = micromatch.matcher(ourGlob, ourOpt);
       }
 
       globArray.push({
@@ -149,8 +148,8 @@ var gs = {
 };
 
 function isMatch(file, matcher) {
-  if (matcher instanceof Minimatch) {
-    return matcher.match(file.path);
+  if (typeof matcher === 'function') {
+    return matcher(file.path);
   }
   if (matcher instanceof RegExp) {
     return matcher.test(file.path);
