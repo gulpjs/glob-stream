@@ -8,7 +8,6 @@ var glob = require('glob');
 var micromatch = require('micromatch');
 var resolveGlob = require('to-absolute-glob');
 var globParent = require('glob-parent');
-var path = require('path');
 var extend = require('extend');
 
 var gs = {
