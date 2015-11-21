@@ -22,9 +22,8 @@
   },
   "dependencies": {
     "extend": "^3.0.0",
-    "glob": "^5.0.3",
+    "glob": "^7.0.6",
     "glob-parent": "^3.0.0",
-    "micromatch": "^2.3.7",
     "ordered-read-streams": "^0.3.0",
     "through2": "^0.6.0",
     "to-absolute-glob": "^0.1.1",
