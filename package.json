@@ -1,12 +1,25 @@
 {
   "name": "glob-stream",
-  "description": "File system globs as a stream",
   "version": "5.2.0",
-  "repository": "wearefractal/glob-stream",
-  "author": "Fractal <contact@wearefractal.com> (http://wearefractal.com/)",
+  "description": "A wrapper around node-glob to make it streamy",
+  "author": "Gulp Team <team@gulpjs.com> (http://gulpjs.com/)",
+  "contributors": [],
+  "homepage": "http://gulpjs.com",
+  "repository": "gulpjs/glob-stream",
+  "license": "MIT",
+  "engines": {
+    "node": ">= 0.10"
+  },
+  "main": "index.js",
   "files": [
     "index.js"
   ],
+  "scripts": {
+    "lint": "eslint . && jscs *.js test/",
+    "pretest": "npm run lint",
+    "test": "mocha",
+    "coveralls": "istanbul cover _mocha --report lcovonly && istanbul-coveralls"
+  },
   "dependencies": {
     "extend": "^3.0.0",
     "glob": "^5.0.3",
@@ -31,14 +44,8 @@
     "should": "^7.1.0",
     "stream-sink": "^1.2.0"
   },
-  "scripts": {
-    "lint": "eslint . && jscs *.js test/",
-    "pretest": "npm run lint",
-    "test": "mocha",
-    "coveralls": "istanbul cover _mocha --report lcovonly && istanbul-coveralls"
-  },
-  "engines": {
-    "node": ">= 0.9"
-  },
-  "license": "MIT"
+  "keywords": [
+    "glob",
+    "stream"
+  ]
 }
