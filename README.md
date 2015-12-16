@@ -1,30 +1,21 @@
-# glob-stream [![NPM version][npm-image]][npm-url] [![Build Status][travis-image]][travis-url] [![Coveralls Status][coveralls-image]][coveralls-url] [![Dependency Status][david-image]][david-url]
+<p align="center">
+  <a href="http://gulpjs.com">
+    <img height="257" width="114" src="https://raw.githubusercontent.com/gulpjs/artwork/master/gulp-2x.png">
+  </a>
+</p>
 
+# glob-stream
 
-## Information
+[![NPM version][npm-image]][npm-url] [![Downloads][downloads-image]][npm-url] [![Build Status][travis-image]][travis-url] [![Coveralls Status][coveralls-image]][coveralls-url] [![Gitter chat][gitter-image]][gitter-url]
 
-<table>
-<tr>
-<td>Package</td><td>glob-stream</td>
-</tr>
-<tr>
-<td>Description</td>
-<td>File system globs as a stream</td>
-</tr>
-<tr>
-<td>Node Version</td>
-<td>>= 0.9</td>
-</tr>
-</table>
-
-This is a simple wrapper around node-glob to make it streamy.
+A wrapper around [node-glob][node-glob-url] to make it streamy.
 
 ## Usage
 
 ```javascript
 var gs = require('glob-stream');
 
-var stream = gs.create('./files/**/*.coffee', {options});
+var stream = gs.create('./files/**/*.coffee', { /* options */ });
 
 stream.on('data', function(file){
   // file has path, base, and cwd attrs
@@ -47,9 +38,9 @@ You can pass any combination of globs. One caveat is that you can not only pass 
   - If true, won't emit an error when a glob pointing at a single file fails to match
 - Any through2 related options are documented in [through2](https://github.com/rvagg/through2)
 
-This argument is passed directly to [node-glob](https://github.com/isaacs/node-glob) so check there for more options
+This argument is passed directly to [node-glob][node-glob-url] so check there for more options
 
-#### Glob
+### Glob
 
 ```js
 var stream = gs.create(['./**/*.js', '!./node_modules/**/*']);
@@ -67,11 +58,14 @@ would not exclude any files, but this would
 gulp.src(['*.js', '!b*.js'])
 ```
 
-#### Related
+## Related
 
-- [globby](https://github.com/sindresorhus/globby) - Non-streaming `glob` wrapper with support for multiple patterns.
+- [globby][globby-url] - Non-streaming `glob` wrapper with support for multiple patterns.
 
+[globby-url]: https://github.com/sindresorhus/globby
+[node-glob-url]: https://github.com/isaacs/node-glob
 
+[downloads-image]: http://img.shields.io/npm/dm/glob-stream.svg
 [npm-url]: https://www.npmjs.com/package/glob-stream
 [npm-image]: https://badge.fury.io/js/glob-stream.svg
 
@@ -81,5 +75,5 @@ gulp.src(['*.js', '!b*.js'])
 [coveralls-url]: https://coveralls.io/r/gulpjs/glob-stream
 [coveralls-image]: https://coveralls.io/repos/gulpjs/glob-stream/badge.svg
 
-[david-url]: https://david-dm.org/gulpjs/glob-stream
-[david-image]: https://david-dm.org/gulpjs/glob-stream.svg
+[gitter-url]: https://gitter.im/gulpjs/gulp
+[gitter-image]: https://badges.gitter.im/gulpjs/gulp.png
