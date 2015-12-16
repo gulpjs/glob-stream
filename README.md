@@ -72,6 +72,10 @@ gulp.src(['*.js', '!b*.js'])
 
 - [globby][globby-url] - Non-streaming `glob` wrapper with support for multiple patterns.
 
+## License
+
+MIT
+
 [globby-url]: https://github.com/sindresorhus/globby
 [through2-url]: https://github.com/rvagg/through2
 [node-glob-url]: https://github.com/isaacs/node-glob
