@@ -24,19 +24,29 @@ stream.on('data', function(file){
 
 You can pass any combination of globs. One caveat is that you can not only pass a glob negation, you must give it at least one positive glob so it knows where to start. All given must match for the file to be returned.
 
+## API
+
+### create(globs, options)
+
+Returns a stream for multiple globs or filters.
+
+### createStream(positiveGlob, negativeGlobs, options)
+
+Returns a stream for a single glob or filter.
+
 ### Options
 
 - cwd
   - Default is `process.cwd()`
 - base
-  - Default is everything before a glob starts (see [glob-parent](https://github.com/es128/glob-parent))
+  - Default is everything before a glob starts (see [glob-parent][glob-parent-url])
 - cwdbase
   - Default is `false`
   - When true it is the same as saying opt.base = opt.cwd
 - allowEmpty
   - Default is `false`
   - If true, won't emit an error when a glob pointing at a single file fails to match
-- Any through2 related options are documented in [through2](https://github.com/rvagg/through2)
+- Any through2 related options are documented in [through2][through2-url]
 
 This argument is passed directly to [node-glob][node-glob-url] so check there for more options
 
@@ -63,7 +73,9 @@ gulp.src(['*.js', '!b*.js'])
 - [globby][globby-url] - Non-streaming `glob` wrapper with support for multiple patterns.
 
 [globby-url]: https://github.com/sindresorhus/globby
+[through2-url]: https://github.com/rvagg/through2
 [node-glob-url]: https://github.com/isaacs/node-glob
+[glob-parent-url]: https://github.com/es128/glob-parent
 
 [downloads-image]: http://img.shields.io/npm/dm/glob-stream.svg
 [npm-url]: https://www.npmjs.com/package/glob-stream
