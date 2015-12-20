@@ -8,6 +8,7 @@ var glob = require('glob');
 var micromatch = require('micromatch');
 var resolveGlob = require('to-absolute-glob');
 var globParent = require('glob-parent');
+var path = require('path');
 var extend = require('extend');
 
 var gs = {
@@ -23,7 +24,7 @@ var gs = {
     var globber = new glob.Glob(ourGlob, ourOpt);
 
     // Extract base path from glob
-    var basePath = opt.base || globParent(ourGlob) + '/';
+    var basePath = opt.base || globParent(ourGlob) + path.sep;
 
     // Create stream and map events from globber to it
     var stream = through2.obj(opt,
