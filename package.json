@@ -1,6 +1,6 @@
 {
   "name": "glob-stream",
-  "version": "5.3.0",
+  "version": "5.3.1",
   "description": "A wrapper around node-glob to make it streamy",
   "author": "Gulp Team <team@gulpjs.com> (http://gulpjs.com/)",
   "contributors": [],
