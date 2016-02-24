@@ -26,7 +26,7 @@
     "glob-parent": "^2.0.0",
     "micromatch": "^2.3.7",
     "ordered-read-streams": "^0.3.0",
-    "through2": "^0.6.0",
+    "through2": "^2.0.1",
     "to-absolute-glob": "^0.1.1",
     "unique-stream": "^2.0.2"
   },
