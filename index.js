@@ -47,7 +47,7 @@ var gs = {
       stream.write({
         cwd: opt.cwd,
         base: basePath,
-        path: filename,
+        path: path.normalize(filename),
       });
     });
 
