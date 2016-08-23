@@ -14,13 +14,15 @@ var extend = require('extend');
 var gs = {
   // Creates a stream for a single glob or filter
   createStream: function(ourGlob, negatives, opt) {
+
+    var ourOpt = extend({}, opt);
+    delete ourOpt.root;
+
     // Extract base path from glob
-    var basePath = getBasePath(ourGlob, opt);
+    var basePath = ourOpt.base || getBasePath(ourGlob, opt);
 
     // Remove path relativity to make globs make sense
     ourGlob = resolveGlob(ourGlob, opt);
-    var ourOpt = extend({}, opt);
-    delete ourOpt.root;
 
     // Create globbing stuff
     var globber = new glob.Glob(ourGlob, ourOpt);
@@ -188,9 +190,6 @@ function globIsSingular(glob) {
 }
 
 function getBasePath(ourGlob, opt) {
-  if (opt.base) {
-    return opt.base;
-  }
   return resolveGlob(globParent(ourGlob) + path.sep, opt);
 }
 
