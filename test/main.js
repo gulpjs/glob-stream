@@ -61,6 +61,25 @@ describe('glob-stream', function() {
       });
     });
 
+    it('should handle ( ) in directory paths', function(done) {
+      var cwd = join(__dirname, './fixtures/has (parens)');
+      var stream = gs.create('*.dmc', { cwd: cwd });
+      should.exist(stream);
+      stream.on('error', function(err) {
+        throw err;
+      });
+      stream.on('data', function(file) {
+        should.exist(file);
+        should.exist(file.path);
+        should.exist(file.base);
+        should.exist(file.cwd);
+        String(file.cwd).should.equal(cwd);
+        String(file.base).should.equal(cwd + sep);
+        String(join(file.path,'')).should.equal(join(cwd, 'test.dmc'));
+        done();
+      });
+    });
+
     it('should return a file name stream from a glob and respect state', function(done) {
       var stream = gs.create('./fixtures/stuff/*.dmc', { cwd: __dirname });
       var wrapper = stream.pipe(through2.obj(function(data, enc, cb) {
