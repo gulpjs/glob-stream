@@ -80,6 +80,27 @@ describe('glob-stream', function() {
       });
     });
 
+    it('should find files in paths that contain ( )', function(done) {
+      var stream = gs.create('./fixtures/**/*.dmc', { cwd: __dirname });
+      var files = [];
+      stream.on('error', done);
+      stream.on('data', function(file) {
+        should.exist(file);
+        should.exist(file.path);
+        files.push(file);
+      });
+      stream.on('end', function() {
+        files.length.should.equal(3);
+        path.basename(files[0].path).should.equal('test.dmc');
+        files[0].path.should.equal(join(__dirname, 'fixtures/has (parens)/test.dmc'));
+        path.basename(files[1].path).should.equal('run.dmc');
+        files[1].path.should.equal(join(__dirname, 'fixtures/stuff/run.dmc'));
+        path.basename(files[2].path).should.equal('test.dmc');
+        files[2].path.should.equal(join(__dirname, 'fixtures/stuff/test.dmc'));
+        done();
+      });
+    });
+
     it('should return a file name stream from a glob and respect state', function(done) {
       var stream = gs.create('./fixtures/stuff/*.dmc', { cwd: __dirname });
       var wrapper = stream.pipe(through2.obj(function(data, enc, cb) {
@@ -293,6 +314,7 @@ describe('glob-stream', function() {
         join(__dirname, './fixtures/**/test.txt'),
         join(__dirname, './fixtures/**/test.coffee'),
         join(__dirname, './fixtures/**/test.js'),
+        join(__dirname, './fixtures/**/test.dmc'),
       ];
       var stream = gs.create(globArray, { cwd: __dirname });
 
@@ -304,10 +326,12 @@ describe('glob-stream', function() {
         files.push(file);
       });
       stream.on('end', function() {
-        files.length.should.equal(3);
+        files.length.should.equal(5);
         path.basename(files[0].path).should.equal('test.txt');
         path.basename(files[1].path).should.equal('test.coffee');
         path.basename(files[2].path).should.equal('test.js');
+        path.basename(files[3].path).should.equal('test.dmc');
+        path.basename(files[4].path).should.equal('test.dmc');
         done();
       });
     });
