@@ -15,16 +15,17 @@ var gs = {
   // Creates a stream for a single glob or filter
   createStream: function(ourGlob, negatives, opt) {
 
-    // Remove path relativity to make globs make sense
-    ourGlob = resolveGlob(ourGlob, opt);
     var ourOpt = extend({}, opt);
     delete ourOpt.root;
 
+    // Extract base path from glob
+    var basePath = ourOpt.base || getBasePath(ourGlob, opt);
+
+    // Remove path relativity to make globs make sense
+    ourGlob = resolveGlob(ourGlob, opt);
+
     // Create globbing stuff
     var globber = new glob.Glob(ourGlob, ourOpt);
-
-    // Extract base path from glob
-    var basePath = opt.base || globParent(ourGlob) + path.sep;
 
     // Create stream and map events from globber to it
     var stream = through2.obj(opt,
@@ -186,6 +187,10 @@ function globIsSingular(glob) {
   return globSet[0].every(function isString(value) {
     return typeof value === 'string';
   });
+}
+
+function getBasePath(ourGlob, opt) {
+  return resolveGlob(globParent(ourGlob) + path.sep, opt);
 }
 
 module.exports = gs;
