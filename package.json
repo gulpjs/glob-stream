@@ -15,7 +15,7 @@
     "index.js"
   ],
   "scripts": {
-    "lint": "eslint . && jscs *.js test/",
+    "lint": "eslint . && jscs . test/",
     "pretest": "npm run lint",
     "test": "mocha",
     "coveralls": "istanbul cover _mocha --report lcovonly && istanbul-coveralls"
