@@ -10,6 +10,7 @@ var resolveGlob = require('to-absolute-glob');
 var globParent = require('glob-parent');
 var path = require('path');
 var extend = require('extend');
+var sepRe = (process.platform === 'win32' ? /[\/\\]/ : /\/+/);
 
 var gs = {
   // Creates a stream for a single glob or filter
@@ -190,7 +191,19 @@ function globIsSingular(glob) {
 }
 
 function getBasePath(ourGlob, opt) {
-  return resolveGlob(globParent(ourGlob) + path.sep, opt);
+  var basePath;
+  var parent = globParent(ourGlob);
+
+  if (parent === '/' && opt && opt.root) {
+    basePath = path.normalize(opt.root);
+  } else {
+    basePath = resolveGlob(parent, opt);
+  }
+
+  if (!sepRe.test(basePath.charAt(basePath.length - 1))) {
+    basePath += path.sep;
+  }
+  return basePath;
 }
 
 module.exports = gs;
