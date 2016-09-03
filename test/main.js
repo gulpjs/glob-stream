@@ -80,6 +80,24 @@ describe('glob-stream', function() {
       });
     });
 
+    it('should set the correct base when ( ) in glob', function(done) {
+      var stream = gs.create('./fixtures/has (parens)/*.dmc', { cwd: __dirname });
+      should.exist(stream);
+      stream.on('error', function(err) {
+        throw err;
+      });
+      stream.on('data', function(file) {
+        should.exist(file);
+        should.exist(file.path);
+        should.exist(file.base);
+        should.exist(file.cwd);
+        String(file.cwd).should.equal(__dirname);
+        String(file.base).should.equal(join(__dirname, 'fixtures/has (parens)/'));
+        String(join(file.path,'')).should.equal(join(__dirname, './fixtures/has (parens)/test.dmc'));
+        done();
+      });
+    });
+
     it('should find files in paths that contain ( )', function(done) {
       var stream = gs.create('./fixtures/**/*.dmc', { cwd: __dirname });
       var files = [];
