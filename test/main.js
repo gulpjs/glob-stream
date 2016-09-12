@@ -626,4 +626,54 @@ describe('glob-stream', function() {
     });
 
   });
+
+  describe('create() ignore option', function() {
+
+    it('should support the ignore option instead of negation', function(done) {
+      var expectedPath = join(__dirname, './fixtures/stuff/run.dmc');
+      var glob = join(__dirname, './fixtures/stuff/*.dmc');
+      var stream = gs.create(glob, { cwd: __dirname, ignore: ['./fixtures/stuff/test.dmc'] });
+
+      var files = [];
+      stream.on('error', done);
+      stream.on('data', function(file) {
+        should.exist(file);
+        should.exist(file.path);
+        files.push(file);
+      });
+      stream.on('end', function() {
+        files.length.should.equal(1);
+        files[0].path.should.equal(expectedPath);
+        done();
+      });
+    });
+
+    it('should support the ignore option with dot option', function(done) {
+      var stream = gs.create('./fixtures/*swag', { cwd: __dirname, dot: true, ignore: ['./fixtures/**'] });
+      should.exist(stream);
+      stream.on('error', function(err) {
+        throw err;
+      });
+      stream.once('data', function(file) {
+        throw new Error('file ' + file.path + ' should have been negated');
+      });
+      stream.once('end', done);
+    });
+
+    it('should merge ignore option and negative globs', function(done) {
+      var globArray = [
+        './fixtures/stuff/*.dmc',
+        '!./fixtures/stuff/test.dmc',
+      ];
+      var stream = gs.create(globArray, { cwd: __dirname, ignore: ['./fixtures/stuff/run.dmc'] });
+      should.exist(stream);
+      stream.on('error', function(err) {
+        throw err;
+      });
+      stream.once('data', function(file) {
+        throw new Error('file ' + file.path + ' should have been negated');
+      });
+      stream.once('end', done);
+    });
+  });
 });

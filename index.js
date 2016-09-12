@@ -22,6 +22,9 @@ var gs = {
     var ourOpt = extend({}, opt);
     delete ourOpt.root;
 
+    if (Array.isArray(opt.ignore)) {
+      negatives = opt.ignore.concat(negatives);
+    }
     var ourNegatives = negatives.map(resolveNegatives);
     ourOpt.ignore = ourNegatives;
 
