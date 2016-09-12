@@ -5,6 +5,7 @@ var Combine = require('ordered-read-streams');
 var unique = require('unique-stream');
 
 var glob = require('glob');
+var pumpify = require('pumpify');
 var resolveGlob = require('to-absolute-glob');
 var isNegatedGlob = require('is-negated-glob');
 var globParent = require('glob-parent');
@@ -124,13 +125,8 @@ var gs = {
     // Then just pipe them to a single unique stream and return it
     var aggregate = new Combine(streams);
     var uniqueStream = unique('path');
-    var returnStream = aggregate.pipe(uniqueStream);
 
-    aggregate.on('error', function(err) {
-      returnStream.emit('error', err);
-    });
-
-    return returnStream;
+    return pumpify.obj(aggregate, uniqueStream);
 
     function streamFromPositive(positive) {
       var negativeGlobs = negatives.filter(indexGreaterThan(positive.index))
