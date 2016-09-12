@@ -17,23 +17,26 @@ function globStream(globs, opt) {
   if (!opt) {
     opt = {};
   }
-  if (typeof opt.cwd !== 'string') {
-    opt.cwd = process.cwd();
+
+  var ourOpt = extend({}, opt);
+
+  if (typeof ourOpt.cwd !== 'string') {
+    ourOpt.cwd = process.cwd();
   }
-  if (typeof opt.dot !== 'boolean') {
-    opt.dot = false;
+  if (typeof ourOpt.dot !== 'boolean') {
+    ourOpt.dot = false;
   }
-  if (typeof opt.silent !== 'boolean') {
-    opt.silent = true;
+  if (typeof ourOpt.silent !== 'boolean') {
+    ourOpt.silent = true;
   }
-  if (typeof opt.nonull !== 'boolean') {
-    opt.nonull = false;
+  if (typeof ourOpt.nonull !== 'boolean') {
+    ourOpt.nonull = false;
   }
-  if (typeof opt.cwdbase !== 'boolean') {
-    opt.cwdbase = false;
+  if (typeof ourOpt.cwdbase !== 'boolean') {
+    ourOpt.cwdbase = false;
   }
-  if (opt.cwdbase) {
-    opt.base = opt.cwd;
+  if (ourOpt.cwdbase) {
+    ourOpt.base = ourOpt.cwd;
   }
 
   // Only one glob no need to aggregate
@@ -79,7 +82,7 @@ function globStream(globs, opt) {
   function streamFromPositive(positive) {
     var negativeGlobs = negatives.filter(indexGreaterThan(positive.index))
       .map(toGlob);
-    return createStream(positive.glob, negativeGlobs, opt);
+    return createStream(positive.glob, negativeGlobs, ourOpt);
   }
 }
 
