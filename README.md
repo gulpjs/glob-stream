@@ -15,7 +15,7 @@ A wrapper around [node-glob][node-glob-url] to make it streamy.
 ```javascript
 var gs = require('glob-stream');
 
-var stream = gs.create('./files/**/*.coffee', { /* options */ });
+var stream = gs('./files/**/*.coffee', { /* options */ });
 
 stream.on('data', function(file){
   // file has path, base, and cwd attrs
@@ -26,13 +26,9 @@ You can pass any combination of globs. One caveat is that you can not only pass 
 
 ## API
 
-### create(globs, options)
+### globStream(globs, options)
 
 Returns a stream for multiple globs or filters.
-
-### createStream(positiveGlob, negativeGlobs, options)
-
-Returns a stream for a single glob or filter.
 
 ### Options
 
@@ -53,7 +49,7 @@ This argument is passed directly to [node-glob][node-glob-url] so check there fo
 ### Glob
 
 ```js
-var stream = gs.create(['./**/*.js', '!./node_modules/**/*']);
+var stream = gs(['./**/*.js', '!./node_modules/**/*']);
 ```
 
 Globs are executed in order, so negations should follow positive globs. For example:

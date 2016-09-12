@@ -13,128 +13,124 @@ var path = require('path');
 var extend = require('extend');
 var sepRe = (process.platform === 'win32' ? /[\/\\]/ : /\/+/);
 
-var gs = {
-  // Creates a stream for a single glob or filter
-  createStream: function(ourGlob, negatives, opt) {
-    function resolveNegatives(negative) {
-      return resolveGlob(negative, opt);
+function globStream(globs, opt) {
+  if (!opt) {
+    opt = {};
+  }
+  if (typeof opt.cwd !== 'string') {
+    opt.cwd = process.cwd();
+  }
+  if (typeof opt.dot !== 'boolean') {
+    opt.dot = false;
+  }
+  if (typeof opt.silent !== 'boolean') {
+    opt.silent = true;
+  }
+  if (typeof opt.nonull !== 'boolean') {
+    opt.nonull = false;
+  }
+  if (typeof opt.cwdbase !== 'boolean') {
+    opt.cwdbase = false;
+  }
+  if (opt.cwdbase) {
+    opt.base = opt.cwd;
+  }
+
+  // Only one glob no need to aggregate
+  if (!Array.isArray(globs)) {
+    globs = [globs];
+  }
+
+  var positives = [];
+  var negatives = [];
+
+  globs.forEach(function(globString, index) {
+    if (typeof globString !== 'string') {
+      throw new Error('Invalid glob at index ' + index);
     }
 
-    var ourOpt = extend({}, opt);
-    delete ourOpt.root;
+    var glob = isNegatedGlob(globString);
+    var globArray = glob.negated ? negatives : positives;
 
-    if (Array.isArray(opt.ignore)) {
-      negatives = opt.ignore.concat(negatives);
-    }
-    var ourNegatives = negatives.map(resolveNegatives);
-    ourOpt.ignore = ourNegatives;
-
-    // Extract base path from glob
-    var basePath = ourOpt.base || getBasePath(ourGlob, opt);
-
-    // Remove path relativity to make globs make sense
-    ourGlob = resolveGlob(ourGlob, opt);
-
-    // Create globbing stuff
-    var globber = new glob.Glob(ourGlob, ourOpt);
-
-    // Create stream and map events from globber to it
-    var stream = through2.obj(ourOpt);
-
-    var found = false;
-
-    globber.on('error', stream.emit.bind(stream, 'error'));
-    globber.once('end', function() {
-      if (opt.allowEmpty !== true && !found && globIsSingular(globber)) {
-        stream.emit('error',
-          new Error('File not found with singular glob: ' + ourGlob));
-      }
-
-      stream.end();
+    globArray.push({
+      index: index,
+      glob: glob.pattern,
     });
-    globber.on('match', function(filename) {
-      found = true;
+  });
 
-      stream.write({
-        cwd: opt.cwd,
-        base: basePath,
-        path: path.normalize(filename),
-      });
+  if (positives.length === 0) {
+    throw new Error('Missing positive glob');
+  }
+
+  // Only one positive glob no need to aggregate
+  if (positives.length === 1) {
+    return streamFromPositive(positives[0]);
+  }
+
+  // Create all individual streams
+  var streams = positives.map(streamFromPositive);
+
+  // Then just pipe them to a single unique stream and return it
+  var aggregate = new Combine(streams);
+  var uniqueStream = unique('path');
+
+  return pumpify.obj(aggregate, uniqueStream);
+
+  function streamFromPositive(positive) {
+    var negativeGlobs = negatives.filter(indexGreaterThan(positive.index))
+      .map(toGlob);
+    return createStream(positive.glob, negativeGlobs, opt);
+  }
+}
+
+function createStream(ourGlob, negatives, opt) {
+  function resolveNegatives(negative) {
+    return resolveGlob(negative, opt);
+  }
+
+  var ourOpt = extend({}, opt);
+  delete ourOpt.root;
+
+  if (Array.isArray(opt.ignore)) {
+    negatives = opt.ignore.concat(negatives);
+  }
+  var ourNegatives = negatives.map(resolveNegatives);
+  ourOpt.ignore = ourNegatives;
+
+  // Extract base path from glob
+  var basePath = ourOpt.base || getBasePath(ourGlob, opt);
+
+  // Remove path relativity to make globs make sense
+  ourGlob = resolveGlob(ourGlob, opt);
+
+  // Create globbing stuff
+  var globber = new glob.Glob(ourGlob, ourOpt);
+
+  // Create stream and map events from globber to it
+  var stream = through2.obj(ourOpt);
+
+  var found = false;
+
+  globber.on('error', stream.emit.bind(stream, 'error'));
+  globber.once('end', function() {
+    if (opt.allowEmpty !== true && !found && globIsSingular(globber)) {
+      stream.emit('error',
+        new Error('File not found with singular glob: ' + ourGlob));
+    }
+
+    stream.end();
+  });
+  globber.on('match', function(filename) {
+    found = true;
+
+    stream.write({
+      cwd: opt.cwd,
+      base: basePath,
+      path: path.normalize(filename),
     });
-    return stream;
-  },
-
-  // Creates a stream for multiple globs or filters
-  create: function(globs, opt) {
-    if (!opt) {
-      opt = {};
-    }
-    if (typeof opt.cwd !== 'string') {
-      opt.cwd = process.cwd();
-    }
-    if (typeof opt.dot !== 'boolean') {
-      opt.dot = false;
-    }
-    if (typeof opt.silent !== 'boolean') {
-      opt.silent = true;
-    }
-    if (typeof opt.nonull !== 'boolean') {
-      opt.nonull = false;
-    }
-    if (typeof opt.cwdbase !== 'boolean') {
-      opt.cwdbase = false;
-    }
-    if (opt.cwdbase) {
-      opt.base = opt.cwd;
-    }
-
-    // Only one glob no need to aggregate
-    if (!Array.isArray(globs)) {
-      globs = [globs];
-    }
-
-    var positives = [];
-    var negatives = [];
-
-    globs.forEach(function(globString, index) {
-      if (typeof globString !== 'string') {
-        throw new Error('Invalid glob at index ' + index);
-      }
-
-      var glob = isNegatedGlob(globString);
-      var globArray = glob.negated ? negatives : positives;
-
-      globArray.push({
-        index: index,
-        glob: glob.pattern,
-      });
-    });
-
-    if (positives.length === 0) {
-      throw new Error('Missing positive glob');
-    }
-
-    // Only one positive glob no need to aggregate
-    if (positives.length === 1) {
-      return streamFromPositive(positives[0]);
-    }
-
-    // Create all individual streams
-    var streams = positives.map(streamFromPositive);
-
-    // Then just pipe them to a single unique stream and return it
-    var aggregate = new Combine(streams);
-    var uniqueStream = unique('path');
-
-    return pumpify.obj(aggregate, uniqueStream);
-
-    function streamFromPositive(positive) {
-      var negativeGlobs = negatives.filter(indexGreaterThan(positive.index))
-        .map(toGlob);
-      return gs.createStream(positive.glob, negativeGlobs, opt);
-    }
-  },
-};
+  });
+  return stream;
+}
 
 function indexGreaterThan(index) {
   return function(obj) {
@@ -173,4 +169,4 @@ function getBasePath(ourGlob, opt) {
   return basePath;
 }
 
-module.exports = gs;
+module.exports = globStream;
