@@ -648,6 +648,25 @@ describe('options', function() {
 
   describe('ignore', function() {
 
+    it('accepts a string (in addition to array)', function(done) {
+      var expectedPath = join(__dirname, './fixtures/stuff/run.dmc');
+      var glob = join(__dirname, './fixtures/stuff/*.dmc');
+      var stream = globStream(glob, { cwd: __dirname, ignore: './fixtures/stuff/test.dmc' });
+
+      var files = [];
+      stream.on('error', done);
+      stream.on('data', function(file) {
+        should.exist(file);
+        should.exist(file.path);
+        files.push(file);
+      });
+      stream.on('end', function() {
+        files.length.should.equal(1);
+        files[0].path.should.equal(expectedPath);
+        done();
+      });
+    });
+
     it('should support the ignore option instead of negation', function(done) {
       var expectedPath = join(__dirname, './fixtures/stuff/run.dmc');
       var glob = join(__dirname, './fixtures/stuff/*.dmc');
