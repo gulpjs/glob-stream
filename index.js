@@ -19,6 +19,7 @@ function globStream(globs, opt) {
   }
 
   var ourOpt = extend({}, opt);
+  var ignore = ourOpt.ignore;
 
   if (typeof ourOpt.cwd !== 'string') {
     ourOpt.cwd = process.cwd();
@@ -37,6 +38,14 @@ function globStream(globs, opt) {
   }
   if (ourOpt.cwdbase) {
     ourOpt.base = ourOpt.cwd;
+  }
+  // Normalize string `ignore` to array
+  if (typeof ignore === 'string') {
+    ignore = [ignore];
+  }
+  // Ensure `ignore` is an array
+  if (!Array.isArray(ignore)) {
+    ignore = [];
   }
 
   // Only one glob no need to aggregate
@@ -80,8 +89,10 @@ function globStream(globs, opt) {
   return pumpify.obj(aggregate, uniqueStream);
 
   function streamFromPositive(positive) {
-    var negativeGlobs = negatives.filter(indexGreaterThan(positive.index))
-      .map(toGlob);
+    var negativeGlobs = negatives
+      .filter(indexGreaterThan(positive.index))
+      .map(toGlob)
+      .concat(ignore);
     return createStream(positive.glob, negativeGlobs, ourOpt);
   }
 }
@@ -94,9 +105,6 @@ function createStream(ourGlob, negatives, opt) {
   var ourOpt = extend({}, opt);
   delete ourOpt.root;
 
-  if (Array.isArray(opt.ignore)) {
-    negatives = opt.ignore.concat(negatives);
-  }
   var ourNegatives = negatives.map(resolveNegatives);
   ourOpt.ignore = ourNegatives;
 
