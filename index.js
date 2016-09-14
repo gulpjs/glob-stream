@@ -134,7 +134,7 @@ function createStream(ourGlob, negatives, opt) {
   globber.on('match', function(filename) {
     found = true;
 
-    stream.write({
+    stream.push({
       cwd: opt.cwd,
       base: basePath,
       path: path.normalize(filename),
