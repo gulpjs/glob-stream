@@ -6,12 +6,11 @@ var unique = require('unique-stream');
 
 var glob = require('glob');
 var pumpify = require('pumpify');
-var resolveGlob = require('to-absolute-glob');
 var isNegatedGlob = require('is-negated-glob');
 var globParent = require('glob-parent');
-var path = require('path');
+var resolveGlob = require('to-absolute-glob');
 var extend = require('extend');
-var sepRe = (process.platform === 'win32' ? /[\/\\]/ : /\/+/);
+var removeTrailingSeparator = require('remove-trailing-separator');
 
 function globStream(globs, opt) {
   if (!opt) {
@@ -137,7 +136,7 @@ function createStream(ourGlob, negatives, opt) {
     stream.write({
       cwd: opt.cwd,
       base: basePath,
-      path: path.normalize(filename),
+      path: removeTrailingSeparator(filename),
     });
   });
   return stream;
@@ -165,19 +164,7 @@ function globIsSingular(glob) {
 }
 
 function getBasePath(ourGlob, opt) {
-  var basePath;
-  var parent = globParent(ourGlob);
-
-  if (parent === '/' && opt && opt.root) {
-    basePath = path.normalize(opt.root);
-  } else {
-    basePath = resolveGlob(parent, opt);
-  }
-
-  if (!sepRe.test(basePath.charAt(basePath.length - 1))) {
-    basePath += path.sep;
-  }
-  return basePath;
+  return globParent(resolveGlob(ourGlob, opt));
 }
 
 module.exports = globStream;
