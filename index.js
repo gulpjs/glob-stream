@@ -1,16 +1,12 @@
 'use strict';
 
-var through2 = require('through2');
 var Combine = require('ordered-read-streams');
 var unique = require('unique-stream');
-
-var glob = require('glob');
 var pumpify = require('pumpify');
 var isNegatedGlob = require('is-negated-glob');
-var globParent = require('glob-parent');
-var resolveGlob = require('to-absolute-glob');
 var extend = require('extend');
-var removeTrailingSeparator = require('remove-trailing-separator');
+
+var GlobStream = require('./stream');
 
 function globStream(globs, opt) {
   if (!opt) {
@@ -92,54 +88,8 @@ function globStream(globs, opt) {
       .filter(indexGreaterThan(positive.index))
       .map(toGlob)
       .concat(ignore);
-    return createStream(positive.glob, negativeGlobs, ourOpt);
+    return new GlobStream(positive.glob, negativeGlobs, ourOpt);
   }
-}
-
-function createStream(ourGlob, negatives, opt) {
-  function resolveNegatives(negative) {
-    return resolveGlob(negative, opt);
-  }
-
-  var ourOpt = extend({}, opt);
-  delete ourOpt.root;
-
-  var ourNegatives = negatives.map(resolveNegatives);
-  ourOpt.ignore = ourNegatives;
-
-  // Extract base path from glob
-  var basePath = ourOpt.base || getBasePath(ourGlob, opt);
-
-  // Remove path relativity to make globs make sense
-  ourGlob = resolveGlob(ourGlob, opt);
-
-  // Create globbing stuff
-  var globber = new glob.Glob(ourGlob, ourOpt);
-
-  // Create stream and map events from globber to it
-  var stream = through2.obj(ourOpt);
-
-  var found = false;
-
-  globber.on('error', stream.emit.bind(stream, 'error'));
-  globber.once('end', function() {
-    if (opt.allowEmpty !== true && !found && globIsSingular(globber)) {
-      stream.emit('error',
-        new Error('File not found with singular glob: ' + ourGlob));
-    }
-
-    stream.end();
-  });
-  globber.on('match', function(filename) {
-    found = true;
-
-    stream.write({
-      cwd: opt.cwd,
-      base: basePath,
-      path: removeTrailingSeparator(filename),
-    });
-  });
-  return stream;
 }
 
 function indexGreaterThan(index) {
@@ -150,21 +100,6 @@ function indexGreaterThan(index) {
 
 function toGlob(obj) {
   return obj.glob;
-}
-
-function globIsSingular(glob) {
-  var globSet = glob.minimatch.set;
-  if (globSet.length !== 1) {
-    return false;
-  }
-
-  return globSet[0].every(function isString(value) {
-    return typeof value === 'string';
-  });
-}
-
-function getBasePath(ourGlob, opt) {
-  return globParent(resolveGlob(ourGlob, opt));
 }
 
 module.exports = globStream;
