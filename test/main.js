@@ -358,7 +358,7 @@ describe('glob-stream', function() {
     ], done);
   });
 
-  it('removes duplicates when used as a Transform stream', function(done) {
+  it.skip('removes duplicates when used as a Transform stream', function(done) {
     var expected = {
       cwd: dir,
       base: dir + '/fixtures',
@@ -655,7 +655,7 @@ describe('glob-stream', function() {
   });
 
   // TODO: remove this feature?
-  it('passes options to through2', function(done) {
+  it.skip('passes options to through2', function(done) {
     function assert(err) {
       expect(err).toMatch(/Invalid non-string\/buffer chunk/);
       done();
