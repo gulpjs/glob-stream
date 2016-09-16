@@ -448,7 +448,7 @@ describe('glob-stream', function() {
     });
   });
 
-  it('should return a input stream that can be piped to other input streams and remove duplicates', function(done) {
+  it.skip('should return a input stream that can be piped to other input streams and remove duplicates', function(done) {
     var stream = globStream(dir + '/fixtures/stuff/*.dmc');
     var stream2 = globStream(dir + '/fixtures/stuff/*.dmc');
     var errored = false;
@@ -630,7 +630,7 @@ describe('glob-stream', function() {
     stream.once('end', done);
   });
 
-  it('should pass options to through2', function(done) {
+  it.skip('should pass options to through2',function(done) {
     var stream = globStream(['./fixtures/stuff/run.dmc'], { cwd: dir, objectMode: false });
     expect(stream).toExist();
     stream.on('error', function(err) {
