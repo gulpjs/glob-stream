@@ -29,7 +29,7 @@ function GlobStream(ourGlob, negatives, opt) {
     return new GlobStream(ourGlob, negatives, opt);
   }
 
-  // TODO: accept other opts?
+  // TODO: document that we don't accept any stream options
   Readable.call(this, { objectMode: true });
 
   var self = this;
@@ -69,11 +69,17 @@ function GlobStream(ourGlob, negatives, opt) {
 
   globber.once('end', function() {
     if (opt.allowEmpty !== true && !found && globIsSingular(globber)) {
+      // TODO: consider adding note about `allowEmpty` option in error
+      // TODO: should we really be emitting the event here or should it be passed to destroy
       self.emit('error',
         new Error('File not found with singular glob: ' + ourGlob));
     }
 
     self.push(null);
+  });
+
+  globber.once('error', function() {
+    // TODO: re-emit error on stream (maybe call destroy?)
   });
 }
 inherits(GlobStream, Readable);
@@ -84,6 +90,10 @@ GlobStream.prototype._read = function() {
 
 GlobStream.prototype.destroy = function(err) {
   var self = this;
+
+  // TODO: figure out proper signature for this and use correctly
+  this._globber.abort();
+
   process.nextTick(function() {
     if (err) {
       self.emit('error', err);
