@@ -2,6 +2,7 @@ var globStream = require('../');
 var through2 = require('through2');
 var should = require('should');
 var path = require('path');
+var gs = require('../stream');
 
 function deWindows(p) {
   return p.replace(/\\/g, '/');
@@ -112,6 +113,7 @@ describe('glob-stream', function() {
     });
     stream.on('end', function() {
       files.length.should.equal(3);
+      // Was getting failures here, is the `files` ordering deterministic?
       path.basename(files[0].path).should.equal('test.dmc');
       files[0].path.should.equal(dir + '/fixtures/has (parens)/test.dmc');
       path.basename(files[1].path).should.equal('run.dmc');
@@ -717,5 +719,18 @@ describe('options', function() {
       });
       stream.once('end', done);
     });
+  });
+});
+
+describe.only('GlobStream', function() {
+  it('should error out if there are no matches', function(done) {
+    function shouldError() {
+      return gs('./fixtures/whatsgoingon', [], { cwd: '/Users/Kyle/workspace/glob-stream/**/*.txt', });
+    }
+
+    var st = shouldError();
+    st.on('done', done);
+    st.on('error', done);
+    done();
   });
 });
