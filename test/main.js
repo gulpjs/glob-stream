@@ -2,7 +2,7 @@ var globStream = require('../');
 var through2 = require('through2');
 var should = require('should');
 var path = require('path');
-var gs = require('../stream');
+var stream = require('../stream');
 
 function deWindows(p) {
   return p.replace(/\\/g, '/');
@@ -724,13 +724,19 @@ describe('options', function() {
 
 describe.only('GlobStream', function() {
   it('should error out if there are no matches', function(done) {
-    function shouldError() {
-      return gs('./fixtures/whatsgoingon', [], { cwd: '/Users/Kyle/workspace/glob-stream/**/*.txt', });
-    }
+    var gs = stream('./fixtures/whatsgoingon/kojaslkjas.txt', [], { cwd: __dirname, });
 
-    var st = shouldError();
-    st.on('done', done);
-    st.on('error', done);
-    done();
+    gs.once('error', function(err) {
+      err.message.should.match(/^File not found with singular glob/g);
+      done();
+    });
+  });
+
+  it('should emit end with matched files', function(done) {
+    var gs = stream('./fixtures/whatsgoingon/**/*.txt', [], { cwd: __dirname, });
+    gs._globber.once('end', function(res) {
+      res[0].should.match(/\/test.txt$/g);
+      done();
+    });
   });
 });
