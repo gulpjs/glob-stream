@@ -113,7 +113,6 @@ describe('glob-stream', function() {
     });
     stream.on('end', function() {
       files.length.should.equal(3);
-      // Was getting failures here, is the `files` ordering deterministic?
       path.basename(files[0].path).should.equal('test.dmc');
       files[0].path.should.equal(dir + '/fixtures/has (parens)/test.dmc');
       path.basename(files[1].path).should.equal('run.dmc');
@@ -722,9 +721,13 @@ describe('options', function() {
   });
 });
 
-describe.only('GlobStream', function() {
+describe('GlobStream', function() {
   it('should error out if there are no matches', function(done) {
-    var gs = stream('./fixtures/whatsgoingon/kojaslkjas.txt', [], { cwd: __dirname, });
+    var gs = stream(
+      './fixtures/whatsgoingon/kojaslkjas.txt',
+      [],
+      { cwd: __dirname, }
+    );
 
     gs.once('error', function(err) {
       err.message.should.match(/^File not found with singular glob/g);
@@ -732,10 +735,21 @@ describe.only('GlobStream', function() {
     });
   });
 
-  it('should emit end with matched files', function(done) {
+  it('should emit end with one matched file', function(done) {
     var gs = stream('./fixtures/whatsgoingon/**/*.txt', [], { cwd: __dirname, });
+
     gs._globber.once('end', function(res) {
+      res.length.should.eql(1);
       res[0].should.match(/\/test.txt$/g);
+      done();
+    });
+  });
+
+  it('should emit end with multiple matched files', function(done) {
+    var gs = stream('./fixtures/**/*.dmc', [], { cwd: __dirname, });
+
+    gs._globber.once('end', function(res) {
+      res.length.should.eql(3);
       done();
     });
   });
