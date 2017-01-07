@@ -750,6 +750,10 @@ describe('GlobStream', function() {
 
     gs._globber.once('end', function(res) {
       res.length.should.eql(3);
+      res.sort();
+      res[0].should.match(/\/has\s\(parens\)\/test.dmc$/);
+      res[1].should.match(/\/stuff\/run.dmc$/);
+      res[2].should.match(/\/stuff\/test.dmc$/);
       done();
     });
   });
