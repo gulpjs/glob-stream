@@ -1,8 +1,13 @@
 var globStream = require('../');
-var through2 = require('through2');
-var should = require('should');
+var miss = require('mississippi');
 var path = require('path');
+var should = require('should');
 var stream = require('../stream');
+var through2 = require('through2');
+
+var concat = miss.concat;
+var finished = miss.finished;
+var pipe = miss.pipe;
 
 function deWindows(p) {
   return p.replace(/\\/g, '/');
@@ -736,25 +741,33 @@ describe('GlobStream', function() {
   });
 
   it('should emit end with one matched file', function(done) {
-    var gs = stream('./fixtures/whatsgoingon/**/*.txt', [], { cwd: __dirname, });
+    function assert(files) {
+      files.length.should.eql(1);
+      files[0].path.should.match(/\/test.txt$/g);
+    }
 
-    gs._globber.once('end', function(res) {
-      res.length.should.eql(1);
-      res[0].should.match(/\/test.txt$/g);
-      done();
-    });
+    var p = pipe([
+      stream('./fixtures/whatsgoingon/**/*.txt', [], { cwd: __dirname, }),
+      concat(assert),
+    ]);
+
+    finished(p, done);
   });
 
   it('should emit end with multiple matched files', function(done) {
-    var gs = stream('./fixtures/**/*.dmc', [], { cwd: __dirname, });
+    function assert(files) {
+      files.length.should.eql(3);
+      files.sort();
+      files[0].path.should.match(/\/has\s\(parens\)\/test.dmc$/);
+      files[1].path.should.match(/\/stuff\/run.dmc$/);
+      files[2].path.should.match(/\/stuff\/test.dmc$/);
+    }
 
-    gs._globber.once('end', function(res) {
-      res.length.should.eql(3);
-      res.sort();
-      res[0].should.match(/\/has\s\(parens\)\/test.dmc$/);
-      res[1].should.match(/\/stuff\/run.dmc$/);
-      res[2].should.match(/\/stuff\/test.dmc$/);
-      done();
-    });
+    var p = pipe([
+      stream('./fixtures/**/*.dmc', [], { cwd: __dirname, }),
+      concat(assert),
+    ]);
+
+    finished(p, done);
   });
 });
