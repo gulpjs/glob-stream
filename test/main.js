@@ -1,7 +1,9 @@
-var globStream = require('../');
-var through2 = require('through2');
-var should = require('should');
+'use strict';
+
 var path = require('path');
+var through2 = require('through2');
+var expect = require('expect');
+var globStream = require('../');
 
 function deWindows(p) {
   return p.replace(/\\/g, '/');
@@ -12,18 +14,18 @@ var dir = deWindows(__dirname);
 describe('glob-stream', function() {
   it('should return a folder name stream from a glob', function(done) {
     var stream = globStream('./fixtures/whatsgoingon', { cwd: dir });
-    should.exist(stream);
+    expect(stream).toExist();
     stream.on('error', function(err) {
       throw err;
     });
     stream.on('data', function(file) {
-      should.exist(file);
-      should.exist(file.path);
-      should.exist(file.base);
-      should.exist(file.cwd);
-      String(file.cwd).should.equal(dir);
-      String(file.base).should.equal(dir + '/fixtures');
-      String(file.path).should.equal(dir + '/fixtures/whatsgoingon');
+      expect(file).toExist();
+      expect(file.path).toExist();
+      expect(file.base).toExist();
+      expect(file.cwd).toExist();
+      expect(String(file.cwd)).toBe(dir);
+      expect(String(file.base)).toBe(dir + '/fixtures');
+      expect(String(file.path)).toBe(dir + '/fixtures/whatsgoingon');
       done();
     });
   });
@@ -35,31 +37,31 @@ describe('glob-stream', function() {
       throw err;
     });
     stream.on('data', function(file) {
-      should.exist(file);
-      should.exist(file.path);
-      String(file.path).should.equal(dir + '/fixtures/whatsgoingon/hey');
+      expect(file).toExist();
+      expect(file.path).toExist();
+      expect(String(file.path)).toBe(dir + '/fixtures/whatsgoingon/hey');
       folderCount++;
     });
     stream.on('end', function() {
-      folderCount.should.equal(1);
+      expect(folderCount).toBe(1);
       done();
     });
   });
 
   it('should return a file name stream from a glob', function(done) {
     var stream = globStream('./fixtures/*.coffee', { cwd: dir });
-    should.exist(stream);
+    expect(stream).toExist();
     stream.on('error', function(err) {
       throw err;
     });
     stream.on('data', function(file) {
-      should.exist(file);
-      should.exist(file.path);
-      should.exist(file.base);
-      should.exist(file.cwd);
-      String(file.cwd).should.equal(dir);
-      String(file.base).should.equal(dir + '/fixtures');
-      String(file.path).should.equal(dir + '/fixtures/test.coffee');
+      expect(file).toExist();
+      expect(file.path).toExist();
+      expect(file.base).toExist();
+      expect(file.cwd).toExist();
+      expect(String(file.cwd)).toBe(dir);
+      expect(String(file.base)).toBe(dir + '/fixtures');
+      expect(String(file.path)).toBe(dir + '/fixtures/test.coffee');
       done();
     });
   });
@@ -67,36 +69,36 @@ describe('glob-stream', function() {
   it('should handle ( ) in directory paths', function(done) {
     var cwd = dir + '/fixtures/has (parens)';
     var stream = globStream('*.dmc', { cwd: cwd });
-    should.exist(stream);
+    expect(stream).toExist();
     stream.on('error', function(err) {
       throw err;
     });
     stream.on('data', function(file) {
-      should.exist(file);
-      should.exist(file.path);
-      should.exist(file.base);
-      should.exist(file.cwd);
-      String(file.cwd).should.equal(cwd);
-      String(file.base).should.equal(cwd);
-      String(file.path).should.equal(cwd + '/test.dmc');
+      expect(file).toExist();
+      expect(file.path).toExist();
+      expect(file.base).toExist();
+      expect(file.cwd).toExist();
+      expect(String(file.cwd)).toBe(cwd);
+      expect(String(file.base)).toBe(cwd);
+      expect(String(file.path)).toBe(cwd + '/test.dmc');
       done();
     });
   });
 
   it('should set the correct base when ( ) in glob', function(done) {
     var stream = globStream('./fixtures/has (parens)/*.dmc', { cwd: dir });
-    should.exist(stream);
+    expect(stream).toExist();
     stream.on('error', function(err) {
       throw err;
     });
     stream.on('data', function(file) {
-      should.exist(file);
-      should.exist(file.path);
-      should.exist(file.base);
-      should.exist(file.cwd);
-      String(file.cwd).should.equal(dir);
-      String(file.base).should.equal(dir + '/fixtures/has (parens)');
-      String(file.path).should.equal(dir + '/fixtures/has (parens)/test.dmc');
+      expect(file).toExist();
+      expect(file.path).toExist();
+      expect(file.base).toExist();
+      expect(file.cwd).toExist();
+      expect(String(file.cwd)).toBe(dir);
+      expect(String(file.base)).toBe(dir + '/fixtures/has (parens)');
+      expect(String(file.path)).toBe(dir + '/fixtures/has (parens)/test.dmc');
       done();
     });
   });
@@ -106,18 +108,18 @@ describe('glob-stream', function() {
     var files = [];
     stream.on('error', done);
     stream.on('data', function(file) {
-      should.exist(file);
-      should.exist(file.path);
+      expect(file).toExist();
+      expect(file.path).toExist();
       files.push(file);
     });
     stream.on('end', function() {
-      files.length.should.equal(3);
-      path.basename(files[0].path).should.equal('test.dmc');
-      files[0].path.should.equal(dir + '/fixtures/has (parens)/test.dmc');
-      path.basename(files[1].path).should.equal('run.dmc');
-      files[1].path.should.equal(dir + '/fixtures/stuff/run.dmc');
-      path.basename(files[2].path).should.equal('test.dmc');
-      files[2].path.should.equal(dir + '/fixtures/stuff/test.dmc');
+      expect(files.length).toBe(3);
+      expect(path.basename(files[0].path)).toBe('test.dmc');
+      expect(files[0].path).toBe(dir + '/fixtures/has (parens)/test.dmc');
+      expect(path.basename(files[1].path)).toBe('run.dmc');
+      expect(files[1].path).toBe(dir + '/fixtures/stuff/run.dmc');
+      expect(path.basename(files[2].path)).toBe('test.dmc');
+      expect(files[2].path).toBe(dir + '/fixtures/stuff/test.dmc');
       done();
     });
   });
@@ -135,7 +137,7 @@ describe('glob-stream', function() {
 
     var count = 0;
 
-    should.exist(stream);
+    expect(stream).toExist();
     stream.on('error', function(err) {
       throw err;
     });
@@ -143,7 +145,7 @@ describe('glob-stream', function() {
       count++;
     });
     wrapper.on('end', function() {
-      count.should.equal(2);
+      expect(count).toBe(2);
       done();
     });
   });
@@ -160,9 +162,9 @@ describe('glob-stream', function() {
 
     stream.on('error', done);
     stream.on('data', function(file) {
-      should.exist(file);
-      should.exist(file.base);
-      file.base.should.equal(baseDir);
+      expect(file).toExist().toExist();
+      expect(file.base).toExist().toExist();
+      expect(file.base).toBe(baseDir);
     });
     stream.on('end', function() {
       done();
@@ -181,9 +183,9 @@ describe('glob-stream', function() {
 
     stream.on('error', done);
     stream.on('data', function(file) {
-      should.exist(file);
-      should.exist(file.base);
-      file.base.should.equal(baseDir);
+      expect(file).toExist();
+      expect(file.base).toExist();
+      expect(file.base).toBe(baseDir);
     });
     stream.on('end', function() {
       done();
@@ -192,18 +194,18 @@ describe('glob-stream', function() {
 
   it('should return a file name stream that does not duplicate', function(done) {
     var stream = globStream(['./fixtures/test.coffee', './fixtures/test.coffee'], { cwd: dir });
-    should.exist(stream);
+    expect(stream).toExist();
     stream.on('error', function(err) {
       throw err;
     });
     stream.on('data', function(file) {
-      should.exist(file);
-      should.exist(file.path);
-      should.exist(file.base);
-      should.exist(file.cwd);
-      String(file.cwd).should.equal(dir);
-      String(file.base).should.equal(dir + '/fixtures');
-      String(file.path).should.equal(dir + '/fixtures/test.coffee');
+      expect(file).toExist();
+      expect(file.path).toExist();
+      expect(file.base).toExist();
+      expect(file.cwd).toExist();
+      expect(String(file.cwd)).toBe(dir);
+      expect(String(file.base)).toBe(dir + '/fixtures');
+      expect(String(file.path)).toBe(dir + '/fixtures/test.coffee');
       done();
     });
   });
@@ -213,18 +215,18 @@ describe('glob-stream', function() {
     var stream2 = globStream('./fixtures/test.coffee', { cwd: dir });
     stream2.pipe(stream);
 
-    should.exist(stream);
+    expect(stream).toExist();
     stream.on('error', function(err) {
       throw err;
     });
     stream.on('data', function(file) {
-      should.exist(file);
-      should.exist(file.path);
-      should.exist(file.base);
-      should.exist(file.cwd);
-      String(file.cwd).should.equal(dir);
-      String(file.base).should.equal(dir + '/fixtures');
-      String(file.path).should.equal(dir + '/fixtures/test.coffee');
+      expect(file).toExist();
+      expect(file.path).toExist();
+      expect(file.base).toExist();
+      expect(file.cwd).toExist();
+      expect(String(file.cwd)).toBe(dir);
+      expect(String(file.base)).toBe(dir + '/fixtures');
+      expect(String(file.path)).toBe(dir + '/fixtures/test.coffee');
       done();
     });
   });
@@ -232,25 +234,25 @@ describe('glob-stream', function() {
 
   it('should return a file name stream from a direct path', function(done) {
     var stream = globStream('./fixtures/test.coffee', { cwd: dir });
-    should.exist(stream);
+    expect(stream).toExist();
     stream.on('error', function(err) {
       throw err;
     });
     stream.on('data', function(file) {
-      should.exist(file);
-      should.exist(file.path);
-      should.exist(file.base);
-      should.exist(file.cwd);
-      String(file.cwd).should.equal(dir);
-      String(file.base).should.equal(dir + '/fixtures');
-      String(file.path).should.equal(dir + '/fixtures/test.coffee');
+      expect(file).toExist();
+      expect(file.path).toExist();
+      expect(file.base).toExist();
+      expect(file.cwd).toExist();
+      expect(String(file.cwd)).toBe(dir);
+      expect(String(file.base)).toBe(dir + '/fixtures');
+      expect(String(file.path)).toBe(dir + '/fixtures/test.coffee');
       done();
     });
   });
 
   it('should not return a file name stream with dotfiles without dot option', function(done) {
     var stream = globStream('./fixtures/*swag', { cwd: dir });
-    should.exist(stream);
+    expect(stream).toExist();
     stream.on('error', function(err) {
       throw err;
     });
@@ -262,25 +264,25 @@ describe('glob-stream', function() {
 
   it('should return a file name stream with dotfiles with dot option', function(done) {
     var stream = globStream('./fixtures/*swag', { cwd: dir, dot: true });
-    should.exist(stream);
+    expect(stream).toExist();
     stream.on('error', function(err) {
       throw err;
     });
     stream.once('data', function(file) {
-      should.exist(file);
-      should.exist(file.path);
-      should.exist(file.base);
-      should.exist(file.cwd);
-      String(file.cwd).should.equal(dir);
-      String(file.base).should.equal(dir + '/fixtures');
-      String(file.path).should.equal(dir + '/fixtures/.swag');
+      expect(file).toExist();
+      expect(file.path).toExist();
+      expect(file.base).toExist();
+      expect(file.cwd).toExist();
+      expect(String(file.cwd)).toBe(dir);
+      expect(String(file.base)).toBe(dir + '/fixtures');
+      expect(String(file.path)).toBe(dir + '/fixtures/.swag');
       done();
     });
   });
 
   it('should return a file name stream with dotfiles negated', function(done) {
     var stream = globStream(['./fixtures/*swag', '!./fixtures/**'], { cwd: dir, dot: true });
-    should.exist(stream);
+    expect(stream).toExist();
     stream.on('error', function(err) {
       throw err;
     });
@@ -292,18 +294,18 @@ describe('glob-stream', function() {
 
   it('should return a file name stream from a direct path and pause/buffer items', function(done) {
     var stream = globStream('./fixtures/test.coffee', { cwd: dir });
-    should.exist(stream);
+    expect(stream).toExist();
     stream.on('error', function(err) {
       throw err;
     });
     stream.on('data', function(file) {
-      should.exist(file);
-      should.exist(file.path);
-      should.exist(file.base);
-      should.exist(file.cwd);
-      String(file.cwd).should.equal(dir);
-      String(file.base).should.equal(dir + '/fixtures');
-      String(file.path).should.equal(dir + '/fixtures/test.coffee');
+      expect(file).toExist();
+      expect(file.path).toExist();
+      expect(file.base).toExist();
+      expect(file.cwd).toExist();
+      expect(String(file.cwd)).toBe(dir);
+      expect(String(file.base)).toBe(dir + '/fixtures');
+      expect(String(file.path)).toBe(dir + '/fixtures/test.coffee');
       done();
     });
     stream.pause();
@@ -314,18 +316,18 @@ describe('glob-stream', function() {
 
   it('should not fuck up direct paths with no cwd', function(done) {
     var stream = globStream(dir + '/fixtures/test.coffee');
-    should.exist(stream);
+    expect(stream).toExist();
     stream.on('error', function(err) {
       throw err;
     });
     stream.on('data', function(file) {
-      should.exist(file);
-      should.exist(file.path);
-      should.exist(file.base);
-      should.exist(file.cwd);
-      String(file.cwd).should.equal(process.cwd());
-      String(file.base).should.equal(dir + '/fixtures');
-      String(file.path).should.equal(dir + '/fixtures/test.coffee');
+      expect(file).toExist();
+      expect(file.path).toExist();
+      expect(file.base).toExist();
+      expect(file.cwd).toExist();
+      expect(String(file.cwd)).toBe(process.cwd());
+      expect(String(file.base)).toBe(dir + '/fixtures');
+      expect(String(file.path)).toBe(dir + '/fixtures/test.coffee');
       done();
     });
   });
@@ -342,17 +344,17 @@ describe('glob-stream', function() {
     var files = [];
     stream.on('error', done);
     stream.on('data', function(file) {
-      should.exist(file);
-      should.exist(file.path);
+      expect(file).toExist();
+      expect(file.path).toExist();
       files.push(file);
     });
     stream.on('end', function() {
-      files.length.should.equal(5);
-      path.basename(files[0].path).should.equal('test.txt');
-      path.basename(files[1].path).should.equal('test.coffee');
-      path.basename(files[2].path).should.equal('test.js');
-      path.basename(files[3].path).should.equal('test.dmc');
-      path.basename(files[4].path).should.equal('test.dmc');
+      expect(files.length).toBe(5);
+      expect(path.basename(files[0].path)).toBe('test.txt');
+      expect(path.basename(files[1].path)).toBe('test.coffee');
+      expect(path.basename(files[2].path)).toBe('test.js');
+      expect(path.basename(files[3].path)).toBe('test.dmc');
+      expect(path.basename(files[4].path)).toBe('test.dmc');
       done();
     });
   });
@@ -368,15 +370,15 @@ describe('glob-stream', function() {
     var files = [];
     stream.on('error', done);
     stream.on('data', function(file) {
-      should.exist(file);
-      should.exist(file.path);
+      expect(file).toExist();
+      expect(file.path).toExist();
       files.push(file);
     });
     stream.on('end', function() {
-      files.length.should.equal(3);
-      files[0].path.should.equal(globArray[0]);
-      files[1].path.should.equal(globArray[1]);
-      files[2].path.should.equal(globArray[2]);
+      expect(files.length).toBe(3);
+      expect(files[0].path).toBe(globArray[0]);
+      expect(files[1].path).toBe(globArray[1]);
+      expect(files[2].path).toBe(globArray[2]);
       done();
     });
   });
@@ -393,9 +395,9 @@ describe('glob-stream', function() {
 
       stream.on('error', done);
       stream.on('data', function(file) {
-        should.exist(file);
-        should.exist(file.base);
-        file.base.should.equal(baseDir);
+        expect(file).toExist();
+        expect(file.base).toExist();
+        expect(file.base).toBe(baseDir);
       });
       stream.on('end', function() {
         done();
@@ -413,13 +415,13 @@ describe('glob-stream', function() {
     var files = [];
     stream.on('error', done);
     stream.on('data', function(file) {
-      should.exist(file);
-      should.exist(file.path);
+      expect(file).toExist();
+      expect(file.path).toExist();
       files.push(file);
     });
     stream.on('end', function() {
-      files.length.should.equal(1);
-      files[0].path.should.equal(expectedPath);
+      expect(files.length).toBe(1);
+      expect(files[0].path).toBe(expectedPath);
       done();
     });
   });
@@ -435,13 +437,13 @@ describe('glob-stream', function() {
     var files = [];
     stream.on('error', done);
     stream.on('data', function(file) {
-      should.exist(file);
-      should.exist(file.path);
+      expect(file).toExist();
+      expect(file.path).toExist();
       files.push(file);
     });
     stream.on('end', function() {
-      files.length.should.equal(1);
-      files[0].path.should.equal(expectedPath);
+      expect(files.length).toBe(1);
+      expect(files[0].path).toBe(expectedPath);
       done();
     });
   });
@@ -449,25 +451,32 @@ describe('glob-stream', function() {
   it.skip('should return a input stream that can be piped to other input streams and remove duplicates', function(done) {
     var stream = globStream(dir + '/fixtures/stuff/*.dmc');
     var stream2 = globStream(dir + '/fixtures/stuff/*.dmc');
+    var errored = false;
 
     stream2.pipe(stream);
 
     var files = [];
-    stream.on('error', done);
+    stream.once('error', function(err) {
+      errored = true;
+      done(err);
+    });
     stream.on('data', function(file) {
-      should.exist(file);
-      should.exist(file.path);
+      expect(file).toExist();
+      expect(file.path).toExist();
       files.push(file);
     });
-    stream.on('end', function() {
-      files.length.should.equal(2);
+    stream.once('end', function() {
+      if (errored) {
+        return;
+      }
+      expect(files.length).toBe(2);
       done();
     });
   });
 
   it('should return a file name stream with negation from a glob', function(done) {
     var stream = globStream(['./fixtures/**/*.js', '!./**/test.js'], { cwd: dir });
-    should.exist(stream);
+    expect(stream).toExist();
     stream.on('error', function(err) {
       throw err;
     });
@@ -481,125 +490,127 @@ describe('glob-stream', function() {
 
   it('should return a file name stream from two globs and a negative', function(done) {
     var stream = globStream(['./fixtures/*.coffee', './fixtures/whatsgoingon/*.coffee'], { cwd: dir });
-    should.exist(stream);
+    expect(stream).toExist();
     stream.on('error', function(err) {
       throw err;
     });
     stream.on('data', function(file) {
-      should.exist(file);
-      should.exist(file.path);
-      should.exist(file.base);
-      should.exist(file.cwd);
-      String(file.cwd).should.equal(dir);
-      String(file.base).should.equal(dir + '/fixtures');
-      String(file.path).should.equal(dir + '/fixtures/test.coffee');
+      expect(file).toExist();
+      expect(file.path).toExist();
+      expect(file.base).toExist();
+      expect(file.cwd).toExist();
+      expect(String(file.cwd)).toBe(dir);
+      expect(String(file.base)).toBe(dir + '/fixtures');
+      expect(String(file.path)).toBe(dir + '/fixtures/test.coffee');
       done();
     });
   });
 
   it('should respect the globs array order', function(done) {
     var stream = globStream(['./fixtures/stuff/*', '!./fixtures/stuff/*.dmc', './fixtures/stuff/run.dmc'], { cwd: dir });
-    should.exist(stream);
+    expect(stream).toExist();
     stream.on('error', function(err) {
       throw err;
     });
     stream.on('data', function(file) {
-      should.exist(file);
-      should.exist(file.path);
-      should.exist(file.base);
-      should.exist(file.cwd);
-      String(file.cwd).should.equal(dir);
-      String(file.base).should.equal(dir + '/fixtures/stuff');
-      String(file.path).should.equal(dir + '/fixtures/stuff/run.dmc');
+      expect(file).toExist();
+      expect(file.path).toExist();
+      expect(file.base).toExist();
+      expect(file.cwd).toExist();
+      expect(String(file.cwd)).toBe(dir);
+      expect(String(file.base)).toBe(dir + '/fixtures/stuff');
+      expect(String(file.path)).toBe(dir + '/fixtures/stuff/run.dmc');
       done();
     });
   });
 
   it('should ignore leading negative globs', function(done) {
     var stream = globStream(['!./fixtures/stuff/*.dmc', './fixtures/stuff/run.dmc'], { cwd: dir });
-    should.exist(stream);
+    expect(stream).toExist();
     stream.on('error', function(err) {
       throw err;
     });
     stream.on('data', function(file) {
-      should.exist(file);
-      should.exist(file.path);
-      should.exist(file.base);
-      should.exist(file.cwd);
-      String(file.cwd).should.equal(dir);
-      String(file.base).should.equal(dir + '/fixtures/stuff');
-      String(file.path).should.equal(dir + '/fixtures/stuff/run.dmc');
+      expect(file).toExist();
+      expect(file.path).toExist();
+      expect(file.base).toExist();
+      expect(file.cwd).toExist();
+      expect(String(file.cwd)).toBe(dir);
+      expect(String(file.base)).toBe(dir + '/fixtures/stuff');
+      expect(String(file.path)).toBe(dir + '/fixtures/stuff/run.dmc');
       done();
     });
   });
 
-  it('should throw on invalid glob argument', function() {
-    globStream.bind(globStream, 42, { cwd: dir }).should.throw(/Invalid glob .* 0/);
-    globStream.bind(globStream, ['.', 42], { cwd: dir }).should.throw(/Invalid glob .* 1/);
+  it('should throw on invalid glob argument', function(done) {
+    expect(globStream.bind(globStream, 42, { cwd: dir })).toThrow(/Invalid glob .* 0/);
+    expect(globStream.bind(globStream, ['.', 42], { cwd: dir })).toThrow(/Invalid glob .* 1/);
+    done();
   });
 
-  it('should throw on missing positive glob', function() {
-    globStream.bind(globStream, '!c', { cwd: dir }).should.throw(/Missing positive glob/);
-    globStream.bind(globStream, ['!a', '!b'], { cwd: dir }).should.throw(/Missing positive glob/);
+  it('should throw on missing positive glob', function(done) {
+    expect(globStream.bind(globStream, '!c', { cwd: dir })).toThrow(/Missing positive glob/);
+    expect(globStream.bind(globStream, ['!a', '!b'], { cwd: dir })).toThrow(/Missing positive glob/);
+    done();
   });
 
   it('should emit error on singular glob when file not found', function(done) {
     var stream = globStream('notfound');
-    should.exist(stream);
+    expect(stream).toExist();
     stream.on('error', function(err) {
-      err.should.match(/File not found with singular glob/);
+      expect(err).toMatch(/File not found with singular glob/);
       done();
     });
   });
 
   it('should emit error when a glob in multiple globs not found', function(done) {
     var stream = globStream(['notfound', './fixtures/whatsgoingon'], { cwd: dir });
-    should.exist(stream);
+    expect(stream).toExist();
     stream.on('error', function(err) {
-      err.should.match(/File not found with singular glob/);
+      expect(err).toMatch(/File not found with singular glob/);
       done();
     });
   });
 
   it('should resolve relative paths when root option is given', function(done) {
     var stream = globStream('./fixtures/test.coffee', { cwd: dir, root: dir + '/fixtures' });
-    should.exist(stream);
+    expect(stream).toExist();
     stream.on('error', function(err) {
       throw err;
     });
     stream.on('data', function(file) {
-      should.exist(file);
-      should.exist(file.path);
-      should.exist(file.base);
-      should.exist(file.cwd);
-      String(file.cwd).should.equal(dir);
-      String(file.base).should.equal(dir + '/fixtures');
-      String(file.path).should.equal(dir + '/fixtures/test.coffee');
+      expect(file).toExist();
+      expect(file.path).toExist();
+      expect(file.base).toExist();
+      expect(file.cwd).toExist();
+      expect(String(file.cwd)).toBe(dir);
+      expect(String(file.base)).toBe(dir + '/fixtures');
+      expect(String(file.path)).toBe(dir + '/fixtures/test.coffee');
       done();
     });
   });
 
   it('should resolve absolute paths when root option is given', function(done) {
     var stream = globStream('/test.coffee', { cwd: dir, root: dir + '/fixtures' });
-    should.exist(stream);
+    expect(stream).toExist();
     stream.on('error', function(err) {
       throw err;
     });
     stream.on('data', function(file) {
-      should.exist(file);
-      should.exist(file.path);
-      should.exist(file.base);
-      should.exist(file.cwd);
-      String(file.cwd).should.equal(dir);
-      String(file.base).should.equal(dir + '/fixtures');
-      String(file.path).should.equal(dir + '/fixtures/test.coffee');
+      expect(file).toExist();
+      expect(file.path).toExist();
+      expect(file.base).toExist();
+      expect(file.cwd).toExist();
+      expect(String(file.cwd)).toBe(dir);
+      expect(String(file.base)).toBe(dir + '/fixtures');
+      expect(String(file.path)).toBe(dir + '/fixtures/test.coffee');
       done();
     });
   });
 
   it('should not emit error on glob containing {} when not found', function(done) {
     var stream = globStream('notfound{a,b}');
-    should.exist(stream);
+    expect(stream).toExist();
     stream.on('error', function() {
       throw new Error('Error was emitted');
     });
@@ -610,7 +621,7 @@ describe('glob-stream', function() {
 
   it('should not emit error on singular glob when allowEmpty is true', function(done) {
     var stream = globStream('notfound', { allowEmpty: true });
-    should.exist(stream);
+    expect(stream).toExist();
     stream.on('error', function() {
       throw new Error('Error was emitted');
     });
@@ -621,9 +632,9 @@ describe('glob-stream', function() {
 
   it.skip('should pass options to through2',function(done) {
     var stream = globStream(['./fixtures/stuff/run.dmc'], { cwd: dir, objectMode: false });
-    should.exist(stream);
+    expect(stream).toExist();
     stream.on('error', function(err) {
-      err.should.match(/Invalid non-string\/buffer chunk/);
+      expect(err).toMatch(/Invalid non-string\/buffer chunk/);
       done();
     });
   });
@@ -644,8 +655,8 @@ describe('options', function() {
     var opts = {};
 
     var stream = globStream(dir + '/fixtures/stuff/run.dmc', opts);
-    Object.keys(opts).length.should.equal(0);
-    opts.should.not.eql(defaultedOpts);
+    expect(Object.keys(opts).length).toBe(0);
+    expect(opts).toNotBe(defaultedOpts);
     stream.on('data', function() {});
     stream.on('end', done);
   });
@@ -660,13 +671,13 @@ describe('options', function() {
       var files = [];
       stream.on('error', done);
       stream.on('data', function(file) {
-        should.exist(file);
-        should.exist(file.path);
+        expect(file).toExist();
+        expect(file.path).toExist();
         files.push(file);
       });
       stream.on('end', function() {
-        files.length.should.equal(1);
-        files[0].path.should.equal(expectedPath);
+        expect(files.length).toBe(1);
+        expect(files[0].path).toBe(expectedPath);
         done();
       });
     });
@@ -679,20 +690,20 @@ describe('options', function() {
       var files = [];
       stream.on('error', done);
       stream.on('data', function(file) {
-        should.exist(file);
-        should.exist(file.path);
+        expect(file).toExist();
+        expect(file.path).toExist();
         files.push(file);
       });
       stream.on('end', function() {
-        files.length.should.equal(1);
-        files[0].path.should.equal(expectedPath);
+        expect(files.length).toBe(1);
+        expect(files[0].path).toBe(expectedPath);
         done();
       });
     });
 
     it('should support the ignore option with dot option', function(done) {
       var stream = globStream('./fixtures/*swag', { cwd: dir, dot: true, ignore: ['./fixtures/**'] });
-      should.exist(stream);
+      expect(stream).toExist();
       stream.on('error', function(err) {
         throw err;
       });
@@ -708,7 +719,7 @@ describe('options', function() {
         '!./fixtures/stuff/test.dmc',
       ];
       var stream = globStream(globArray, { cwd: dir, ignore: ['./fixtures/stuff/run.dmc'] });
-      should.exist(stream);
+      expect(stream).toExist();
       stream.on('error', function(err) {
         throw err;
       });
