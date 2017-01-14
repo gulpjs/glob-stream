@@ -6,7 +6,6 @@ var stream = require('../stream');
 var through2 = require('through2');
 
 var concat = miss.concat;
-var finished = miss.finished;
 var pipe = miss.pipe;
 
 function deWindows(p) {
@@ -740,21 +739,19 @@ describe('GlobStream', function() {
     });
   });
 
-  it('should emit end with one matched file', function(done) {
+  it('should finish and pass the one matched file to the next pipe', function(done) {
     function assert(files) {
       files.length.should.eql(1);
       files[0].path.should.match(/\/test.txt$/g);
     }
 
-    var p = pipe([
+    pipe([
       stream('./fixtures/whatsgoingon/**/*.txt', [], { cwd: __dirname, }),
       concat(assert),
-    ]);
-
-    finished(p, done);
+    ], done);
   });
 
-  it('should emit end with multiple matched files', function(done) {
+  it('should finish and pass multiple matched files to the next pipe', function(done) {
     function assert(files) {
       files.length.should.eql(3);
       files.sort();
@@ -763,11 +760,9 @@ describe('GlobStream', function() {
       files[2].path.should.match(/\/stuff\/test.dmc$/);
     }
 
-    var p = pipe([
+    pipe([
       stream('./fixtures/**/*.dmc', [], { cwd: __dirname, }),
       concat(assert),
-    ]);
-
-    finished(p, done);
+    ], done);
   });
 });
