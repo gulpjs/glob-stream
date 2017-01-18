@@ -1,9 +1,9 @@
-var globStream = require('../');
-var miss = require('mississippi');
 var path = require('path');
 var should = require('should');
 var stream = require('../stream');
-var through2 = require('through2');
+var expect = require('expect');
+var globStream = require('../');
+var miss = require('mississippi');
 
 var concat = miss.concat;
 var pipe = miss.pipe;
@@ -129,7 +129,7 @@ describe('glob-stream', function() {
 
   it('should return a file name stream from a glob and respect state', function(done) {
     var stream = globStream('./fixtures/stuff/*.dmc', { cwd: dir });
-    var wrapper = stream.pipe(through2.obj(function(data, enc, cb) {
+    var wrapper = stream.pipe(miss.through.obj(function(data, enc, cb) {
       this.pause();
       setTimeout(function() {
         this.push(data);
@@ -726,7 +726,7 @@ describe('options', function() {
 });
 
 describe('GlobStream', function() {
-  it('should error out if there are no matches', function(done) {
+  it('emits an error if there are no matches', function(done) {
     var gs = stream(
       './fixtures/whatsgoingon/kojaslkjas.txt',
       [],
@@ -734,15 +734,15 @@ describe('GlobStream', function() {
     );
 
     gs.once('error', function(err) {
-      err.message.should.match(/^File not found with singular glob/g);
+      expect(err.message).toMatch(/^File not found with singular glob/g);
       done();
     });
   });
 
-  it('should finish and pass the one matched file to the next pipe', function(done) {
+  it('finishes and passes the one matched file to the next pipe', function(done) {
     function assert(files) {
-      files.length.should.eql(1);
-      files[0].path.should.match(/\/test.txt$/g);
+      expect(files.length).toBe(1);
+      expect(files[0].path).toMatch(/\/test.txt$/g);
     }
 
     pipe([
@@ -751,13 +751,13 @@ describe('GlobStream', function() {
     ], done);
   });
 
-  it('should finish and pass multiple matched files to the next pipe', function(done) {
+  it('finishes and passes the multiple matched files to the next pipe', function(done) {
     function assert(files) {
-      files.length.should.eql(3);
+      expect(files.length).toBe(3);
       files.sort();
-      files[0].path.should.match(/\/has\s\(parens\)\/test.dmc$/);
-      files[1].path.should.match(/\/stuff\/run.dmc$/);
-      files[2].path.should.match(/\/stuff\/test.dmc$/);
+      expect(files[0].path).toMatch(/\/has\s\(parens\)\/test.dmc$/);
+      expect(files[1].path).toMatch(/\/stuff\/run.dmc$/);
+      expect(files[2].path).toMatch(/\/stuff\/test.dmc$/);
     }
 
     pipe([

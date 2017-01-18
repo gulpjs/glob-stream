@@ -21,6 +21,7 @@
     "coveralls": "istanbul cover _mocha --report lcovonly && istanbul-coveralls"
   },
   "dependencies": {
+    "expect": "^1.20.2",
     "extend": "^3.0.0",
     "glob": "^7.1.1",
     "glob-parent": "^3.1.0",
