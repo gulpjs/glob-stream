@@ -20,7 +20,7 @@
   "scripts": {
     "lint": "eslint . && jscs index.js test/",
     "pretest": "npm run lint",
-    "test": "mocha",
+    "test": "mocha --async-only",
     "cover": "istanbul cover _mocha --report lcovonly",
     "coveralls": "npm run cover && istanbul-coveralls"
   },
@@ -44,6 +44,7 @@
     "istanbul-coveralls": "^1.0.3",
     "jscs": "^2.4.0",
     "jscs-preset-gulp": "^1.0.0",
+    "mississippi": "^1.2.0",
     "mocha": "^2.4.5"
   },
   "keywords": [
