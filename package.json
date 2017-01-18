@@ -3,7 +3,10 @@
   "version": "5.3.5",
   "description": "A wrapper around node-glob to make it streamy",
   "author": "Gulp Team <team@gulpjs.com> (http://gulpjs.com/)",
-  "contributors": [],
+  "contributors": [
+    "Eric Schoffstall <yo@contra.io>",
+    "Blaine Bublitz <blaine.bublitz@gmail.com>"
+  ],
   "homepage": "http://gulpjs.com",
   "repository": "gulpjs/glob-stream",
   "license": "MIT",
@@ -15,10 +18,11 @@
     "index.js"
   ],
   "scripts": {
-    "lint": "eslint . && jscs . test/",
+    "lint": "eslint . && jscs index.js test/",
     "pretest": "npm run lint",
     "test": "mocha",
-    "coveralls": "istanbul cover _mocha --report lcovonly && istanbul-coveralls"
+    "cover": "istanbul cover _mocha --report lcovonly",
+    "coveralls": "npm run cover && istanbul-coveralls"
   },
   "dependencies": {
     "extend": "^3.0.0",
@@ -48,6 +52,7 @@
   },
   "keywords": [
     "glob",
-    "stream"
+    "stream",
+    "gulp"
   ]
 }
