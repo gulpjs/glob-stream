@@ -5,8 +5,7 @@ var expect = require('expect');
 var globStream = require('../');
 var miss = require('mississippi');
 
-var concat = miss.concat;
-var pipe = miss.pipe;
+var through = miss.through;
 
 function deWindows(p) {
   return p.replace(/\\/g, '/');
@@ -129,7 +128,7 @@ describe('glob-stream', function() {
 
   it('should return a file name stream from a glob and respect state', function(done) {
     var stream = globStream('./fixtures/stuff/*.dmc', { cwd: dir });
-    var wrapper = stream.pipe(miss.through.obj(function(data, enc, cb) {
+    var wrapper = stream.pipe(through.obj(function(data, enc, cb) {
       this.pause();
       setTimeout(function() {
         this.push(data);
@@ -725,44 +724,3 @@ describe('options', function() {
   });
 });
 
-describe('GlobStream', function() {
-  it('emits an error if there are no matches', function(done) {
-    var gs = stream(
-      './fixtures/whatsgoingon/kojaslkjas.txt',
-      [],
-      { cwd: __dirname, }
-    );
-
-    gs.once('error', function(err) {
-      expect(err.message).toMatch(/^File not found with singular glob/g);
-      done();
-    });
-  });
-
-  it('finishes and passes the one matched file to the next pipe', function(done) {
-    function assert(files) {
-      expect(files.length).toBe(1);
-      expect(files[0].path).toMatch(/\/test.txt$/g);
-    }
-
-    pipe([
-      stream('./fixtures/whatsgoingon/**/*.txt', [], { cwd: __dirname, }),
-      concat(assert),
-    ], done);
-  });
-
-  it('finishes and passes the multiple matched files to the next pipe', function(done) {
-    function assert(files) {
-      expect(files.length).toBe(3);
-      files.sort();
-      expect(files[0].path).toMatch(/\/has\s\(parens\)\/test.dmc$/);
-      expect(files[1].path).toMatch(/\/stuff\/run.dmc$/);
-      expect(files[2].path).toMatch(/\/stuff\/test.dmc$/);
-    }
-
-    pipe([
-      stream('./fixtures/**/*.dmc', [], { cwd: __dirname, }),
-      concat(assert),
-    ], done);
-  });
-});
