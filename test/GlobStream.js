@@ -6,6 +6,16 @@ var concat = miss.concat;
 var pipe = miss.pipe;
 
 describe('GlobStream', function() {
+  it('emits an error if it is not first in the stream', function(done) {
+    var gs1 = stream('./fixtures/whatsgoingon/**/*.txt', [], { cwd: __dirname, });
+    var gs2 = stream('./fixtures/whatsgoingon/**/*.txt', [], { cwd: __dirname, });
+
+    pipe([
+      gs1,
+      gs2,
+    ]);
+  });
+
   it('emits an error if there are no matches', function(done) {
     var gs = stream(
       './fixtures/whatsgoingon/kojaslkjas.txt',

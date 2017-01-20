@@ -1,7 +1,5 @@
 var path = require('path');
 var should = require('should');
-var stream = require('../stream');
-var expect = require('expect');
 var globStream = require('../');
 var miss = require('mississippi');
 
