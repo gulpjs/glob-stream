@@ -3,6 +3,7 @@ var expect = require('expect');
 var miss = require('mississippi');
 
 var concat = miss.concat;
+var finished = miss.finished;
 var pipe = miss.pipe;
 
 describe('GlobStream', function() {
@@ -23,10 +24,13 @@ describe('GlobStream', function() {
       { cwd: __dirname, }
     );
 
-    gs.once('error', function(err) {
-      expect(err.message).toMatch(/^File not found with singular glob/g);
-      done();
-    });
+    finished(
+      gs,
+      function(err) {
+        expect(arguments[0].message).toMatch(/^File not found with singular glob/g);
+        done();
+      }
+    );
   });
 
   it('finishes and passes the one matched file to the next pipe', function(done) {
