@@ -7,16 +7,6 @@ var finished = miss.finished;
 var pipe = miss.pipe;
 
 describe('GlobStream', function() {
-  it('emits an error if it is not first in the stream', function(done) {
-    var gs1 = stream('./fixtures/whatsgoingon/**/*.txt', [], { cwd: __dirname, });
-    var gs2 = stream('./fixtures/whatsgoingon/**/*.txt', [], { cwd: __dirname, });
-
-    pipe([
-      gs1,
-      gs2,
-    ]);
-  });
-
   it('emits an error if there are no matches', function(done) {
     var gs = stream(
       './fixtures/whatsgoingon/kojaslkjas.txt',
@@ -27,10 +17,36 @@ describe('GlobStream', function() {
     finished(
       gs,
       function(err) {
-        expect(arguments[0].message).toMatch(/^File not found with singular glob/g);
+        expect(err.message).toMatch(/^File not found with singular glob/g);
         done();
       }
     );
+  });
+
+  it('throws an error if you try to write to it', function(done) {
+    var gs = stream(
+      './fixtures/whatsgoingon/lkasdkl.txt',
+      [],
+      { cwd: __dirname, }
+    );
+
+    try {
+      gs.write({});
+    } catch (err) {
+      expect(err.message).toExist();
+      done();
+    }
+  });
+
+  it('does not throw an error if you try to push to it', function(done) {
+    var gs = stream(
+      './fixtures/whatsgoingon/lkasdkl.txt',
+      [],
+      { cwd: __dirname, }
+    );
+
+    gs.push({});
+    done();
   });
 
   it('finishes and passes the one matched file to the next pipe', function(done) {
