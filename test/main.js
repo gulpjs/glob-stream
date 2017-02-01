@@ -358,25 +358,6 @@ describe('glob-stream', function() {
     ], done);
   });
 
-  it.skip('removes duplicates when used as a Transform stream', function(done) {
-    var expected = {
-      cwd: dir,
-      base: dir + '/fixtures',
-      path: dir + '/fixtures/test.coffee',
-    };
-
-    function assert(pathObjs) {
-      expect(pathObjs.length).toEqual(1);
-      expect(pathObjs[0]).toEqual(expected);
-    }
-
-    pipe([
-      globStream('./fixtures/test.coffee', { cwd: dir }),
-      globStream('./fixtures/*.coffee', { cwd: dir }),
-      concat(assert),
-    ], done);
-  });
-
   it('ignores dotfiles without dot option', function(done) {
     function assert(pathObjs) {
       expect(pathObjs.length).toEqual(0);
