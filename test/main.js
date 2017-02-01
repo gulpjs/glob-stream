@@ -634,19 +634,6 @@ describe('glob-stream', function() {
       concat(assert),
     ], done);
   });
-
-  // TODO: remove this feature?
-  it.skip('passes options to through2', function(done) {
-    function assert(err) {
-      expect(err).toMatch(/Invalid non-string\/buffer chunk/);
-      done();
-    }
-
-    pipe([
-      globStream('./fixtures/stuff/run.dmc', { cwd: dir, objectMode: false }),
-      concat(),
-    ], assert);
-  });
 });
 
 describe('options', function() {

@@ -42,7 +42,6 @@ Returns a stream for multiple globs or filters.
 - allowEmpty
   - Default is `false`
   - If true, won't emit an error when a glob pointing at a single file fails to match
-- Any through2 related options are documented in [through2][through2-url]
 
 This argument is passed directly to [node-glob][node-glob-url] so check there for more options
 
@@ -73,7 +72,6 @@ gulp.src(['*.js', '!b*.js'])
 MIT
 
 [globby-url]: https://github.com/sindresorhus/globby
-[through2-url]: https://github.com/rvagg/through2
 [node-glob-url]: https://github.com/isaacs/node-glob
 [glob-parent-url]: https://github.com/es128/glob-parent
 
