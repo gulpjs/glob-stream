@@ -29,8 +29,11 @@ function GlobStream(ourGlob, negatives, opt) {
     return new GlobStream(ourGlob, negatives, opt);
   }
 
-  // TODO: document that we don't accept any stream options
-  Readable.call(this, { objectMode: true });
+  // TODO: document that we only accept highWaterMark
+  Readable.call(this, {
+    objectMode: true,
+    highWaterMark: opt.highWaterMark
+  });
 
   var self = this;
 
@@ -40,6 +43,7 @@ function GlobStream(ourGlob, negatives, opt) {
 
   var ourOpt = extend({}, opt);
   delete ourOpt.root;
+  delete ourOpt.highWaterMark;
 
   var ourNegatives = negatives.map(resolveNegatives);
   ourOpt.ignore = ourNegatives;

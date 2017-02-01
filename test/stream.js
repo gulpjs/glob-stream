@@ -11,6 +11,7 @@ function deWindows(p) {
 
 var pipe = miss.pipe;
 var concat = miss.concat;
+var through = miss.through;
 
 var dir = deWindows(__dirname);
 
@@ -105,6 +106,30 @@ describe('readable stream', function() {
 
     pipe([
       stream('./fixtures/**/*.dmc', [], { cwd: dir }),
+      concat(assert),
+    ], done);
+  });
+
+  it('pauses the globber upon backpressure', function(done) {
+    var gs = stream('./fixtures/**/*.dmc', [], { cwd: dir, highWaterMark: 1 });
+
+    var spy = expect.spyOn(gs._globber, 'pause').andCallThrough();
+
+    function waiter(pathObj, _, cb) {
+      setTimeout(function() {
+        cb(null, pathObj);
+      }, 500);
+    }
+
+    function assert(pathObjs) {
+      expect(pathObjs.length).toEqual(3);
+      expect(spy.calls.length).toEqual(2);
+      spy.restore();
+    }
+
+    pipe([
+      gs,
+      through.obj({ highWaterMark: 1 }, waiter),
       concat(assert),
     ], done);
   });
