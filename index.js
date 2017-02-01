@@ -60,11 +60,6 @@ function globStream(globs, opt) {
     throw new Error('Missing positive glob');
   }
 
-  // Only one positive glob no need to aggregate
-  if (positives.length === 1) {
-    return streamFromPositive(positives[0]);
-  }
-
   // Create all individual streams
   var streams = positives.map(streamFromPositive);
 
