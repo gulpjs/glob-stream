@@ -32,7 +32,7 @@ function GlobStream(ourGlob, negatives, opt) {
   // TODO: document that we only accept highWaterMark
   Readable.call(this, {
     objectMode: true,
-    highWaterMark: opt.highWaterMark
+    highWaterMark: opt.highWaterMark || 16
   });
 
   var self = this;
