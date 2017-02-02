@@ -29,30 +29,35 @@ function GlobStream(ourGlob, negatives, opt) {
     return new GlobStream(ourGlob, negatives, opt);
   }
 
-  // TODO: document that we only accept highWaterMark
+  var ourOpt = extend({}, opt);
+
   Readable.call(this, {
     objectMode: true,
-    highWaterMark: opt.highWaterMark || 16
+    highWaterMark: ourOpt.highWaterMark || 16
   });
+
+  // Delete `highWaterMark` after inheriting from Readable
+  delete ourOpt.highWaterMark;
 
   var self = this;
 
   function resolveNegatives(negative) {
-    return toAbsoluteGlob(negative, opt);
+    return toAbsoluteGlob(negative, ourOpt);
   }
-
-  var ourOpt = extend({}, opt);
-  delete ourOpt.root;
-  delete ourOpt.highWaterMark;
 
   var ourNegatives = negatives.map(resolveNegatives);
   ourOpt.ignore = ourNegatives;
 
+  var cwd = ourOpt.cwd;
+  var allowEmpty = ourOpt.allowEmpty || false;
+
   // Extract base path from glob
-  var basePath = ourOpt.base || getBasePath(ourGlob, opt);
+  var basePath = ourOpt.base || getBasePath(ourGlob, ourOpt);
 
   // Remove path relativity to make globs make sense
-  ourGlob = toAbsoluteGlob(ourGlob, opt);
+  ourGlob = toAbsoluteGlob(ourGlob, ourOpt);
+  // Delete `root` after all resolving done
+  delete ourOpt.root;
 
   var globber = new glob.Glob(ourGlob, ourOpt);
   this._globber = globber;
@@ -62,7 +67,7 @@ function GlobStream(ourGlob, negatives, opt) {
   globber.on('match', function(filepath) {
     found = true;
     var obj = {
-      cwd: opt.cwd,
+      cwd: cwd,
       base: basePath,
       path: removeTrailingSeparator(filepath),
     };
@@ -72,11 +77,11 @@ function GlobStream(ourGlob, negatives, opt) {
   });
 
   globber.once('end', function() {
-    if (opt.allowEmpty !== true && !found && globIsSingular(globber)) {
       // TODO: consider adding note about `allowEmpty` option in error
       // TODO: should we really be emitting the event here or should it be passed to destroy
       self.emit('error',
         new Error('File not found with singular glob: ' + ourGlob));
+    if (allowEmpty !== true && !found && globIsSingular(globber)) {
     }
 
     self.push(null);
