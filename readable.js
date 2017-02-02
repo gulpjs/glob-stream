@@ -9,6 +9,9 @@ var globParent = require('glob-parent');
 var toAbsoluteGlob = require('to-absolute-glob');
 var removeTrailingSeparator = require('remove-trailing-separator');
 
+var globErrMessage1 = 'File not found with singular glob: ';
+var globErrMessage2 = ' (if this was purposeful, use `allowEmpty` option)';
+
 function getBasePath(ourGlob, opt) {
   return globParent(toAbsoluteGlob(ourGlob, opt));
 }
@@ -77,11 +80,11 @@ function GlobStream(ourGlob, negatives, opt) {
   });
 
   globber.once('end', function() {
-      // TODO: consider adding note about `allowEmpty` option in error
-      // TODO: should we really be emitting the event here or should it be passed to destroy
-      self.emit('error',
-        new Error('File not found with singular glob: ' + ourGlob));
     if (allowEmpty !== true && !found && globIsSingular(globber)) {
+      var err = new Error(globErrMessage1 + ourGlob + globErrMessage2);
+
+      // TODO: needs test
+      return self.destroy(err);
     }
 
     self.push(null);

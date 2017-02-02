@@ -133,4 +133,22 @@ describe('readable stream', function() {
       concat(assert),
     ], done);
   });
+
+  it('destroys the stream with an error if no match is found', function(done) {
+    var gs = stream('notfound', []);
+
+    var spy = expect.spyOn(gs, 'destroy').andCallThrough();
+
+    function assert(err) {
+      expect(spy).toHaveBeenCalledWith(err);
+      expect(err).toMatch(/File not found with singular glob/);
+      spy.restore();
+      done();
+    }
+
+    pipe([
+      gs,
+      concat(),
+    ], assert);
+  });
 });
