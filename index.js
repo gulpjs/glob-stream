@@ -6,7 +6,7 @@ var pumpify = require('pumpify');
 var isNegatedGlob = require('is-negated-glob');
 var extend = require('extend');
 
-var GlobStream = require('./stream');
+var GlobStream = require('./readable');
 
 function globStream(globs, opt) {
   if (!opt) {

@@ -3,7 +3,7 @@
 var expect = require('expect');
 var miss = require('mississippi');
 
-var stream = require('../stream');
+var stream = require('../readable');
 
 function deWindows(p) {
   return p.replace(/\\/g, '/');
