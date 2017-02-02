@@ -75,13 +75,21 @@ A constructor for a ReadableStream against a single glob string. An array of glo
 
 #### Options
 
+##### `options.allowEmpty`
+
+Whether or not to error upon an empty singular glob.
+
+Type: `Boolean`
+
+Default: `false` (error upon no match)
+
 ##### `options.highWaterMark`
 
 The highWaterMark of the ReadableStream. This is mostly exposed to test backpressure.
 
 Type: `Number`
 
-Default: 16
+Default: `16`
 
 ##### `options.root`
 
@@ -109,7 +117,7 @@ Default: The absolute path segement before a glob starts (see [glob-parent][glob
 
 ##### other
 
-Any glob-related options are documented in [node-glob][node-glob-url]. Those options are forwarded verbatim, with the exception of `root` and `ignore`. `root` pre-resolved and `ignore` is overwritten by the `negativesArray` argument.
+Any glob-related options are documented in [node-glob][node-glob-url]. Those options are forwarded verbatim, with the exception of `root` and `ignore`. `root` is pre-resolved and `ignore` is overwritten by the `negativesArray` argument.
 
 ## License
 
