@@ -5,6 +5,9 @@ var miss = require('mississippi');
 
 var stream = require('../readable');
 
+// Need to wrap this to cause node-glob to emit an error
+var fs = require('fs');
+
 function deWindows(p) {
   return p.replace(/\\/g, '/');
 }
@@ -140,9 +143,35 @@ describe('readable stream', function() {
     var spy = expect.spyOn(gs, 'destroy').andCallThrough();
 
     function assert(err) {
+      spy.restore();
       expect(spy).toHaveBeenCalledWith(err);
       expect(err).toMatch(/File not found with singular glob/);
+      done();
+    }
+
+    pipe([
+      gs,
+      concat(),
+    ], assert);
+  });
+
+  it('destroys the stream if node-glob errors', function(done) {
+    var expectedError = new Error('Stubbed error');
+
+    var gs = stream('./fixtures/**/*.dmc', [], { cwd: dir, silent: true });
+
+    function stubError(dirpath, cb) {
+      cb(expectedError);
+    }
+
+    var spy = expect.spyOn(gs, 'destroy').andCallThrough();
+    var fsStub = expect.spyOn(fs, 'readdir').andCall(stubError);
+
+    function assert(err) {
+      fsStub.restore();
       spy.restore();
+      expect(spy).toHaveBeenCalledWith(err);
+      expect(err).toBe(expectedError);
       done();
     }
 

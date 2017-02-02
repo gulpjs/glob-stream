@@ -83,16 +83,17 @@ function GlobStream(ourGlob, negatives, opt) {
     if (allowEmpty !== true && !found && globIsSingular(globber)) {
       var err = new Error(globErrMessage1 + ourGlob + globErrMessage2);
 
-      // TODO: needs test
       return self.destroy(err);
     }
 
     self.push(null);
   });
 
-  globber.once('error', function() {
-    // TODO: re-emit error on stream (maybe call destroy?)
-  });
+  function onError(err) {
+    self.destroy(err);
+  }
+
+  globber.once('error', onError);
 }
 inherits(GlobStream, Readable);
 
