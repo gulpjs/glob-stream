@@ -42,7 +42,9 @@ function globStream(globs, opt) {
   var positives = [];
   var negatives = [];
 
-  globs.forEach(function(globString, index) {
+  globs.forEach(sortGlobs);
+
+  function sortGlobs(globString, index) {
     if (typeof globString !== 'string') {
       throw new Error('Invalid glob at index ' + index);
     }
@@ -54,7 +56,7 @@ function globStream(globs, opt) {
       index: index,
       glob: glob.pattern,
     });
-  });
+  }
 
   if (positives.length === 0) {
     throw new Error('Missing positive glob');
