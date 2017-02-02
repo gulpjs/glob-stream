@@ -104,7 +104,6 @@ GlobStream.prototype._read = function() {
 GlobStream.prototype.destroy = function(err) {
   var self = this;
 
-  // TODO: figure out proper signature for this and use correctly
   this._globber.abort();
 
   process.nextTick(function() {
