@@ -6,72 +6,29 @@
 
 # glob-stream
 
-[![NPM version][npm-image]][npm-url] [![Downloads][downloads-image]][npm-url] [![Build Status][travis-image]][travis-url] [![Coveralls Status][coveralls-image]][coveralls-url] [![Gitter chat][gitter-image]][gitter-url]
+[![NPM version][npm-image]][npm-url] [![Downloads][downloads-image]][npm-url] [![Build Status][travis-image]][travis-url] [![AppVeyor Build Status][appveyor-image]][appveyor-url] [![Coveralls Status][coveralls-image]][coveralls-url] [![Gitter chat][gitter-image]][gitter-url]
 
-A wrapper around [node-glob][node-glob-url] to make it streamy.
+A [Readable Stream][readable-stream-url] interface over [node-glob][node-glob-url].
 
 ## Usage
 
 ```javascript
 var gs = require('glob-stream');
 
-var stream = gs('./files/**/*.coffee', { /* options */ });
+var readable = gs('./files/**/*.coffee', { /* options */ });
 
-stream.on('data', function(file){
-  // file has path, base, and cwd attrs
-});
+var writable = /* your WriteableStream */
+
+readable.pipe(writable);
 ```
 
-You can pass any combination of globs. One caveat is that you can not only pass a glob negation, you must give it at least one positive glob so it knows where to start. All given must match for the file to be returned.
+You can pass any combination of glob strings. One caveat is that you cannot __only__ pass a negative glob, you must give it at least one positive glob so it knows where to start. If given a non-glob path (also referred to as a singular glob), only one file will be emitted. If given a singular glob and no files match, an error is emitted (see also [`options.allowEmpty`][allow-empty-url]).
 
 ## API
 
-### globStream(globs, options)
+### `globStream(globs, options)`
 
-Returns a stream for multiple globs or filters.
-
-#### Options
-
-- cwd
-  - Default is `process.cwd()`
-- base
-  - Default is everything before a glob starts (see [glob-parent][glob-parent-url])
-- cwdbase
-  - Default is `false`
-  - When true it is the same as saying opt.base = opt.cwd
-- allowEmpty
-  - Default is `false`
-  - If true, won't emit an error when a glob pointing at a single file fails to match
-
-This argument is passed directly to [node-glob][node-glob-url] so check there for more options
-
-#### Glob
-
-```js
-var stream = gs(['./**/*.js', '!./node_modules/**/*']);
-```
-
-Globs are executed in order, so negations should follow positive globs. For example:
-
-```js
-gulp.src(['!b*.js', '*.js'])
-```
-
-would not exclude any files, but this would
-
-```js
-gulp.src(['*.js', '!b*.js'])
-```
-
-## Readable Stream
-
-A ReadableStream interface is available by requiring `glob-stream/readable`.
-
-__Note: This is an advanced feature and you probably don't want to use it.__
-
-### `new ReadableGlobStream(singleGlob, negativesArray, options)`
-
-A constructor for a ReadableStream against a single glob string. An array of globs can be provided as the second argument and will remove matches from the result. Options are passed as the last argument. No argument juggling is provided, so all arguments must be provided (use an empty array if you have no negatives).
+Takes a glob string or an array of glob strings as the first argument and an options object as the second. Returns a stream of objects that contain `cwd`, `base` and `path` properties.
 
 #### Options
 
@@ -83,21 +40,21 @@ Type: `Boolean`
 
 Default: `false` (error upon no match)
 
-##### `options.highWaterMark`
+##### `options.dot`
 
-The highWaterMark of the ReadableStream. This is mostly exposed to test backpressure.
+Whether or not to treat dotfiles as regular files. This is passed through to [node-glob][node-glob-url].
 
-Type: `Number`
+Type: `Boolean`
 
-Default: `16`
+Default: `false`
 
-##### `options.root`
+##### `options.silent`
 
-The root path that the glob is resolved against.
+Whether or not to suppress warnings on stderr from [node-glob][node-glob-url]. This is passed through to [node-glob][node-glob-url].
 
-Type: `String`
+Type: `Boolean`
 
-Default: `undefined` (use the filesystem root)
+Default: `true`
 
 ##### `options.cwd`
 
@@ -107,6 +64,16 @@ Type: `String`
 
 Default: `process.cwd()`
 
+##### `options.root`
+
+The root path that the glob is resolved against.
+
+__Note: This is never passed to [node-glob][node-glob-url] because it is pre-resolved against your paths.__
+
+Type: `String`
+
+Default: `undefined` (use the filesystem root)
+
 ##### `options.base`
 
 The absolute segment of the glob path that isn't a glob. This value is attached to each glob object and is useful for relative pathing.
@@ -115,9 +82,35 @@ Type: `String`
 
 Default: The absolute path segement before a glob starts (see [glob-parent][glob-parent-url])
 
+##### `options.cwdbase`
+
+Whether or not the `cwd` and `base` should be the same.
+
+Type: `Boolean`
+
+Default: `false`
+
 ##### other
 
-Any glob-related options are documented in [node-glob][node-glob-url]. Those options are forwarded verbatim, with the exception of `root` and `ignore`. `root` is pre-resolved and `ignore` is overwritten by the `negativesArray` argument.
+Any glob-related options are documented in [node-glob][node-glob-url]. Those options are forwarded verbatim, with the exception of `root` and `ignore`. `root` is pre-resolved and `ignore` is joined with all negative globs.
+
+#### Globbing & Negation
+
+```js
+var stream = gs(['./**/*.js', '!./node_modules/**/*']);
+```
+
+Globs are executed in order, so negations should follow positive globs. For example:
+
+The following would __not__ exclude any files:
+```js
+gs(['!b*.js', '*.js'])
+```
+
+However, this would exclude all files that started with `b`:
+```js
+gs(['*.js', '!b*.js'])
+```
 
 ## License
 
@@ -125,16 +118,21 @@ MIT
 
 [node-glob-url]: https://github.com/isaacs/node-glob
 [glob-parent-url]: https://github.com/es128/glob-parent
+[allow-empty-url]: #optionsallowempty
+[readable-stream-url]: https://nodejs.org/api/stream.html#stream_readable_streams
 
 [downloads-image]: http://img.shields.io/npm/dm/glob-stream.svg
 [npm-url]: https://www.npmjs.com/package/glob-stream
-[npm-image]: https://badge.fury.io/js/glob-stream.svg
+[npm-image]: http://img.shields.io/npm/v/glob-stream.svg
 
 [travis-url]: https://travis-ci.org/gulpjs/glob-stream
-[travis-image]: https://travis-ci.org/gulpjs/glob-stream.svg?branch=master
+[travis-image]: http://img.shields.io/travis/gulpjs/glob-stream.svg?label=travis-ci
+
+[appveyor-url]: https://ci.appveyor.com/project/gulpjs/glob-stream
+[appveyor-image]: https://img.shields.io/appveyor/ci/gulpjs/glob-stream.svg?label=appveyor
 
 [coveralls-url]: https://coveralls.io/r/gulpjs/glob-stream
-[coveralls-image]: https://coveralls.io/repos/gulpjs/glob-stream/badge.svg
+[coveralls-image]: http://img.shields.io/coveralls/gulpjs/glob-stream/master.svg
 
 [gitter-url]: https://gitter.im/gulpjs/gulp
-[gitter-image]: https://badges.gitter.im/gulpjs/gulp.png
+[gitter-image]: https://badges.gitter.im/gulpjs/gulp.svg
