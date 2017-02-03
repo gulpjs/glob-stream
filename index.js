@@ -19,7 +19,6 @@ function globStream(globs, opt) {
   ourOpt.cwd = typeof ourOpt.cwd === 'string' ? ourOpt.cwd : process.cwd();
   ourOpt.dot = typeof ourOpt.dot === 'boolean' ? ourOpt.dot : false;
   ourOpt.silent = typeof ourOpt.silent === 'boolean' ? ourOpt.silent : true;
-  ourOpt.nonull = typeof ourOpt.nonull === 'boolean' ? ourOpt.nonull : false;
   ourOpt.cwdbase = typeof ourOpt.cwdbase === 'boolean' ? ourOpt.cwdbase : false;
 
   if (ourOpt.cwdbase) {
