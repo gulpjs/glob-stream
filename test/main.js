@@ -1,649 +1,676 @@
 'use strict';
 
-var path = require('path');
-var through2 = require('through2');
 var expect = require('expect');
+var miss = require('mississippi');
+
 var globStream = require('../');
 
 function deWindows(p) {
   return p.replace(/\\/g, '/');
 }
 
+var pipe = miss.pipe;
+var concat = miss.concat;
+var through2 = miss.through;
+
 var dir = deWindows(__dirname);
 
 describe('glob-stream', function() {
-  it('should return a folder name stream from a glob', function(done) {
-    var stream = globStream('./fixtures/whatsgoingon', { cwd: dir });
-    expect(stream).toExist();
-    stream.on('error', function(err) {
-      throw err;
-    });
-    stream.on('data', function(file) {
-      expect(file).toExist();
-      expect(file.path).toExist();
-      expect(file.base).toExist();
-      expect(file.cwd).toExist();
-      expect(String(file.cwd)).toBe(dir);
-      expect(String(file.base)).toBe(dir + '/fixtures');
-      expect(String(file.path)).toBe(dir + '/fixtures/whatsgoingon');
-      done();
-    });
+
+  it('streams a single object when given a directory path', function(done) {
+    var expected = {
+      cwd: dir,
+      base: dir + '/fixtures',
+      path: dir + '/fixtures/whatsgoingon',
+    };
+
+    function assert(pathObjs) {
+      expect(pathObjs.length).toEqual(1);
+      expect(pathObjs[0]).toEqual(expected);
+    }
+
+    pipe([
+      globStream('./fixtures/whatsgoingon', { cwd: dir }),
+      concat(assert),
+    ], done);
   });
 
-  it('should return only folder name stream from a glob', function(done) {
-    var folderCount = 0;
-    var stream = globStream('./fixtures/whatsgoingon/*/', { cwd: dir });
-    stream.on('error', function(err) {
-      throw err;
-    });
-    stream.on('data', function(file) {
-      expect(file).toExist();
-      expect(file.path).toExist();
-      expect(String(file.path)).toBe(dir + '/fixtures/whatsgoingon/hey');
-      folderCount++;
-    });
-    stream.on('end', function() {
-      expect(folderCount).toBe(1);
-      done();
-    });
+  it('streams a single object when given a file path', function(done) {
+    var expected = {
+      cwd: dir,
+      base: dir + '/fixtures',
+      path: dir + '/fixtures/test.coffee',
+    };
+
+    function assert(pathObjs) {
+      expect(pathObjs.length).toEqual(1);
+      expect(pathObjs[0]).toEqual(expected);
+    }
+
+    pipe([
+      globStream('./fixtures/test.coffee', { cwd: dir }),
+      concat(assert),
+    ], done);
   });
 
-  it('should return a file name stream from a glob', function(done) {
-    var stream = globStream('./fixtures/*.coffee', { cwd: dir });
-    expect(stream).toExist();
-    stream.on('error', function(err) {
-      throw err;
-    });
-    stream.on('data', function(file) {
-      expect(file).toExist();
-      expect(file.path).toExist();
-      expect(file.base).toExist();
-      expect(file.cwd).toExist();
-      expect(String(file.cwd)).toBe(dir);
-      expect(String(file.base)).toBe(dir + '/fixtures');
-      expect(String(file.path)).toBe(dir + '/fixtures/test.coffee');
-      done();
-    });
+  it('streams only objects with directory paths when given a directory glob', function(done) {
+    var expected = {
+      cwd: dir,
+      base: dir + '/fixtures/whatsgoingon',
+      path: dir + '/fixtures/whatsgoingon/hey',
+    };
+
+    function assert(pathObjs) {
+      expect(pathObjs.length).toEqual(1);
+      expect(pathObjs[0]).toEqual(expected);
+    }
+
+    pipe([
+      globStream('./fixtures/whatsgoingon/*/', { cwd: dir }),
+      concat(assert),
+    ], done);
   });
 
-  it('should handle ( ) in directory paths', function(done) {
+  it('streams only objects with file paths from a non-directory glob', function(done) {
+    var expected = {
+      cwd: dir,
+      base: dir + '/fixtures',
+      path: dir + '/fixtures/test.coffee',
+    };
+
+    function assert(pathObjs) {
+      expect(pathObjs.length).toEqual(1);
+      expect(pathObjs[0]).toEqual(expected);
+    }
+
+    pipe([
+      globStream('./fixtures/*.coffee', { cwd: dir }),
+      concat(assert),
+    ], done);
+  });
+
+  it('properly handles ( ) in cwd path', function(done) {
     var cwd = dir + '/fixtures/has (parens)';
-    var stream = globStream('*.dmc', { cwd: cwd });
-    expect(stream).toExist();
-    stream.on('error', function(err) {
-      throw err;
-    });
-    stream.on('data', function(file) {
-      expect(file).toExist();
-      expect(file.path).toExist();
-      expect(file.base).toExist();
-      expect(file.cwd).toExist();
-      expect(String(file.cwd)).toBe(cwd);
-      expect(String(file.base)).toBe(cwd);
-      expect(String(file.path)).toBe(cwd + '/test.dmc');
-      done();
-    });
+
+    var expected = {
+      cwd: cwd,
+      base: cwd,
+      path: cwd + '/test.dmc',
+    };
+
+    function assert(pathObjs) {
+      expect(pathObjs.length).toEqual(1);
+      expect(pathObjs[0]).toEqual(expected);
+    }
+
+    pipe([
+      globStream('*.dmc', { cwd: cwd }),
+      concat(assert),
+    ], done);
   });
 
-  it('should set the correct base when ( ) in glob', function(done) {
-    var stream = globStream('./fixtures/has (parens)/*.dmc', { cwd: dir });
-    expect(stream).toExist();
-    stream.on('error', function(err) {
-      throw err;
-    });
-    stream.on('data', function(file) {
-      expect(file).toExist();
-      expect(file.path).toExist();
-      expect(file.base).toExist();
-      expect(file.cwd).toExist();
-      expect(String(file.cwd)).toBe(dir);
-      expect(String(file.base)).toBe(dir + '/fixtures/has (parens)');
-      expect(String(file.path)).toBe(dir + '/fixtures/has (parens)/test.dmc');
-      done();
-    });
+  it('sets the correct base when ( ) in glob', function(done) {
+    var expected = {
+      cwd: dir,
+      base: dir + '/fixtures/has (parens)',
+      path: dir + '/fixtures/has (parens)/test.dmc',
+    };
+
+    function assert(pathObjs) {
+      expect(pathObjs.length).toEqual(1);
+      expect(pathObjs[0]).toEqual(expected);
+    }
+
+    pipe([
+      globStream('./fixtures/has (parens)/*.dmc', { cwd: dir }),
+      concat(assert),
+    ], done);
   });
 
-  it('should find files in paths that contain ( )', function(done) {
-    var stream = globStream('./fixtures/**/*.dmc', { cwd: dir });
-    var files = [];
-    stream.on('error', done);
-    stream.on('data', function(file) {
-      expect(file).toExist();
-      expect(file.path).toExist();
-      files.push(file);
-    });
-    stream.on('end', function() {
-      expect(files.length).toBe(3);
-      expect(path.basename(files[0].path)).toBe('test.dmc');
-      expect(files[0].path).toBe(dir + '/fixtures/has (parens)/test.dmc');
-      expect(path.basename(files[1].path)).toBe('run.dmc');
-      expect(files[1].path).toBe(dir + '/fixtures/stuff/run.dmc');
-      expect(path.basename(files[2].path)).toBe('test.dmc');
-      expect(files[2].path).toBe(dir + '/fixtures/stuff/test.dmc');
-      done();
-    });
+  // TODO: flaky globbing?
+  it('finds files in paths that contain ( ) when they match the glob', function(done) {
+    var expected = [
+      {
+        cwd: dir,
+        base: dir + '/fixtures',
+        path: dir + '/fixtures/has (parens)/test.dmc',
+      },
+      {
+        cwd: dir,
+        base: dir + '/fixtures',
+        path: dir + '/fixtures/stuff/run.dmc',
+      },
+      {
+        cwd: dir,
+        base: dir + '/fixtures',
+        path: dir + '/fixtures/stuff/test.dmc',
+      },
+    ];
+
+    function assert(pathObjs) {
+      expect(pathObjs.length).toEqual(3);
+      expect(pathObjs).toEqual(expected);
+    }
+
+    pipe([
+      globStream('./fixtures/**/*.dmc', { cwd: dir }),
+      concat(assert),
+    ], done);
   });
 
-  it('should return a file name stream from a glob and respect state', function(done) {
-    var stream = globStream('./fixtures/stuff/*.dmc', { cwd: dir });
-    var wrapper = stream.pipe(through2.obj(function(data, enc, cb) {
-      this.pause();
+  // TODO: This doesn't seem to be testing that backpressure is respected
+  it('respects backpressure and stream state', function(done) {
+    var delayStream = through2.obj(function(data, enc, cb) {
+      var self = this;
+
+      self.pause();
       setTimeout(function() {
-        this.push(data);
-        cb();
-        this.resume();
-      }.bind(this), 500);
-    }));
+        cb(null, data);
+        self.resume();
+      }, 500);
+    });
 
-    var count = 0;
+    function assert(pathObjs) {
+      expect(pathObjs.length).toEqual(2);
+    }
 
-    expect(stream).toExist();
-    stream.on('error', function(err) {
-      throw err;
-    });
-    wrapper.on('data', function() {
-      count++;
-    });
-    wrapper.on('end', function() {
-      expect(count).toBe(2);
-      done();
-    });
+    pipe([
+      globStream('./fixtures/stuff/*.dmc', { cwd: dir }),
+      delayStream,
+      concat(assert),
+    ], done);
   });
 
-  it('should return a correctly ordered file name stream for two globs and specified base', function(done) {
-    var baseDir = dir + '/fixtures';
+  it('properly orders objects when given multiple paths and specified base', function(done) {
+    var base = dir + '/fixtures';
 
-    var globArray = [
+    var expected = [
+     {
+        cwd: base,
+        base: base,
+        path: base + '/whatsgoingon/hey/isaidhey/whatsgoingon/test.txt',
+      },
+      {
+        cwd: base,
+        base: base,
+        path: base + '/test.coffee',
+      },
+      {
+        cwd: base,
+        base: base,
+        path: base + '/whatsgoingon/test.js',
+      },
+    ];
+
+    var paths = [
       './whatsgoingon/hey/isaidhey/whatsgoingon/test.txt',
       './test.coffee',
       './whatsgoingon/test.js',
     ];
-    var stream = globStream(globArray, { cwd: baseDir, base: baseDir });
 
-    stream.on('error', done);
-    stream.on('data', function(file) {
-      expect(file).toExist().toExist();
-      expect(file.base).toExist().toExist();
-      expect(file.base).toBe(baseDir);
-    });
-    stream.on('end', function() {
-      done();
-    });
+    function assert(pathObjs) {
+      expect(pathObjs.length).toEqual(3);
+      expect(pathObjs).toEqual(expected);
+    }
+
+    pipe([
+      globStream(paths, { cwd: base, base: base }),
+      concat(assert),
+    ], done);
   });
 
-  it('should return a correctly ordered file name stream for two globs and cwdbase', function(done) {
-    var baseDir = dir + '/fixtures';
+  it('properly orders objects when given multiple paths and cwdbase', function(done) {
+    var base = dir + '/fixtures';
 
-    var globArray = [
+    var expected = [
+     {
+        cwd: base,
+        base: base,
+        path: base + '/whatsgoingon/hey/isaidhey/whatsgoingon/test.txt',
+      },
+      {
+        cwd: base,
+        base: base,
+        path: base + '/test.coffee',
+      },
+      {
+        cwd: base,
+        base: base,
+        path: base + '/whatsgoingon/test.js',
+      },
+    ];
+
+    var paths = [
       './whatsgoingon/hey/isaidhey/whatsgoingon/test.txt',
       './test.coffee',
       './whatsgoingon/test.js',
     ];
-    var stream = globStream(globArray, { cwd: baseDir, cwdbase: true });
 
-    stream.on('error', done);
-    stream.on('data', function(file) {
-      expect(file).toExist();
-      expect(file.base).toExist();
-      expect(file.base).toBe(baseDir);
-    });
-    stream.on('end', function() {
-      done();
-    });
+    function assert(pathObjs) {
+      expect(pathObjs.length).toEqual(3);
+      expect(pathObjs).toEqual(expected);
+    }
+
+    pipe([
+      globStream(paths, { cwd: base, cwdbase: true }),
+      concat(assert),
+    ], done);
   });
 
-  it('should return a file name stream that does not duplicate', function(done) {
-    var stream = globStream(['./fixtures/test.coffee', './fixtures/test.coffee'], { cwd: dir });
-    expect(stream).toExist();
-    stream.on('error', function(err) {
-      throw err;
-    });
-    stream.on('data', function(file) {
-      expect(file).toExist();
-      expect(file.path).toExist();
-      expect(file.base).toExist();
-      expect(file.cwd).toExist();
-      expect(String(file.cwd)).toBe(dir);
-      expect(String(file.base)).toBe(dir + '/fixtures');
-      expect(String(file.path)).toBe(dir + '/fixtures/test.coffee');
-      done();
-    });
+  it('properly orders objects when given multiple globs with globstars', function(done) {
+    var expected = [
+     {
+        cwd: dir,
+        base: dir + '/fixtures',
+        path: dir + '/fixtures/whatsgoingon/hey/isaidhey/whatsgoingon/test.txt',
+      },
+      {
+        cwd: dir,
+        base: dir + '/fixtures',
+        path: dir + '/fixtures/test.coffee',
+      },
+      {
+        cwd: dir,
+        base: dir + '/fixtures',
+        path: dir + '/fixtures/whatsgoingon/test.js',
+      },
+      {
+        cwd: dir,
+        base: dir + '/fixtures',
+        path: dir + '/fixtures/has (parens)/test.dmc',
+      },
+      {
+        cwd: dir,
+        base: dir + '/fixtures',
+        path: dir + '/fixtures/stuff/test.dmc',
+      },
+    ];
+
+    var globs = [
+      './fixtures/**/test.txt',
+      './fixtures/**/test.coffee',
+      './fixtures/**/test.js',
+      './fixtures/**/test.dmc',
+    ];
+
+    function assert(pathObjs) {
+      expect(pathObjs.length).toEqual(5);
+      expect(pathObjs).toEqual(expected);
+    }
+
+    pipe([
+      globStream(globs, { cwd: dir }),
+      concat(assert),
+    ], done);
   });
 
-  it('should return a file name stream that does not duplicate when piped twice', function(done) {
+  it('properly orders objects when given multiple absolute paths and no cwd', function(done) {
+    var expected = [
+     {
+        cwd: process.cwd(),
+        base: dir + '/fixtures/whatsgoingon/hey/isaidhey/whatsgoingon',
+        path: dir + '/fixtures/whatsgoingon/hey/isaidhey/whatsgoingon/test.txt',
+      },
+      {
+        cwd: process.cwd(),
+        base: dir + '/fixtures',
+        path: dir + '/fixtures/test.coffee',
+      },
+      {
+        cwd: process.cwd(),
+        base: dir + '/fixtures/whatsgoingon',
+        path: dir + '/fixtures/whatsgoingon/test.js',
+      },
+    ];
+
+    var paths = [
+      dir + '/fixtures/whatsgoingon/hey/isaidhey/whatsgoingon/test.txt',
+      dir + '/fixtures/test.coffee',
+      dir + '/fixtures/whatsgoingon/test.js',
+    ];
+
+    function assert(pathObjs) {
+      expect(pathObjs.length).toEqual(3);
+      expect(pathObjs).toEqual(expected);
+    }
+
+    pipe([
+      globStream(paths),
+      concat(assert),
+    ], done);
+  });
+
+  it('removes duplicate objects from the stream', function(done) {
+    var expected = {
+      cwd: dir,
+      base: dir + '/fixtures',
+      path: dir + '/fixtures/test.coffee',
+    };
+
+    function assert(pathObjs) {
+      expect(pathObjs.length).toEqual(1);
+      expect(pathObjs[0]).toEqual(expected);
+    }
+
+    pipe([
+      globStream(['./fixtures/test.coffee', './fixtures/*.coffee'], { cwd: dir }),
+      concat(assert),
+    ], done);
+  });
+
+  it('removes duplicates when used as a Transform stream', function(done) {
+    var expected = {
+      cwd: dir,
+      base: dir + '/fixtures',
+      path: dir + '/fixtures/test.coffee',
+    };
+
+    function assert(pathObjs) {
+      expect(pathObjs.length).toEqual(1);
+      expect(pathObjs[0]).toEqual(expected);
+    }
+
+    pipe([
+      globStream('./fixtures/test.coffee', { cwd: dir }),
+      globStream('./fixtures/*.coffee', { cwd: dir }),
+      concat(assert),
+    ], done);
+  });
+
+  it('ignores dotfiles without dot option', function(done) {
+    function assert(pathObjs) {
+      expect(pathObjs.length).toEqual(0);
+    }
+
+    pipe([
+      globStream('./fixtures/*swag', { cwd: dir }),
+      concat(assert),
+    ], done);
+  });
+
+  it('finds dotfiles with dot option', function(done) {
+    var expected = {
+      cwd: dir,
+      base: dir + '/fixtures',
+      path: dir + '/fixtures/.swag',
+    };
+
+    function assert(pathObjs) {
+      expect(pathObjs.length).toEqual(1);
+      expect(pathObjs[0]).toEqual(expected);
+    }
+
+    pipe([
+      globStream('./fixtures/*swag', { cwd: dir, dot: true }),
+      concat(assert),
+    ], done);
+  });
+
+  it('removes dotfiles that match negative globs with dot option', function(done) {
+    function assert(pathObjs) {
+      expect(pathObjs.length).toEqual(0);
+    }
+
+    pipe([
+      globStream(['./fixtures/*swag', '!./fixtures/**'], { cwd: dir, dot: true }),
+      concat(assert),
+    ], done);
+  });
+
+  it('respects pause/resume', function(done) {
+    var expected = {
+      cwd: dir,
+      base: dir + '/fixtures',
+      path: dir + '/fixtures/test.coffee',
+    };
+
+    function assert(pathObjs) {
+      expect(pathObjs.length).toEqual(1);
+      expect(pathObjs[0]).toEqual(expected);
+    }
+
     var stream = globStream('./fixtures/test.coffee', { cwd: dir });
-    var stream2 = globStream('./fixtures/test.coffee', { cwd: dir });
-    stream2.pipe(stream);
-
-    expect(stream).toExist();
-    stream.on('error', function(err) {
-      throw err;
-    });
-    stream.on('data', function(file) {
-      expect(file).toExist();
-      expect(file.path).toExist();
-      expect(file.base).toExist();
-      expect(file.cwd).toExist();
-      expect(String(file.cwd)).toBe(dir);
-      expect(String(file.base)).toBe(dir + '/fixtures');
-      expect(String(file.path)).toBe(dir + '/fixtures/test.coffee');
-      done();
-    });
-  });
-
-
-  it('should return a file name stream from a direct path', function(done) {
-    var stream = globStream('./fixtures/test.coffee', { cwd: dir });
-    expect(stream).toExist();
-    stream.on('error', function(err) {
-      throw err;
-    });
-    stream.on('data', function(file) {
-      expect(file).toExist();
-      expect(file.path).toExist();
-      expect(file.base).toExist();
-      expect(file.cwd).toExist();
-      expect(String(file.cwd)).toBe(dir);
-      expect(String(file.base)).toBe(dir + '/fixtures');
-      expect(String(file.path)).toBe(dir + '/fixtures/test.coffee');
-      done();
-    });
-  });
-
-  it('should not return a file name stream with dotfiles without dot option', function(done) {
-    var stream = globStream('./fixtures/*swag', { cwd: dir });
-    expect(stream).toExist();
-    stream.on('error', function(err) {
-      throw err;
-    });
-    stream.once('data', function() {
-      throw new Error('It matched!');
-    });
-    stream.once('end', done);
-  });
-
-  it('should return a file name stream with dotfiles with dot option', function(done) {
-    var stream = globStream('./fixtures/*swag', { cwd: dir, dot: true });
-    expect(stream).toExist();
-    stream.on('error', function(err) {
-      throw err;
-    });
-    stream.once('data', function(file) {
-      expect(file).toExist();
-      expect(file.path).toExist();
-      expect(file.base).toExist();
-      expect(file.cwd).toExist();
-      expect(String(file.cwd)).toBe(dir);
-      expect(String(file.base)).toBe(dir + '/fixtures');
-      expect(String(file.path)).toBe(dir + '/fixtures/.swag');
-      done();
-    });
-  });
-
-  it('should return a file name stream with dotfiles negated', function(done) {
-    var stream = globStream(['./fixtures/*swag', '!./fixtures/**'], { cwd: dir, dot: true });
-    expect(stream).toExist();
-    stream.on('error', function(err) {
-      throw err;
-    });
-    stream.once('data', function() {
-      throw new Error('It matched!');
-    });
-    stream.once('end', done);
-  });
-
-  it('should return a file name stream from a direct path and pause/buffer items', function(done) {
-    var stream = globStream('./fixtures/test.coffee', { cwd: dir });
-    expect(stream).toExist();
-    stream.on('error', function(err) {
-      throw err;
-    });
-    stream.on('data', function(file) {
-      expect(file).toExist();
-      expect(file.path).toExist();
-      expect(file.base).toExist();
-      expect(file.cwd).toExist();
-      expect(String(file.cwd)).toBe(dir);
-      expect(String(file.base)).toBe(dir + '/fixtures');
-      expect(String(file.path)).toBe(dir + '/fixtures/test.coffee');
-      done();
-    });
     stream.pause();
+
+    pipe([
+      stream,
+      concat(assert),
+    ], done);
+
     setTimeout(function() {
       stream.resume();
     }, 1000);
   });
 
-  it('should not fuck up direct paths with no cwd', function(done) {
-    var stream = globStream(dir + '/fixtures/test.coffee');
-    expect(stream).toExist();
-    stream.on('error', function(err) {
-      throw err;
-    });
-    stream.on('data', function(file) {
-      expect(file).toExist();
-      expect(file.path).toExist();
-      expect(file.base).toExist();
-      expect(file.cwd).toExist();
-      expect(String(file.cwd)).toBe(process.cwd());
-      expect(String(file.base)).toBe(dir + '/fixtures');
-      expect(String(file.path)).toBe(dir + '/fixtures/test.coffee');
-      done();
-    });
+  it('works with direct paths and no cwd', function(done) {
+    var expected = {
+      cwd: process.cwd(),
+      base: dir + '/fixtures',
+      path: dir + '/fixtures/test.coffee',
+    };
+
+    function assert(pathObjs) {
+      expect(pathObjs.length).toEqual(1);
+      expect(pathObjs[0]).toEqual(expected);
+    }
+
+    pipe([
+      globStream(dir + '/fixtures/test.coffee'),
+      concat(assert),
+    ], done);
   });
 
-  it('should return a correctly ordered file name stream for three globs with globstars', function(done) {
-    var globArray = [
-      dir + '/fixtures/**/test.txt',
-      dir + '/fixtures/**/test.coffee',
-      dir + '/fixtures/**/test.js',
-      dir + '/fixtures/**/test.dmc',
+  it('supports negative globs', function(done) {
+    var expected = {
+      cwd: process.cwd(),
+      base: dir + '/fixtures/stuff',
+      path: dir + '/fixtures/stuff/run.dmc',
+    };
+
+    var globs = [
+      dir + '/fixtures/stuff/*.dmc',
+      '!' + dir + '/fixtures/stuff/*test.dmc',
     ];
-    var stream = globStream(globArray, { cwd: dir });
 
-    var files = [];
-    stream.on('error', done);
-    stream.on('data', function(file) {
-      expect(file).toExist();
-      expect(file.path).toExist();
-      files.push(file);
-    });
-    stream.on('end', function() {
-      expect(files.length).toBe(5);
-      expect(path.basename(files[0].path)).toBe('test.txt');
-      expect(path.basename(files[1].path)).toBe('test.coffee');
-      expect(path.basename(files[2].path)).toBe('test.js');
-      expect(path.basename(files[3].path)).toBe('test.dmc');
-      expect(path.basename(files[4].path)).toBe('test.dmc');
-      done();
-    });
+    function assert(pathObjs) {
+      expect(pathObjs.length).toEqual(1);
+      expect(pathObjs[0]).toEqual(expected);
+    }
+
+    pipe([
+      globStream(globs),
+      concat(assert),
+    ], done);
   });
 
-  it('should return a correctly ordered file name stream for two globs', function(done) {
-    var globArray = [
-      dir + '/fixtures/whatsgoingon/hey/isaidhey/whatsgoingon/test.txt',
-      dir + '/fixtures/test.coffee',
-      dir + '/fixtures/whatsgoingon/test.js',
-    ];
-    var stream = globStream(globArray, { cwd: dir });
+  it('supports negative file paths', function(done) {
+    var expected = {
+      cwd: process.cwd(),
+      base: dir + '/fixtures/stuff',
+      path: dir + '/fixtures/stuff/run.dmc',
+    };
 
-    var files = [];
-    stream.on('error', done);
-    stream.on('data', function(file) {
-      expect(file).toExist();
-      expect(file.path).toExist();
-      files.push(file);
-    });
-    stream.on('end', function() {
-      expect(files.length).toBe(3);
-      expect(files[0].path).toBe(globArray[0]);
-      expect(files[1].path).toBe(globArray[1]);
-      expect(files[2].path).toBe(globArray[2]);
-      done();
-    });
-  });
-
-  it('should return a correctly ordered file name stream for two globs and custom base', function(done) {
-      var baseDir = dir + '/fixtures';
-
-      var globArray = [
-        './whatsgoingon/hey/isaidhey/whatsgoingon/test.txt',
-        './test.coffee',
-        './whatsgoingon/test.js',
-      ];
-      var stream = globStream(globArray, { cwd: baseDir, cwdbase: true });
-
-      stream.on('error', done);
-      stream.on('data', function(file) {
-        expect(file).toExist();
-        expect(file.base).toExist();
-        expect(file.base).toBe(baseDir);
-      });
-      stream.on('end', function() {
-        done();
-      });
-    });
-
-  it('should return a input stream for multiple globs, with negation (globbing)', function(done) {
-    var expectedPath = dir + '/fixtures/stuff/run.dmc';
-    var globArray = [
+    var paths = [
       dir + '/fixtures/stuff/*.dmc',
       '!' + dir + '/fixtures/stuff/test.dmc',
     ];
-    var stream = globStream(globArray);
 
-    var files = [];
-    stream.on('error', done);
-    stream.on('data', function(file) {
-      expect(file).toExist();
-      expect(file.path).toExist();
-      files.push(file);
-    });
-    stream.on('end', function() {
-      expect(files.length).toBe(1);
-      expect(files[0].path).toBe(expectedPath);
-      done();
-    });
+    function assert(pathObjs) {
+      expect(pathObjs.length).toEqual(1);
+      expect(pathObjs[0]).toEqual(expected);
+    }
+
+    pipe([
+      globStream(paths),
+      concat(assert),
+    ], done);
   });
 
-  it('should return a input stream for multiple globs, with negation (direct)', function(done) {
-    var expectedPath = dir + '/fixtures/stuff/run.dmc';
-    var globArray = [
-      dir + '/fixtures/stuff/run.dmc',
-      '!' + dir + '/fixtures/stuff/test.dmc',
+  it('does not error when a negative glob removes all matches from a positive glob', function(done) {
+    function assert(pathObjs) {
+      expect(pathObjs.length).toEqual(0);
+    }
+
+    pipe([
+      globStream(['./fixtures/**/*.js', '!./**/test.js'], { cwd: dir }),
+      concat(assert),
+    ], done);
+  });
+
+  it('respects order of negative globs', function(done) {
+    var expected = {
+      cwd: dir,
+      base: dir + '/fixtures/stuff',
+      path: dir + '/fixtures/stuff/run.dmc',
+    };
+
+    var globs = [
+      './fixtures/stuff/*',
+      '!./fixtures/stuff/*.dmc',
+      './fixtures/stuff/run.dmc',
     ];
-    var stream = globStream(globArray);
 
-    var files = [];
-    stream.on('error', done);
-    stream.on('data', function(file) {
-      expect(file).toExist();
-      expect(file.path).toExist();
-      files.push(file);
-    });
-    stream.on('end', function() {
-      expect(files.length).toBe(1);
-      expect(files[0].path).toBe(expectedPath);
-      done();
-    });
+    function assert(pathObjs) {
+      expect(pathObjs.length).toEqual(1);
+      expect(pathObjs[0]).toEqual(expected);
+    }
+
+    pipe([
+      globStream(globs, { cwd: dir }),
+      concat(assert),
+    ], done);
   });
 
-  it('should return a input stream that can be piped to other input streams and remove duplicates', function(done) {
-    var stream = globStream(dir + '/fixtures/stuff/*.dmc');
-    var stream2 = globStream(dir + '/fixtures/stuff/*.dmc');
-    var errored = false;
+  it('ignores leading negative globs', function(done) {
+    var expected = {
+      cwd: dir,
+      base: dir + '/fixtures/stuff',
+      path: dir + '/fixtures/stuff/run.dmc',
+    };
 
-    stream2.pipe(stream);
+    var globs = [
+      '!./fixtures/stuff/*.dmc',
+      './fixtures/stuff/run.dmc',
+    ];
 
-    var files = [];
-    stream.once('error', function(err) {
-      errored = true;
-      done(err);
-    });
-    stream.on('data', function(file) {
-      expect(file).toExist();
-      expect(file.path).toExist();
-      files.push(file);
-    });
-    stream.once('end', function() {
-      if (errored) {
-        return;
-      }
-      expect(files.length).toBe(2);
-      done();
-    });
+    function assert(pathObjs) {
+      expect(pathObjs.length).toEqual(1);
+      expect(pathObjs[0]).toEqual(expected);
+    }
+
+    pipe([
+      globStream(globs, { cwd: dir }),
+      concat(assert),
+    ], done);
   });
 
-  it('should return a file name stream with negation from a glob', function(done) {
-    var stream = globStream(['./fixtures/**/*.js', '!./**/test.js'], { cwd: dir });
-    expect(stream).toExist();
-    stream.on('error', function(err) {
-      throw err;
-    });
-    stream.on('data', function(file) {
-      throw new Error('file ' + file.path + ' should have been negated');
-    });
-    stream.on('end', function() {
-      done();
-    });
-  });
-
-  it('should return a file name stream from two globs and a negative', function(done) {
-    var stream = globStream(['./fixtures/*.coffee', './fixtures/whatsgoingon/*.coffee'], { cwd: dir });
-    expect(stream).toExist();
-    stream.on('error', function(err) {
-      throw err;
-    });
-    stream.on('data', function(file) {
-      expect(file).toExist();
-      expect(file.path).toExist();
-      expect(file.base).toExist();
-      expect(file.cwd).toExist();
-      expect(String(file.cwd)).toBe(dir);
-      expect(String(file.base)).toBe(dir + '/fixtures');
-      expect(String(file.path)).toBe(dir + '/fixtures/test.coffee');
-      done();
-    });
-  });
-
-  it('should respect the globs array order', function(done) {
-    var stream = globStream(['./fixtures/stuff/*', '!./fixtures/stuff/*.dmc', './fixtures/stuff/run.dmc'], { cwd: dir });
-    expect(stream).toExist();
-    stream.on('error', function(err) {
-      throw err;
-    });
-    stream.on('data', function(file) {
-      expect(file).toExist();
-      expect(file.path).toExist();
-      expect(file.base).toExist();
-      expect(file.cwd).toExist();
-      expect(String(file.cwd)).toBe(dir);
-      expect(String(file.base)).toBe(dir + '/fixtures/stuff');
-      expect(String(file.path)).toBe(dir + '/fixtures/stuff/run.dmc');
-      done();
-    });
-  });
-
-  it('should ignore leading negative globs', function(done) {
-    var stream = globStream(['!./fixtures/stuff/*.dmc', './fixtures/stuff/run.dmc'], { cwd: dir });
-    expect(stream).toExist();
-    stream.on('error', function(err) {
-      throw err;
-    });
-    stream.on('data', function(file) {
-      expect(file).toExist();
-      expect(file.path).toExist();
-      expect(file.base).toExist();
-      expect(file.cwd).toExist();
-      expect(String(file.cwd)).toBe(dir);
-      expect(String(file.base)).toBe(dir + '/fixtures/stuff');
-      expect(String(file.path)).toBe(dir + '/fixtures/stuff/run.dmc');
-      done();
-    });
-  });
-
-  it('should throw on invalid glob argument', function(done) {
+  it('throws on invalid glob argument', function(done) {
     expect(globStream.bind(globStream, 42, { cwd: dir })).toThrow(/Invalid glob .* 0/);
     expect(globStream.bind(globStream, ['.', 42], { cwd: dir })).toThrow(/Invalid glob .* 1/);
     done();
   });
 
-  it('should throw on missing positive glob', function(done) {
+  it('throws on missing positive glob', function(done) {
     expect(globStream.bind(globStream, '!c', { cwd: dir })).toThrow(/Missing positive glob/);
     expect(globStream.bind(globStream, ['!a', '!b'], { cwd: dir })).toThrow(/Missing positive glob/);
     done();
   });
 
-  it('should emit error on singular glob when file not found', function(done) {
-    var stream = globStream('notfound');
-    expect(stream).toExist();
-    stream.on('error', function(err) {
+  it('emits an error when file not found on singular path', function(done) {
+    function assert(err) {
       expect(err).toMatch(/File not found with singular glob/);
       done();
-    });
+    }
+
+    pipe([
+      globStream('notfound'),
+      concat(),
+    ], assert);
   });
 
-  it('should emit error when a glob in multiple globs not found', function(done) {
-    var stream = globStream(['notfound', './fixtures/whatsgoingon'], { cwd: dir });
-    expect(stream).toExist();
-    stream.on('error', function(err) {
+  it('does not emit an error when file not found on glob containing {}', function(done) {
+    function assert(err) {
+      expect(err).toNotExist();
+      done();
+    }
+
+    pipe([
+      globStream('notfound{a,b}'),
+      concat(),
+    ], assert);
+  });
+
+  it('does not emit an error on singular path when allowEmpty is true', function(done) {
+    function assert(err) {
+      expect(err).toNotExist();
+      done();
+    }
+
+    pipe([
+      globStream('notfound', { allowEmpty: true }),
+      concat(),
+    ], assert);
+  });
+
+  it('emits an error when a singular path in multiple paths not found', function(done) {
+    function assert(err) {
       expect(err).toMatch(/File not found with singular glob/);
       done();
-    });
+    }
+
+    pipe([
+      globStream(['notfound', './fixtures/whatsgoingon'], { cwd: dir }),
+      concat(),
+    ], assert);
   });
 
-  it('should resolve relative paths when root option is given', function(done) {
-    var stream = globStream('./fixtures/test.coffee', { cwd: dir, root: dir + '/fixtures' });
-    expect(stream).toExist();
-    stream.on('error', function(err) {
-      throw err;
-    });
-    stream.on('data', function(file) {
-      expect(file).toExist();
-      expect(file.path).toExist();
-      expect(file.base).toExist();
-      expect(file.cwd).toExist();
-      expect(String(file.cwd)).toBe(dir);
-      expect(String(file.base)).toBe(dir + '/fixtures');
-      expect(String(file.path)).toBe(dir + '/fixtures/test.coffee');
+  it('emits an error when a singular path in multiple paths/globs not found', function(done) {
+    function assert(err) {
+      expect(err).toMatch(/File not found with singular glob/);
       done();
-    });
+    }
+
+    pipe([
+      globStream(['notfound', './fixtures/*.coffee'], { cwd: dir }),
+      concat(),
+    ], assert);
   });
 
-  it('should resolve absolute paths when root option is given', function(done) {
-    var stream = globStream('/test.coffee', { cwd: dir, root: dir + '/fixtures' });
-    expect(stream).toExist();
-    stream.on('error', function(err) {
-      throw err;
-    });
-    stream.on('data', function(file) {
-      expect(file).toExist();
-      expect(file.path).toExist();
-      expect(file.base).toExist();
-      expect(file.cwd).toExist();
-      expect(String(file.cwd)).toBe(dir);
-      expect(String(file.base)).toBe(dir + '/fixtures');
-      expect(String(file.path)).toBe(dir + '/fixtures/test.coffee');
-      done();
-    });
+  it('resolves absolute paths when root option is given', function(done) {
+    var expected = {
+      cwd: process.cwd(),
+      base: dir + '/fixtures',
+      path: dir + '/fixtures/test.coffee',
+    };
+
+    function assert(pathObjs) {
+      expect(pathObjs.length).toEqual(1);
+      expect(pathObjs[0]).toEqual(expected);
+    }
+
+    pipe([
+      globStream('/test.coffee', { root: dir + '/fixtures' }),
+      concat(assert),
+    ], done);
   });
 
-  it('should not emit error on glob containing {} when not found', function(done) {
-    var stream = globStream('notfound{a,b}');
-    expect(stream).toExist();
-    stream.on('error', function() {
-      throw new Error('Error was emitted');
-    });
-
-    stream.resume();
-    stream.once('end', done);
-  });
-
-  it('should not emit error on singular glob when allowEmpty is true', function(done) {
-    var stream = globStream('notfound', { allowEmpty: true });
-    expect(stream).toExist();
-    stream.on('error', function() {
-      throw new Error('Error was emitted');
-    });
-
-    stream.resume();
-    stream.once('end', done);
-  });
-
-  it('should pass options to through2', function(done) {
-    var stream = globStream(['./fixtures/stuff/run.dmc'], { cwd: dir, objectMode: false });
-    expect(stream).toExist();
-    stream.on('error', function(err) {
+  // TODO: remove this feature?
+  it('passes options to through2', function(done) {
+    function assert(err) {
       expect(err).toMatch(/Invalid non-string\/buffer chunk/);
       done();
-    });
+    }
+
+    pipe([
+      globStream('./fixtures/stuff/run.dmc', { cwd: dir, objectMode: false }),
+      concat(),
+    ], assert);
   });
 });
 
 describe('options', function() {
 
   it('avoids mutation of options', function(done) {
-
     var defaultedOpts = {
       cwd: process.cwd(),
       dot: false,
@@ -655,78 +682,109 @@ describe('options', function() {
     var opts = {};
 
     var stream = globStream(dir + '/fixtures/stuff/run.dmc', opts);
-    expect(Object.keys(opts).length).toBe(0);
-    expect(opts).toNotBe(defaultedOpts);
-    stream.on('data', function() {});
-    stream.on('end', done);
+    expect(Object.keys(opts).length).toEqual(0);
+    expect(opts).toNotEqual(defaultedOpts);
+
+    pipe([
+      stream,
+      concat(),
+    ], done);
+  });
+
+  describe('silent', function() {
+
+    it('accepts a boolean', function(done) {
+      pipe([
+        globStream(dir + '/fixtures/stuff/run.dmc', { silent: false }),
+        concat(),
+      ], done);
+    });
+  });
+
+  describe('nonull', function() {
+
+    it('accepts a boolean', function(done) {
+      pipe([
+        globStream('notfound{a,b}', { nonull: true }),
+        concat(),
+      ], done);
+    });
+
+    it('does not have any effect on our results', function(done) {
+      function assert(pathObjs) {
+        expect(pathObjs.length).toEqual(0);
+      }
+
+      pipe([
+        globStream('notfound{a,b}', { nonull: true }),
+        concat(assert),
+      ], done);
+    });
   });
 
   describe('ignore', function() {
 
     it('accepts a string (in addition to array)', function(done) {
-      var expectedPath = dir + '/fixtures/stuff/run.dmc';
-      var glob = dir + '/fixtures/stuff/*.dmc';
-      var stream = globStream(glob, { cwd: dir, ignore: './fixtures/stuff/test.dmc' });
+      var expected = {
+        cwd: dir,
+        base: dir + '/fixtures/stuff',
+        path: dir + '/fixtures/stuff/run.dmc',
+      };
 
-      var files = [];
-      stream.on('error', done);
-      stream.on('data', function(file) {
-        expect(file).toExist();
-        expect(file.path).toExist();
-        files.push(file);
-      });
-      stream.on('end', function() {
-        expect(files.length).toBe(1);
-        expect(files[0].path).toBe(expectedPath);
-        done();
-      });
+      function assert(pathObjs) {
+        expect(pathObjs.length).toEqual(1);
+        expect(pathObjs[0]).toEqual(expected);
+      }
+
+      pipe([
+        globStream('./fixtures/stuff/*.dmc', { cwd: dir, ignore: './fixtures/stuff/test.dmc' }),
+        concat(assert),
+      ], done);
     });
 
-    it('should support the ignore option instead of negation', function(done) {
-      var expectedPath = dir + '/fixtures/stuff/run.dmc';
-      var glob = dir + '/fixtures/stuff/*.dmc';
-      var stream = globStream(glob, { cwd: dir, ignore: ['./fixtures/stuff/test.dmc'] });
+    it('supports the ignore option instead of negation', function(done) {
+      var expected = {
+        cwd: dir,
+        base: dir + '/fixtures/stuff',
+        path: dir + '/fixtures/stuff/run.dmc',
+      };
 
-      var files = [];
-      stream.on('error', done);
-      stream.on('data', function(file) {
-        expect(file).toExist();
-        expect(file.path).toExist();
-        files.push(file);
-      });
-      stream.on('end', function() {
-        expect(files.length).toBe(1);
-        expect(files[0].path).toBe(expectedPath);
-        done();
-      });
+      function assert(pathObjs) {
+        expect(pathObjs.length).toEqual(1);
+        expect(pathObjs[0]).toEqual(expected);
+      }
+
+      pipe([
+        globStream('./fixtures/stuff/*.dmc', { cwd: dir, ignore: ['./fixtures/stuff/test.dmc'] }),
+        concat(assert),
+      ], done);
     });
 
-    it('should support the ignore option with dot option', function(done) {
-      var stream = globStream('./fixtures/*swag', { cwd: dir, dot: true, ignore: ['./fixtures/**'] });
-      expect(stream).toExist();
-      stream.on('error', function(err) {
-        throw err;
-      });
-      stream.once('data', function(file) {
-        throw new Error('file ' + file.path + ' should have been negated');
-      });
-      stream.once('end', done);
+    it('supports the ignore option with dot option', function(done) {
+      function assert(pathObjs) {
+        expect(pathObjs.length).toEqual(0);
+      }
+
+      pipe([
+        globStream('./fixtures/*swag', { cwd: dir, dot: true, ignore: ['./fixtures/**'] }),
+        concat(assert),
+      ], done);
     });
 
-    it('should merge ignore option and negative globs', function(done) {
-      var globArray = [
+    it('merges ignore option and negative globs', function(done) {
+      var globs = [
         './fixtures/stuff/*.dmc',
         '!./fixtures/stuff/test.dmc',
       ];
-      var stream = globStream(globArray, { cwd: dir, ignore: ['./fixtures/stuff/run.dmc'] });
-      expect(stream).toExist();
-      stream.on('error', function(err) {
-        throw err;
-      });
-      stream.once('data', function(file) {
-        throw new Error('file ' + file.path + ' should have been negated');
-      });
-      stream.once('end', done);
+
+      function assert(pathObjs) {
+        expect(pathObjs.length).toEqual(0);
+      }
+
+      pipe([
+        globStream(globs, { cwd: dir, ignore: ['./fixtures/stuff/run.dmc'] }),
+        concat(assert),
+      ], done);
     });
   });
 });
