@@ -358,25 +358,6 @@ describe('glob-stream', function() {
     ], done);
   });
 
-  it('removes duplicates when used as a Transform stream', function(done) {
-    var expected = {
-      cwd: dir,
-      base: dir + '/fixtures',
-      path: dir + '/fixtures/test.coffee',
-    };
-
-    function assert(pathObjs) {
-      expect(pathObjs.length).toEqual(1);
-      expect(pathObjs[0]).toEqual(expected);
-    }
-
-    pipe([
-      globStream('./fixtures/test.coffee', { cwd: dir }),
-      globStream('./fixtures/*.coffee', { cwd: dir }),
-      concat(assert),
-    ], done);
-  });
-
   it('ignores dotfiles without dot option', function(done) {
     function assert(pathObjs) {
       expect(pathObjs.length).toEqual(0);
@@ -652,19 +633,6 @@ describe('glob-stream', function() {
       globStream('/test.coffee', { root: dir + '/fixtures' }),
       concat(assert),
     ], done);
-  });
-
-  // TODO: remove this feature?
-  it('passes options to through2', function(done) {
-    function assert(err) {
-      expect(err).toMatch(/Invalid non-string\/buffer chunk/);
-      done();
-    }
-
-    pipe([
-      globStream('./fixtures/stuff/run.dmc', { cwd: dir, objectMode: false }),
-      concat(),
-    ], assert);
   });
 });
 
