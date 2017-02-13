@@ -30,7 +30,7 @@ You can pass any combination of globs. One caveat is that you can not only pass 
 
 Returns a stream for multiple globs or filters.
 
-### Options
+#### Options
 
 - cwd
   - Default is `process.cwd()`
@@ -42,11 +42,10 @@ Returns a stream for multiple globs or filters.
 - allowEmpty
   - Default is `false`
   - If true, won't emit an error when a glob pointing at a single file fails to match
-- Any through2 related options are documented in [through2][through2-url]
 
 This argument is passed directly to [node-glob][node-glob-url] so check there for more options
 
-### Glob
+#### Glob
 
 ```js
 var stream = gs(['./**/*.js', '!./node_modules/**/*']);
@@ -64,16 +63,66 @@ would not exclude any files, but this would
 gulp.src(['*.js', '!b*.js'])
 ```
 
-## Related
+## Readable Stream
 
-- [globby][globby-url] - Non-streaming `glob` wrapper with support for multiple patterns.
+A ReadableStream interface is available by requiring `glob-stream/readable`.
+
+__Note: This is an advanced feature and you probably don't want to use it.__
+
+### `new ReadableGlobStream(singleGlob, negativesArray, options)`
+
+A constructor for a ReadableStream against a single glob string. An array of globs can be provided as the second argument and will remove matches from the result. Options are passed as the last argument. No argument juggling is provided, so all arguments must be provided (use an empty array if you have no negatives).
+
+#### Options
+
+##### `options.allowEmpty`
+
+Whether or not to error upon an empty singular glob.
+
+Type: `Boolean`
+
+Default: `false` (error upon no match)
+
+##### `options.highWaterMark`
+
+The highWaterMark of the ReadableStream. This is mostly exposed to test backpressure.
+
+Type: `Number`
+
+Default: `16`
+
+##### `options.root`
+
+The root path that the glob is resolved against.
+
+Type: `String`
+
+Default: `undefined` (use the filesystem root)
+
+##### `options.cwd`
+
+The current working directory that the glob is resolved against.
+
+Type: `String`
+
+Default: `process.cwd()`
+
+##### `options.base`
+
+The absolute segment of the glob path that isn't a glob. This value is attached to each glob object and is useful for relative pathing.
+
+Type: `String`
+
+Default: The absolute path segement before a glob starts (see [glob-parent][glob-parent-url])
+
+##### other
+
+Any glob-related options are documented in [node-glob][node-glob-url]. Those options are forwarded verbatim, with the exception of `root` and `ignore`. `root` is pre-resolved and `ignore` is overwritten by the `negativesArray` argument.
 
 ## License
 
 MIT
 
-[globby-url]: https://github.com/sindresorhus/globby
-[through2-url]: https://github.com/rvagg/through2
 [node-glob-url]: https://github.com/isaacs/node-glob
 [glob-parent-url]: https://github.com/es128/glob-parent
 
