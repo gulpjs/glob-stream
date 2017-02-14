@@ -36,7 +36,7 @@ function GlobStream(ourGlob, negatives, opt) {
 
   Readable.call(this, {
     objectMode: true,
-    highWaterMark: ourOpt.highWaterMark || 16
+    highWaterMark: ourOpt.highWaterMark || 16,
   });
 
   // Delete `highWaterMark` after inheriting from Readable

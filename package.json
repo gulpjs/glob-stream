@@ -1,13 +1,12 @@
 {
   "name": "glob-stream",
   "version": "5.3.5",
-  "description": "A wrapper around node-glob to make it streamy",
+  "description": "A Readable Stream interface over node-glob.",
   "author": "Gulp Team <team@gulpjs.com> (http://gulpjs.com/)",
   "contributors": [
     "Eric Schoffstall <yo@contra.io>",
     "Blaine Bublitz <blaine.bublitz@gmail.com>"
   ],
-  "homepage": "http://gulpjs.com",
   "repository": "gulpjs/glob-stream",
   "license": "MIT",
   "engines": {
@@ -15,10 +14,12 @@
   },
   "main": "index.js",
   "files": [
-    "index.js"
+    "index.js",
+    "readable.js",
+    "LICENSE"
   ],
   "scripts": {
-    "lint": "eslint . && jscs index.js test/",
+    "lint": "eslint . && jscs index.js readable.js test/",
     "pretest": "npm run lint",
     "test": "mocha --async-only",
     "cover": "istanbul cover _mocha --report lcovonly",
@@ -50,6 +51,9 @@
   "keywords": [
     "glob",
     "stream",
-    "gulp"
+    "gulp",
+    "readable",
+    "fs",
+    "files"
   ]
 }
