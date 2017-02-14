@@ -104,7 +104,9 @@ describe('readable stream', function() {
 
     function assert(pathObjs) {
       expect(pathObjs.length).toBe(3);
-      expect(pathObjs).toEqual(expected);
+      expect(pathObjs).toInclude(expected[0]);
+      expect(pathObjs).toInclude(expected[1]);
+      expect(pathObjs).toInclude(expected[2]);
     }
 
     pipe([
