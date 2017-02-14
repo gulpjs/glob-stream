@@ -127,7 +127,6 @@ describe('glob-stream', function() {
     ], done);
   });
 
-  // TODO: flaky globbing?
   it('finds files in paths that contain ( ) when they match the glob', function(done) {
     var expected = [
       {
@@ -149,7 +148,9 @@ describe('glob-stream', function() {
 
     function assert(pathObjs) {
       expect(pathObjs.length).toEqual(3);
-      expect(pathObjs).toEqual(expected);
+      expect(pathObjs).toInclude(expected[0]);
+      expect(pathObjs).toInclude(expected[1]);
+      expect(pathObjs).toInclude(expected[2]);
     }
 
     pipe([
