@@ -132,7 +132,7 @@ MIT
 [appveyor-image]: https://img.shields.io/appveyor/ci/gulpjs/glob-stream.svg?label=appveyor
 
 [coveralls-url]: https://coveralls.io/r/gulpjs/glob-stream
-[coveralls-image]: http://img.shields.io/coveralls/gulpjs/glob-stream/master.svg
+[coveralls-image]: http://img.shields.io/coveralls/gulpjs/glob-stream.svg
 
 [gitter-url]: https://gitter.im/gulpjs/gulp
 [gitter-image]: https://badges.gitter.im/gulpjs/gulp.svg
