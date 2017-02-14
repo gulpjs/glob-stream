@@ -637,6 +637,153 @@ describe('glob-stream', function() {
   });
 });
 
+describe('edge cases', function() {
+
+  it('should handle pattern starting with paren', function(done) {
+    var cwd = dir + '/fixtures/edge';
+    var expected = {
+      cwd: cwd,
+      base: cwd,
+      path: cwd + '/(case)',
+    };
+
+    function assert(pathObjs) {
+      expect(pathObjs.length).toEqual(1);
+      expect(pathObjs[0]).toEqual(expected);
+    }
+
+    pipe([
+      globStream('(case)', { cwd: cwd }),
+      concat(assert),
+    ], done);
+  });
+
+  it('should handle pattern starting with exclam', function(done) {
+    var cwd = dir + '/fixtures/edge';
+    var expected = {
+      cwd: cwd,
+      base: cwd,
+      path: cwd + '/!case',
+    };
+
+    function assert(pathObjs) {
+      expect(pathObjs.length).toEqual(1);
+      expect(pathObjs[0]).toEqual(expected);
+    }
+
+    pipe([
+      globStream('\\!case', { cwd: cwd }),
+      concat(assert),
+    ], done);
+  });
+
+  it('should handle pattern starting with exclam and paren', function(done) {
+    var cwd = dir + '/fixtures/edge';
+    var expected = {
+      cwd: cwd,
+      base: cwd,
+      path: cwd + '/!(case)',
+    };
+
+    function assert(pathObjs) {
+      expect(pathObjs.length).toEqual(1);
+      expect(pathObjs[0]).toEqual(expected);
+    }
+
+    pipe([
+      globStream('\\!(case)', { cwd: cwd }),
+      concat(assert),
+    ], done);
+  });
+
+  it('should handle pattern that is a negative extglob', function(done) {
+    var cwd = dir + '/fixtures/edge';
+
+    function assert(pathObjs) {
+      expect(pathObjs.length).toEqual(3);
+      pathObjs = pathObjs.filter(function(pathObj) {
+        return pathObj.path.substr(cwd.length) === '/case';
+      });
+      expect(pathObjs.length).toEqual(0);
+    }
+
+    pipe([
+      globStream('!(case)', { cwd: cwd }),
+      concat(assert),
+    ], done);
+  });
+
+  it('should ignore pattern starting with paren', function(done) {
+    var cwd = dir + '/fixtures/edge';
+
+    function assert(pathObjs) {
+      expect(pathObjs.length).toEqual(3);
+      pathObjs = pathObjs.filter(function(pathObj) {
+        return pathObj.path.substr(cwd.length) === '/(case)';
+      });
+      expect(pathObjs.length).toEqual(0);
+    }
+
+    pipe([
+      globStream(['*', '!\\(case)'], { cwd: cwd }),
+      concat(assert),
+    ], done);
+  });
+
+  it('should ignore pattern starting with exclam', function(done) {
+    var cwd = dir + '/fixtures/edge';
+
+    function assert(pathObjs) {
+      expect(pathObjs.length).toEqual(3);
+      pathObjs = pathObjs.filter(function(pathObj) {
+        return pathObj.path.substr(cwd.length) === '/!case';
+      });
+      expect(pathObjs.length).toEqual(0);
+    }
+
+    pipe([
+      globStream(['*', '!\\!case'], { cwd: cwd }),
+      concat(assert),
+    ], done);
+  });
+
+  it('should ignore pattern starting with exclam and paren', function(done) {
+    var cwd = dir + '/fixtures/edge';
+
+    function assert(pathObjs) {
+      expect(pathObjs.length).toEqual(3);
+      pathObjs = pathObjs.filter(function(pathObj) {
+        return pathObj.path.substr(cwd.length) === '/!(case)';
+      });
+      expect(pathObjs.length).toEqual(0);
+    }
+
+    pipe([
+      globStream(['*', '!\\!(case)'], { cwd: cwd }),
+      concat(assert),
+    ], done);
+  });
+
+  it('should ignore pattern that is a negative extglob', function(done) {
+    var cwd = dir + '/fixtures/edge';
+    var expected = {
+      cwd: cwd,
+      base: cwd,
+      path: cwd + '/case',
+    };
+
+    function assert(pathObjs) {
+      expect(pathObjs.length).toEqual(1);
+      expect(pathObjs[0]).toEqual(expected);
+    }
+
+    pipe([
+      globStream(['*', '!!(case)'], { cwd: cwd }),
+      concat(assert),
+    ], done);
+  });
+});
+
 describe('options', function() {
 
   it('avoids mutation of options', function(done) {
