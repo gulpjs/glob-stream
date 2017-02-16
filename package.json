@@ -7,8 +7,8 @@
   "author": "Fractal <contact@wearefractal.com> (http://wearefractal.com/)",
   "main": "./index.js",
   "dependencies": {
-    "glob": "*",
-    "event-stream": "*",
+    "glob": "~3.2.7",
+    "event-stream": "~3.0.18",
     "minimatch": "~0.2.12"
   },
   "devDependencies": {
