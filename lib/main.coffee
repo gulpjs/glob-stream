@@ -15,9 +15,9 @@ module.exports =
       stream.emit 'error', e
 
     globber.on 'end', ->
-      stream.emit 'end'
+      stream.end()
 
     globber.on 'match', (filename) ->
-      stream.emit 'data', filename
+      stream.write filename
 
     return stream
