@@ -1,7 +1,7 @@
 {
   "name": "glob-stream",
   "description": "File system globs as a stream",
-  "version": "4.0.1",
+  "version": "4.1.1",
   "repository": "wearefractal/glob-stream",
   "author": "Fractal <contact@wearefractal.com> (http://wearefractal.com/)",
   "files": [
