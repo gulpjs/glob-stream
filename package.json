@@ -12,7 +12,7 @@
     "minimatch": "^2.0.1",
     "ordered-read-streams": "^0.1.0",
     "glob2base": "^0.0.12",
-    "unique-stream": "^1.0.0",
+    "unique-stream": "^2.0.2",
     "through2": "^0.6.1"
   },
   "devDependencies": {
