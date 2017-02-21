@@ -13,13 +13,13 @@
   "dependencies": {
     "glob": "^4.0.0",
     "minimatch": "^1.0.0",
-    "ordered-read-streams": "0.0.8",
+    "ordered-read-streams": "^0.1.0",
     "glob2base": "^0.0.11",
     "unique-stream": "^1.0.0",
     "through2": "^0.6.1"
   },
   "devDependencies": {
-    "mocha": "^1.17.0",
+    "mocha": "^2.0.0",
     "should": "^4.0.0",
     "mocha-lcov-reporter": "0.0.1",
     "coveralls": "^2.6.1",
