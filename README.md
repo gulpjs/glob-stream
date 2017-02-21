@@ -42,6 +42,9 @@ You can pass any combination of globs. One caveat is that you can not only pass 
 - cwdbase
   - Default is `false`
   - When true it is the same as saying opt.base = opt.cwd
+- allowEmpty
+  - Default is `false`
+  - If true, won't emit an error when a glob pointing at a single file fails to match
 
 This argument is passed directly to [node-glob](https://github.com/isaacs/node-glob) so check there for more options
 

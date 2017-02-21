@@ -8,9 +8,9 @@
     "index.js"
   ],
   "dependencies": {
-    "glob": "^4.3.1",
+    "glob": "^5.0.3",
     "minimatch": "^2.0.1",
-    "ordered-read-streams": "^0.1.0",
+    "ordered-read-streams": "^0.2.0",
     "glob2base": "^0.0.12",
     "unique-stream": "^2.0.2",
     "through2": "^0.6.1"
@@ -21,9 +21,9 @@
     "istanbul-coveralls": "^1.0.1",
     "jshint": "^2.5.10",
     "mocha": "^2.0.0",
-    "mocha-lcov-reporter": "0.0.1",
+    "mocha-lcov-reporter": "0.0.2",
     "rimraf": "^2.2.5",
-    "should": "^4.3.0"
+    "should": "^5.2.0"
   },
   "scripts": {
     "test": "jshint && mocha",
