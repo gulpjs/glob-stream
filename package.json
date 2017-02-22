@@ -1,6 +1,6 @@
 {
   "name": "glob-stream",
-  "version": "5.3.5",
+  "version": "6.0.0",
   "description": "A Readable Stream interface over node-glob.",
   "author": "Gulp Team <team@gulpjs.com> (http://gulpjs.com/)",
   "contributors": [
