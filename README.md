@@ -90,6 +90,14 @@ Type: `Boolean`
 
 Default: `false`
 
+##### `options.uniqueBy`
+
+Filters stream to remove duplicates based on the string property name or the result of function. When using a function, the function receives the streamed data (objects containing `cwd`, `base`, `path` properties) to compare against.
+
+Type: `String` or `Function`
+
+Default: `'path'`
+
 ##### other
 
 Any glob-related options are documented in [node-glob][node-glob-url]. Those options are forwarded verbatim, with the exception of `root` and `ignore`. `root` is pre-resolved and `ignore` is joined with all negative globs.
