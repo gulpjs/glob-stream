@@ -90,6 +90,14 @@ Type: `Boolean`
 
 Default: `false`
 
+##### `options.unique`
+
+Filters stream to remove duplicates based on `unique`.
+
+Type: `String` or `Function`
+
+Default: `'path'`
+
 ##### other
 
 Any glob-related options are documented in [node-glob][node-glob-url]. Those options are forwarded verbatim, with the exception of `root` and `ignore`. `root` is pre-resolved and `ignore` is joined with all negative globs.
