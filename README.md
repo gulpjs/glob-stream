@@ -90,9 +90,9 @@ Type: `Boolean`
 
 Default: `false`
 
-##### `options.unique`
+##### `options.uniqueBy`
 
-Filters stream to remove duplicates based on `unique`.
+Filters stream to remove duplicates based on the string property name or the result of function. When using a function, the function receives the streamed data (objects containing `cwd`, `base`, `path` properties) to compare against.
 
 Type: `String` or `Function`
 

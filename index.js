@@ -20,8 +20,8 @@ function globStream(globs, opt) {
   ourOpt.dot = typeof ourOpt.dot === 'boolean' ? ourOpt.dot : false;
   ourOpt.silent = typeof ourOpt.silent === 'boolean' ? ourOpt.silent : true;
   ourOpt.cwdbase = typeof ourOpt.cwdbase === 'boolean' ? ourOpt.cwdbase : false;
-  ourOpt.unique =  typeof ourOpt.unique == 'string' ||
-                    typeof ourOpt.unique == 'function' ? ourOpt.unique : 'path';
+  ourOpt.uniqueBy =  typeof ourOpt.uniqueBy === 'string' ||
+                    typeof ourOpt.uniqueBy === 'function' ? ourOpt.uniqueBy : 'path';
 
   if (ourOpt.cwdbase) {
     ourOpt.base = ourOpt.cwd;
@@ -68,7 +68,7 @@ function globStream(globs, opt) {
 
   // Then just pipe them to a single unique stream and return it
   var aggregate = new Combine(streams);
-  var uniqueStream = unique(ourOpt.unique);
+  var uniqueStream = unique(ourOpt.uniqueBy);
 
   return pumpify.obj(aggregate, uniqueStream);
 

@@ -359,7 +359,7 @@ describe('glob-stream', function() {
     ], done);
   });
 
-  it('removes duplicate objects from the stream using custom filter', function(done) {
+  it('removes duplicate objects from the stream using custom string filter', function(done) {
     var expected = {
       cwd: dir,
       base: dir + '/fixtures/stuff',
@@ -372,7 +372,37 @@ describe('glob-stream', function() {
     }
 
     pipe([
-      globStream(['./fixtures/stuff/run.dmc', './fixtures/stuff/test.dmc'], { cwd: dir, unique: 'base' }),
+      globStream(['./fixtures/stuff/run.dmc', './fixtures/stuff/test.dmc'], { cwd: dir, uniqueBy: 'base' }),
+      concat(assert),
+    ], done);
+  });
+
+  it('removes duplicate objects from the stream using custom function filter', function(done) {
+    var expected = [
+      {
+        cwd: dir,
+        base: dir + '/fixtures/stuff',
+        path: dir + '/fixtures/stuff/run.dmc',
+      },
+      {
+        cwd: dir,
+        base: dir + '/fixtures/stuff',
+        path: dir + '/fixtures/stuff/test.dmc',
+      },
+    ];
+
+    var uniqueBy = function(data) {
+      return data.path;
+    };
+
+    function assert(pathObjs) {
+      expect(pathObjs.length).toEqual(2);
+      expect(pathObjs).toInclude(expected[0]);
+      expect(pathObjs).toInclude(expected[1]);
+    }
+
+    pipe([
+      globStream('./fixtures/stuff/*.dmc', { cwd: dir, uniqueBy: uniqueBy }),
       concat(assert),
     ], done);
   });
