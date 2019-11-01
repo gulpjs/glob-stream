@@ -38,7 +38,7 @@
     "unique-stream": "^2.0.2"
   },
   "devDependencies": {
-    "eslint": "^1.10.3",
+    "eslint": "^6.6.0",
     "eslint-config-gulp": "^2.0.0",
     "expect": "^1.19.0",
     "istanbul": "^0.4.3",
