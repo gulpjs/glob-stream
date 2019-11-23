@@ -120,6 +120,13 @@ However, this would exclude all files that started with `b`:
 gs(['*.js', '!b*.js'])
 ```
 
+## glob-stream for enterprise
+
+Available as part of the Tidelift Subscription
+
+The maintainers of glob-stream and thousands of other packages are working with Tidelift to deliver commercial support and maintenance for the open source dependencies you use to build your applications. Save time, reduce risk, and improve code health, while paying the maintainers of the exact dependencies you use. [Learn more.](https://tidelift.com/subscription/pkg/npm-glob-stream?utm_source=npm-glob-stream&utm_medium=referral&utm_campaign=enterprise&utm_term=repo)
+
+
 ## License
 
 MIT
@@ -144,11 +151,3 @@ MIT
 
 [gitter-url]: https://gitter.im/gulpjs/gulp
 [gitter-image]: https://badges.gitter.im/gulpjs/gulp.svg
-
----
-
-<div align="center">
-  <b><a href="https://tidelift.com/subscription/pkg/npm-glob-stream?utm_source=npm-glob-stream&utm_medium=referral&utm_campaign=readme">Get supported glob-stream with the Tidelift Subscription</a></b>
-  <br>
-  <sub>Tidelift gives software development teams a single source for purchasing and maintaining their software, with professional grade assurances from the experts who know it best, while seamlessly integrating with existing tools.</sub>
-</div>
