@@ -132,6 +132,11 @@ The maintainers of glob-stream and thousands of other packages are working with 
 MIT
 
 <!-- prettier-ignore-start -->
+[node-glob-url]: https://github.com/isaacs/node-glob
+[glob-parent-url]: https://github.com/es128/glob-parent
+[allow-empty-url]: #optionsallowempty
+[readable-stream-url]: https://nodejs.org/api/stream.html#stream_readable_streams
+
 [downloads-image]: https://img.shields.io/npm/dm/$PROJECT_NAME.svg?style=flat-square
 [npm-url]: https://www.npmjs.com/package/$PROJECT_NAME
 [npm-image]: https://img.shields.io/npm/v/$PROJECT_NAME.svg?style=flat-square
