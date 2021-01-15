@@ -2,7 +2,7 @@
   "name": "glob-stream",
   "version": "6.1.0",
   "description": "A Readable Stream interface over node-glob.",
-  "author": "Gulp Team <team@gulpjs.com> (http://gulpjs.com/)",
+  "author": "Gulp Team <team@gulpjs.com> (https://gulpjs.com/)",
   "contributors": [
     "Eric Schoffstall <yo@contra.io>",
     "Blaine Bublitz <blaine.bublitz@gmail.com>"
@@ -10,7 +10,7 @@
   "repository": "gulpjs/glob-stream",
   "license": "MIT",
   "engines": {
-    "node": ">= 0.10"
+    "node": ">=10.13.0"
   },
   "main": "index.js",
   "files": [
@@ -19,11 +19,9 @@
     "LICENSE"
   ],
   "scripts": {
-    "lint": "eslint . && jscs index.js readable.js test/",
+    "lint": "eslint .",
     "pretest": "npm run lint",
-    "test": "mocha --async-only",
-    "cover": "istanbul cover _mocha --report lcovonly",
-    "coveralls": "npm run cover && istanbul-coveralls"
+    "test": "nyc mocha --async-only"
   },
   "dependencies": {
     "extend": "^3.0.0",
@@ -38,15 +36,21 @@
     "unique-stream": "^2.0.2"
   },
   "devDependencies": {
-    "eslint": "^1.10.3",
-    "eslint-config-gulp": "^2.0.0",
-    "expect": "^1.19.0",
-    "istanbul": "^0.4.3",
-    "istanbul-coveralls": "^1.0.3",
-    "jscs": "^2.4.0",
-    "jscs-preset-gulp": "^1.0.0",
+    "eslint": "^7.0.0",
+    "eslint-config-gulp": "^5.0.0",
+    "expect": "^26.0.1",
     "mississippi": "^1.2.0",
-    "mocha": "^2.4.5"
+    "mocha": "^7.1.2",
+    "nyc": "^15.0.1"
+  },
+  "nyc": {
+    "reporter": [
+      "lcov",
+      "text-summary"
+    ]
+  },
+  "prettier": {
+    "singleQuote": true
   },
   "keywords": [
     "glob",
