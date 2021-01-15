@@ -41,7 +41,8 @@
     "expect": "^26.0.1",
     "mississippi": "^1.2.0",
     "mocha": "^7.1.2",
-    "nyc": "^15.0.1"
+    "nyc": "^15.0.1",
+    "sinon": "^9.2.3"
   },
   "nyc": {
     "reporter": [
