@@ -38,9 +38,9 @@
   "devDependencies": {
     "eslint": "^7.0.0",
     "eslint-config-gulp": "^5.0.0",
-    "expect": "^26.0.1",
+    "expect": "^27.0.0",
     "mississippi": "^1.2.0",
-    "mocha": "^7.1.2",
+    "mocha": "^8.0.0",
     "nyc": "^15.0.1",
     "sinon": "^9.2.3"
   },
