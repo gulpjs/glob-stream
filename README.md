@@ -15,14 +15,17 @@ A [Readable Stream][readable-stream-url] interface over [node-glob][node-glob-ur
 ```js
 var gs = require('glob-stream');
 
-var readable = gs('./files/**/*.coffee', { /* options */ });
+var readable = gs('./files/**/*.coffee', {
+  /* options */
+});
 
-var writable = /* your WriteableStream */
+var writable =
+  /* your WriteableStream */
 
-readable.pipe(writable);
+  readable.pipe(writable);
 ```
 
-You can pass any combination of glob strings. One caveat is that you cannot __only__ pass a negative glob, you must give it at least one positive glob so it knows where to start. If given a non-glob path (also referred to as a singular glob), only one file will be emitted. If given a singular glob and no files match, an error is emitted (see also [`options.allowEmpty`][allow-empty-url]).
+You can pass any combination of glob strings. One caveat is that you cannot **only** pass a negative glob, you must give it at least one positive glob so it knows where to start. If given a non-glob path (also referred to as a singular glob), only one file will be emitted. If given a singular glob and no files match, an error is emitted (see also [`options.allowEmpty`][allow-empty-url]).
 
 ## API
 
@@ -68,7 +71,7 @@ Default: `process.cwd()`
 
 The root path that the glob is resolved against.
 
-__Note: This is never passed to [node-glob][node-glob-url] because it is pre-resolved against your paths.__
+**Note: This is never passed to [node-glob][node-glob-url] because it is pre-resolved against your paths.**
 
 Type: `String`
 
@@ -110,14 +113,16 @@ var stream = gs(['./**/*.js', '!./node_modules/**/*']);
 
 Globs are executed in order, so negations should follow positive globs. For example:
 
-The following would __not__ exclude any files:
+The following would **not** exclude any files:
+
 ```js
-gs(['!b*.js', '*.js'])
+gs(['!b*.js', '*.js']);
 ```
 
 However, this would exclude all files that started with `b`:
+
 ```js
-gs(['*.js', '!b*.js'])
+gs(['*.js', '!b*.js']);
 ```
 
 ## glob-stream for enterprise
@@ -125,7 +130,6 @@ gs(['*.js', '!b*.js'])
 Available as part of the Tidelift Subscription
 
 The maintainers of glob-stream and thousands of other packages are working with Tidelift to deliver commercial support and maintenance for the open source dependencies you use to build your applications. Save time, reduce risk, and improve code health, while paying the maintainers of the exact dependencies you use. [Learn more.](https://tidelift.com/subscription/pkg/npm-glob-stream?utm_source=npm-glob-stream&utm_medium=referral&utm_campaign=enterprise&utm_term=repo)
-
 
 ## License
 

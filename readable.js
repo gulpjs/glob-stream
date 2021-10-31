@@ -67,7 +67,7 @@ function GlobStream(ourGlob, negatives, opt) {
 
   var found = false;
 
-  globber.on('match', function(filepath) {
+  globber.on('match', function (filepath) {
     found = true;
     var obj = {
       cwd: cwd,
@@ -79,7 +79,7 @@ function GlobStream(ourGlob, negatives, opt) {
     }
   });
 
-  globber.once('end', function() {
+  globber.once('end', function () {
     if (allowEmpty !== true && !found && globIsSingular(globber)) {
       var err = new Error(globErrMessage1 + ourGlob + globErrMessage2);
 
@@ -97,16 +97,16 @@ function GlobStream(ourGlob, negatives, opt) {
 }
 inherits(GlobStream, Readable);
 
-GlobStream.prototype._read = function() {
+GlobStream.prototype._read = function () {
   this._globber.resume();
 };
 
-GlobStream.prototype.destroy = function(err) {
+GlobStream.prototype.destroy = function (err) {
   var self = this;
 
   this._globber.abort();
 
-  process.nextTick(function() {
+  process.nextTick(function () {
     if (err) {
       self.emit('error', err);
     }
