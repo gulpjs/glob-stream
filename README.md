@@ -6,13 +6,13 @@
 
 # glob-stream
 
-[![NPM version][npm-image]][npm-url] [![Downloads][downloads-image]][npm-url] [![Build Status][travis-image]][travis-url] [![AppVeyor Build Status][appveyor-image]][appveyor-url] [![Coveralls Status][coveralls-image]][coveralls-url] [![Gitter chat][gitter-image]][gitter-url]
+[![NPM version][npm-image]][npm-url] [![Downloads][downloads-image]][npm-url] [![Build Status][ci-image]][ci-url] [![Coveralls Status][coveralls-image]][coveralls-url]
 
 A [Readable Stream][readable-stream-url] interface over [node-glob][node-glob-url].
 
 ## Usage
 
-```javascript
+```js
 var gs = require('glob-stream');
 
 var readable = gs('./files/**/*.coffee', { /* options */ });
@@ -131,23 +131,19 @@ The maintainers of glob-stream and thousands of other packages are working with 
 
 MIT
 
+<!-- prettier-ignore-start -->
 [node-glob-url]: https://github.com/isaacs/node-glob
 [glob-parent-url]: https://github.com/es128/glob-parent
 [allow-empty-url]: #optionsallowempty
 [readable-stream-url]: https://nodejs.org/api/stream.html#stream_readable_streams
 
-[downloads-image]: http://img.shields.io/npm/dm/glob-stream.svg
+[downloads-image]: https://img.shields.io/npm/dm/glob-stream.svg?style=flat-square
 [npm-url]: https://www.npmjs.com/package/glob-stream
-[npm-image]: http://img.shields.io/npm/v/glob-stream.svg
+[npm-image]: https://img.shields.io/npm/v/glob-stream.svg?style=flat-square
 
-[travis-url]: https://travis-ci.org/gulpjs/glob-stream
-[travis-image]: http://img.shields.io/travis/gulpjs/glob-stream.svg?label=travis-ci
-
-[appveyor-url]: https://ci.appveyor.com/project/gulpjs/glob-stream
-[appveyor-image]: https://img.shields.io/appveyor/ci/gulpjs/glob-stream.svg?label=appveyor
+[ci-url]: https://github.com/gulpjs/glob-stream/actions?query=workflow:dev
+[ci-image]: https://img.shields.io/github/workflow/status/gulpjs/glob-stream/dev?style=flat-square
 
 [coveralls-url]: https://coveralls.io/r/gulpjs/glob-stream
-[coveralls-image]: http://img.shields.io/coveralls/gulpjs/glob-stream.svg
-
-[gitter-url]: https://gitter.im/gulpjs/gulp
-[gitter-image]: https://badges.gitter.im/gulpjs/gulp.svg
+[coveralls-image]: https://img.shields.io/coveralls/gulpjs/glob-stream/master.svg?style=flat-square
+<!-- prettier-ignore-end -->

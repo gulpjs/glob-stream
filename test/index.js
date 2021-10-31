@@ -148,9 +148,9 @@ describe('glob-stream', function() {
 
     function assert(pathObjs) {
       expect(pathObjs.length).toEqual(3);
-      expect(pathObjs).toInclude(expected[0]);
-      expect(pathObjs).toInclude(expected[1]);
-      expect(pathObjs).toInclude(expected[2]);
+      expect(pathObjs).toContainEqual(expected[0]);
+      expect(pathObjs).toContainEqual(expected[1]);
+      expect(pathObjs).toContainEqual(expected[2]);
     }
 
     pipe([
@@ -397,8 +397,8 @@ describe('glob-stream', function() {
 
     function assert(pathObjs) {
       expect(pathObjs.length).toEqual(2);
-      expect(pathObjs).toInclude(expected[0]);
-      expect(pathObjs).toInclude(expected[1]);
+      expect(pathObjs).toContainEqual(expected[0]);
+      expect(pathObjs).toContainEqual(expected[1]);
     }
 
     pipe([
@@ -608,7 +608,7 @@ describe('glob-stream', function() {
 
   it('emits an error when file not found on singular path', function(done) {
     function assert(err) {
-      expect(err).toMatch(/File not found with singular glob/);
+      expect(err.toString()).toMatch(/File not found with singular glob/);
       done();
     }
 
@@ -620,7 +620,7 @@ describe('glob-stream', function() {
 
   it('does not emit an error when file not found on glob containing {}', function(done) {
     function assert(err) {
-      expect(err).toNotExist();
+      expect(err).not.toEqual(expect.anything());
       done();
     }
 
@@ -632,7 +632,7 @@ describe('glob-stream', function() {
 
   it('does not emit an error on singular path when allowEmpty is true', function(done) {
     function assert(err) {
-      expect(err).toNotExist();
+      expect(err).not.toEqual(expect.anything());
       done();
     }
 
@@ -644,7 +644,7 @@ describe('glob-stream', function() {
 
   it('emits an error when a singular path in multiple paths not found', function(done) {
     function assert(err) {
-      expect(err).toMatch(/File not found with singular glob/);
+      expect(err.toString()).toMatch(/File not found with singular glob/);
       done();
     }
 
@@ -656,7 +656,7 @@ describe('glob-stream', function() {
 
   it('emits an error when a singular path in multiple paths/globs not found', function(done) {
     function assert(err) {
-      expect(err).toMatch(/File not found with singular glob/);
+      expect(err.toString()).toMatch(/File not found with singular glob/);
       done();
     }
 
@@ -700,7 +700,7 @@ describe('options', function() {
 
     var stream = globStream(dir + '/fixtures/stuff/run.dmc', opts);
     expect(Object.keys(opts).length).toEqual(0);
-    expect(opts).toNotEqual(defaultedOpts);
+    expect(opts).not.toEqual(defaultedOpts);
 
     pipe([
       stream,

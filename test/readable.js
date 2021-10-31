@@ -1,6 +1,7 @@
 'use strict';
 
 var expect = require('expect');
+var sinon = require('sinon');
 var miss = require('mississippi');
 
 var stream = require('../readable');
@@ -34,11 +35,12 @@ describe('readable stream', function() {
 
   it('throws an error if you try to write to it', function(done) {
     var gs = stream('notfound', [], { cwd: dir });
+    gs.on('error', function () {});
 
     try {
       gs.write({});
     } catch (err) {
-      expect(err).toExist();
+      expect(err).toEqual(expect.anything());
       done();
     }
   });
@@ -74,7 +76,7 @@ describe('readable stream', function() {
 
     function assert(pathObjs) {
       expect(pathObjs.length).toBe(1);
-      expect(pathObjs[0]).toMatch(expected);
+      expect(pathObjs[0]).toMatchObject(expected);
     }
 
     pipe([
@@ -104,9 +106,9 @@ describe('readable stream', function() {
 
     function assert(pathObjs) {
       expect(pathObjs.length).toBe(3);
-      expect(pathObjs).toInclude(expected[0]);
-      expect(pathObjs).toInclude(expected[1]);
-      expect(pathObjs).toInclude(expected[2]);
+      expect(pathObjs).toContainEqual(expected[0]);
+      expect(pathObjs).toContainEqual(expected[1]);
+      expect(pathObjs).toContainEqual(expected[2]);
     }
 
     pipe([
@@ -118,7 +120,7 @@ describe('readable stream', function() {
   it('pauses the globber upon backpressure', function(done) {
     var gs = stream('./fixtures/**/*.dmc', [], { cwd: dir, highWaterMark: 1 });
 
-    var spy = expect.spyOn(gs._globber, 'pause').andCallThrough();
+    var spy = sinon.spy(gs._globber, 'pause');
 
     function waiter(pathObj, _, cb) {
       setTimeout(function() {
@@ -128,8 +130,8 @@ describe('readable stream', function() {
 
     function assert(pathObjs) {
       expect(pathObjs.length).toEqual(3);
-      expect(spy.calls.length).toEqual(2);
-      spy.restore();
+      expect(spy.callCount).toEqual(2);
+      sinon.restore();
     }
 
     pipe([
@@ -142,12 +144,12 @@ describe('readable stream', function() {
   it('destroys the stream with an error if no match is found', function(done) {
     var gs = stream('notfound', []);
 
-    var spy = expect.spyOn(gs, 'destroy').andCallThrough();
+    var spy = sinon.spy(gs, 'destroy');
 
     function assert(err) {
-      spy.restore();
-      expect(spy).toHaveBeenCalledWith(err);
-      expect(err).toMatch(/File not found with singular glob/);
+      sinon.restore();
+      expect(spy.getCall(0).args[0]).toBe(err);
+      expect(err.toString()).toMatch(/File not found with singular glob/);
       done();
     }
 
@@ -166,13 +168,12 @@ describe('readable stream', function() {
       cb(expectedError);
     }
 
-    var spy = expect.spyOn(gs, 'destroy').andCallThrough();
-    var fsStub = expect.spyOn(fs, 'readdir').andCall(stubError);
+    var spy = sinon.spy(gs, 'destroy');
+    sinon.stub(fs, 'readdir').callsFake(stubError);
 
     function assert(err) {
-      fsStub.restore();
-      spy.restore();
-      expect(spy).toHaveBeenCalledWith(err);
+      sinon.restore();
+      expect(spy.called).toEqual(true);
       expect(err).toBe(expectedError);
       done();
     }
