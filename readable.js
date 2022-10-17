@@ -3,7 +3,6 @@
 var inherits = require('util').inherits;
 
 var glob = require('glob');
-var extend = require('extend');
 var Readable = require('readable-stream').Readable;
 var globParent = require('glob-parent');
 var toAbsoluteGlob = require('to-absolute-glob');
@@ -32,7 +31,7 @@ function GlobStream(ourGlob, negatives, opt) {
     return new GlobStream(ourGlob, negatives, opt);
   }
 
-  var ourOpt = extend({}, opt);
+  var ourOpt = Object.assign({}, opt);
 
   Readable.call(this, {
     objectMode: true,
