@@ -82,6 +82,13 @@ function GlobStream(ourGlob, negatives, opt) {
   // Delete `root` after all resolving done
   delete ourOpt.root;
 
+  if (process.platform === 'win32') {
+    // Make glob use windows bracket escaping
+    ourGlob = ourGlob.replace(/\\\[(.*?)\\\]/g, '[[]$1]');
+    // Delete backslash escaping for bracktes in cwd as it isn't needed
+    ourOpt.cwd = ourOpt.cwd.replace(/\\\[(.*?)\\\]/g, '[$1]');
+  }
+
   var globber = new glob.Glob(ourGlob, ourOpt);
   this._globber = globber;
 
