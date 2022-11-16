@@ -548,39 +548,15 @@ describe('glob-stream', function () {
     );
   });
 
-  it('respects order of negative globs', function (done) {
-    var expected = {
-      cwd: dir,
-      base: dir + '/fixtures/stuff',
-      path: dir + '/fixtures/stuff/run.dmc',
-    };
-
+  it('applies all negative globs to each positive glob', function (done) {
     var globs = [
       './fixtures/stuff/*',
       '!./fixtures/stuff/*.dmc',
-      './fixtures/stuff/run.dmc',
+      './fixtures/stuff/*.dmc',
     ];
 
     function assert(pathObjs) {
-      expect(pathObjs.length).toEqual(1);
-      expect(pathObjs[0]).toEqual(expected);
-    }
-
-    pipe([globStream(globs, { cwd: dir }), concat(assert)], done);
-  });
-
-  it('ignores leading negative globs', function (done) {
-    var expected = {
-      cwd: dir,
-      base: dir + '/fixtures/stuff',
-      path: dir + '/fixtures/stuff/run.dmc',
-    };
-
-    var globs = ['!./fixtures/stuff/*.dmc', './fixtures/stuff/run.dmc'];
-
-    function assert(pathObjs) {
-      expect(pathObjs.length).toEqual(1);
-      expect(pathObjs[0]).toEqual(expected);
+      expect(pathObjs.length).toEqual(0);
     }
 
     pipe([globStream(globs, { cwd: dir }), concat(assert)], done);

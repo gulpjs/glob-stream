@@ -74,18 +74,9 @@ function globStream(globs, opt) {
   return pumpify.obj(aggregate, uniqueStream);
 
   function streamFromPositive(positive) {
-    var negativeGlobs = negatives
-      .filter(indexGreaterThan(positive.index))
-      .map(toGlob)
-      .concat(ignore);
+    var negativeGlobs = negatives.map(toGlob).concat(ignore);
     return new GlobStream(positive.glob, negativeGlobs, ourOpt);
   }
-}
-
-function indexGreaterThan(index) {
-  return function (obj) {
-    return obj.index > index;
-  };
 }
 
 function toGlob(obj) {
