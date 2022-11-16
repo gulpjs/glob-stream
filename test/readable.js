@@ -98,7 +98,7 @@ describe('readable stream', function () {
     ];
 
     function assert(pathObjs) {
-      expect(pathObjs.length).toBe(3);
+      expect(pathObjs.length).toBe(4);
       expect(pathObjs).toContainEqual(expected[0]);
       expect(pathObjs).toContainEqual(expected[1]);
       expect(pathObjs).toContainEqual(expected[2]);
@@ -122,8 +122,8 @@ describe('readable stream', function () {
     }
 
     function assert(pathObjs) {
-      expect(pathObjs.length).toEqual(3);
-      expect(spy.callCount).toEqual(2);
+      expect(pathObjs.length).toEqual(4);
+      expect(spy.callCount).toEqual(3);
       sinon.restore();
     }
 

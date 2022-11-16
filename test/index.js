@@ -126,12 +126,17 @@ describe('glob-stream', function () {
     );
   });
 
-  it('finds files in paths that contain ( ) when they match the glob', function (done) {
+  it('finds files in paths that contain ( ) or [ ] when they match the glob', function (done) {
     var expected = [
       {
         cwd: dir,
         base: dir + '/fixtures',
         path: dir + '/fixtures/has (parens)/test.dmc',
+      },
+      {
+        cwd: dir,
+        base: dir + '/fixtures',
+        path: dir + '/fixtures/has [brackets]/test.dmc',
       },
       {
         cwd: dir,
@@ -146,14 +151,53 @@ describe('glob-stream', function () {
     ];
 
     function assert(pathObjs) {
-      expect(pathObjs.length).toEqual(3);
+      expect(pathObjs.length).toEqual(4);
       expect(pathObjs).toContainEqual(expected[0]);
       expect(pathObjs).toContainEqual(expected[1]);
       expect(pathObjs).toContainEqual(expected[2]);
+      expect(pathObjs).toContainEqual(expected[3]);
     }
 
     pipe(
       [globStream('./fixtures/**/*.dmc', { cwd: dir }), concat(assert)],
+      done
+    );
+  });
+
+  it('properly handles [ ] in cwd path', function (done) {
+    var cwd = dir + '/fixtures/has [brackets]';
+
+    var expected = {
+      cwd: cwd,
+      base: cwd,
+      path: cwd + '/test.dmc',
+    };
+
+    function assert(pathObjs) {
+      expect(pathObjs.length).toEqual(1);
+      expect(pathObjs[0]).toEqual(expected);
+    }
+
+    pipe([globStream('*.dmc', { cwd: cwd }), concat(assert)], done);
+  });
+
+  it('sets the correct base when [ ] in glob', function (done) {
+    var expected = {
+      cwd: dir,
+      base: dir + '/fixtures/has [brackets]',
+      path: dir + '/fixtures/has [brackets]/test.dmc',
+    };
+
+    function assert(pathObjs) {
+      expect(pathObjs.length).toEqual(1);
+      expect(pathObjs[0]).toEqual(expected);
+    }
+
+    pipe(
+      [
+        globStream('./fixtures/has \\[brackets\\]/*.dmc', { cwd: dir }),
+        concat(assert),
+      ],
       done
     );
   });
@@ -282,6 +326,11 @@ describe('glob-stream', function () {
       {
         cwd: dir,
         base: dir + '/fixtures',
+        path: dir + '/fixtures/has [brackets]/test.dmc',
+      },
+      {
+        cwd: dir,
+        base: dir + '/fixtures',
         path: dir + '/fixtures/stuff/test.dmc',
       },
     ];
@@ -294,7 +343,7 @@ describe('glob-stream', function () {
     ];
 
     function assert(pathObjs) {
-      expect(pathObjs.length).toEqual(5);
+      expect(pathObjs.length).toEqual(6);
       expect(pathObjs).toEqual(expected);
     }
 
