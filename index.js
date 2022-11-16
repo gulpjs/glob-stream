@@ -54,10 +54,7 @@ function globStream(globs, opt) {
     var glob = isNegatedGlob(globString);
     var globArray = glob.negated ? negatives : positives;
 
-    globArray.push({
-      index: index,
-      glob: glob.pattern,
-    });
+    globArray.push(glob.pattern);
   }
 
   if (positives.length === 0) {
@@ -74,22 +71,9 @@ function globStream(globs, opt) {
   return pumpify.obj(aggregate, uniqueStream);
 
   function streamFromPositive(positive) {
-    var negativeGlobs = negatives
-      .filter(indexGreaterThan(positive.index))
-      .map(toGlob)
-      .concat(ignore);
-    return new GlobStream(positive.glob, negativeGlobs, ourOpt);
+    var negativeGlobs = negatives.concat(ignore);
+    return new GlobStream(positive, negativeGlobs, ourOpt);
   }
-}
-
-function indexGreaterThan(index) {
-  return function (obj) {
-    return obj.index > index;
-  };
-}
-
-function toGlob(obj) {
-  return obj.glob;
 }
 
 module.exports = globStream;
