@@ -12,8 +12,28 @@ var removeTrailingSeparator = require('remove-trailing-separator');
 var globErrMessage1 = 'File not found with singular glob: ';
 var globErrMessage2 = ' (if this was purposeful, use `allowEmpty` option)';
 
+function escapeBrackets(path) {
+  return path.replace(/\[(.*?)\]/g, '\\[$1\\]');
+}
+
+function unscapeBrackets(path) {
+  return path.replace(/\\\[(.*?)\\\]/g, '[$1]');
+}
+
+function absoluteGlob(ourGlob, opt) {
+  opt.cwd = unscapeBrackets(opt.cwd);
+  const abs = toAbsoluteGlob(ourGlob, opt);
+  if (!opt.cwd) {
+    return abs;
+  }
+  const cwd = opt.cwd;
+  opt.cwd = escapeBrackets(opt.cwd);
+  // Replace only the cwd and not the whole glob since we don't wanna touch the selector
+  return abs.replace(cwd, opt.cwd);
+}
+
 function getBasePath(ourGlob, opt) {
-  return globParent(toAbsoluteGlob(ourGlob, opt));
+  return globParent(absoluteGlob(ourGlob, opt));
 }
 
 function globIsSingular(glob) {
@@ -58,7 +78,7 @@ function GlobStream(ourGlob, negatives, opt) {
   var basePath = ourOpt.base || getBasePath(ourGlob, ourOpt);
 
   // Remove path relativity to make globs make sense
-  ourGlob = toAbsoluteGlob(ourGlob, ourOpt);
+  ourGlob = absoluteGlob(ourGlob, ourOpt);
   // Delete `root` after all resolving done
   delete ourOpt.root;
 
