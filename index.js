@@ -4,7 +4,6 @@ var Combine = require('ordered-read-streams');
 var unique = require('unique-stream');
 var pumpify = require('pumpify');
 var isNegatedGlob = require('is-negated-glob');
-var extend = require('extend');
 
 var GlobStream = require('./readable');
 
@@ -13,7 +12,7 @@ function globStream(globs, opt) {
     opt = {};
   }
 
-  var ourOpt = extend({}, opt);
+  var ourOpt = Object.assign({}, opt);
   var ignore = ourOpt.ignore;
 
   ourOpt.cwd = typeof ourOpt.cwd === 'string' ? ourOpt.cwd : process.cwd();

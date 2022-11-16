@@ -24,7 +24,6 @@
     "test": "nyc mocha --async-only"
   },
   "dependencies": {
-    "extend": "^3.0.2",
     "glob": "^7.2.0",
     "glob-parent": "^6.0.2",
     "is-negated-glob": "^1.0.0",
