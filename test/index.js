@@ -119,7 +119,7 @@ describe('glob-stream', function () {
 
     pipe(
       [
-        globStream('./fixtures/has (parens)/*.dmc', { cwd: dir }),
+        globStream('./fixtures/has \\(parens\\)/*.dmc', { cwd: dir }),
         concat(assert),
       ],
       done
@@ -213,7 +213,7 @@ describe('glob-stream', function () {
     );
   });
 
-  it('properly orders objects when given multiple paths and specified base', function (done) {
+  it('emits all objects (unordered) when given multiple paths and specified base', function (done) {
     var base = dir + '/fixtures';
 
     var expected = [
@@ -242,13 +242,15 @@ describe('glob-stream', function () {
 
     function assert(pathObjs) {
       expect(pathObjs.length).toEqual(3);
-      expect(pathObjs).toEqual(expected);
+      expect(pathObjs).toContainEqual(expected[0]);
+      expect(pathObjs).toContainEqual(expected[1]);
+      expect(pathObjs).toContainEqual(expected[2]);
     }
 
     pipe([globStream(paths, { cwd: base, base: base }), concat(assert)], done);
   });
 
-  it('properly orders objects when given multiple paths and cwdbase', function (done) {
+  it('emits all objects (unordered) when given multiple paths and cwdbase', function (done) {
     var base = dir + '/fixtures';
 
     var expected = [
@@ -277,7 +279,9 @@ describe('glob-stream', function () {
 
     function assert(pathObjs) {
       expect(pathObjs.length).toEqual(3);
-      expect(pathObjs).toEqual(expected);
+      expect(pathObjs).toContainEqual(expected[0]);
+      expect(pathObjs).toContainEqual(expected[1]);
+      expect(pathObjs).toContainEqual(expected[2]);
     }
 
     pipe(
@@ -286,7 +290,7 @@ describe('glob-stream', function () {
     );
   });
 
-  it('properly orders objects when given multiple globs with globstars', function (done) {
+  it('emits all objects (unordered) when given multiple globs with globstars', function (done) {
     var expected = [
       {
         cwd: dir,
@@ -324,13 +328,17 @@ describe('glob-stream', function () {
 
     function assert(pathObjs) {
       expect(pathObjs.length).toEqual(5);
-      expect(pathObjs).toEqual(expected);
+      expect(pathObjs).toContainEqual(expected[0]);
+      expect(pathObjs).toContainEqual(expected[1]);
+      expect(pathObjs).toContainEqual(expected[2]);
+      expect(pathObjs).toContainEqual(expected[3]);
+      expect(pathObjs).toContainEqual(expected[4]);
     }
 
     pipe([globStream(globs, { cwd: dir }), concat(assert)], done);
   });
 
-  it('properly orders objects when given multiple absolute paths and no cwd', function (done) {
+  it('emits all objects (unordered) when given multiple absolute paths and no cwd', function (done) {
     var expected = [
       {
         cwd: process.cwd(),
@@ -357,7 +365,9 @@ describe('glob-stream', function () {
 
     function assert(pathObjs) {
       expect(pathObjs.length).toEqual(3);
-      expect(pathObjs).toEqual(expected);
+      expect(pathObjs).toContainEqual(expected[0]);
+      expect(pathObjs).toContainEqual(expected[1]);
+      expect(pathObjs).toContainEqual(expected[2]);
     }
 
     pipe([globStream(paths), concat(assert)], done);
@@ -640,6 +650,7 @@ describe('glob-stream', function () {
 
   it('emits an error when a singular path in multiple paths not found', function (done) {
     function assert(err) {
+      expect(err).toEqual(expect.anything());
       expect(err.toString()).toMatch(/File not found with singular glob/);
       done();
     }

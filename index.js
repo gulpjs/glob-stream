@@ -1,6 +1,5 @@
 'use strict';
 
-var Combine = require('ordered-read-streams');
 var unique = require('unique-stream');
 var pumpify = require('pumpify');
 var isNegatedGlob = require('is-negated-glob');
@@ -62,18 +61,17 @@ function globStream(globs, opt) {
   }
 
   // Create all individual streams
-  var streams = positives.map(streamFromPositive);
 
   // Then just pipe them to a single unique stream and return it
-  var aggregate = new Combine(streams);
+  var aggregate = new GlobStream(positives, negatives.concat(ignore), ourOpt);
   var uniqueStream = unique(ourOpt.uniqueBy);
 
   return pumpify.obj(aggregate, uniqueStream);
 
-  function streamFromPositive(positive) {
-    var negativeGlobs = negatives.concat(ignore);
-    return new GlobStream(positive, negativeGlobs, ourOpt);
-  }
+  // function streamFromPositive(positive) {
+  //   var negativeGlobs = negatives.concat(ignore);
+  //   return
+  // }
 }
 
 module.exports = globStream;

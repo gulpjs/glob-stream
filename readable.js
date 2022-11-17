@@ -2,11 +2,13 @@
 
 var inherits = require('util').inherits;
 
-var glob = require('glob');
 var Readable = require('readable-stream').Readable;
 var globParent = require('glob-parent');
 var toAbsoluteGlob = require('to-absolute-glob');
 var removeTrailingSeparator = require('remove-trailing-separator');
+var walkdir = require('walkdir');
+var anymatch = require('anymatch');
+var isGlob = require('is-glob');
 
 var globErrMessage1 = 'File not found with singular glob: ';
 var globErrMessage2 = ' (if this was purposeful, use `allowEmpty` option)';
@@ -15,20 +17,16 @@ function getBasePath(ourGlob, opt) {
   return globParent(toAbsoluteGlob(ourGlob, opt));
 }
 
-function globIsSingular(glob) {
-  var globSet = glob.minimatch.set;
-  if (globSet.length !== 1) {
-    return false;
-  }
-
-  return globSet[0].every(function isString(value) {
-    return typeof value === 'string';
-  });
+function isFound(glob) {
+  // All globs are "found", while singular globs are only found when matched successfully
+  // This is due to the fact that a glob can match any number of files (0..Infinity) but
+  // a signular glob is always expected to match
+  return isGlob(glob);
 }
 
-function GlobStream(ourGlob, negatives, opt) {
+function GlobStream(positives, negatives, opt) {
   if (!(this instanceof GlobStream)) {
-    return new GlobStream(ourGlob, negatives, opt);
+    return new GlobStream(positives, negatives, opt);
   }
 
   var ourOpt = Object.assign({}, opt);
@@ -43,48 +41,70 @@ function GlobStream(ourGlob, negatives, opt) {
 
   var self = this;
 
-  function resolveNegatives(negative) {
-    return toAbsoluteGlob(negative, ourOpt);
+  function resolveGlob(glob) {
+    return toAbsoluteGlob(glob, ourOpt);
   }
 
-  var ourNegatives = negatives.map(resolveNegatives);
+  if (!Array.isArray(positives)) {
+    positives = [positives];
+  }
+
+  // Remove path relativity to make globs make sense
+  var ourPositives = positives.map(resolveGlob);
+  var ourNegatives = negatives.map(resolveGlob);
   ourOpt.ignore = ourNegatives;
 
   var cwd = ourOpt.cwd;
   var allowEmpty = ourOpt.allowEmpty || false;
 
-  // Extract base path from glob
-  var basePath = ourOpt.base || getBasePath(ourGlob, ourOpt);
+  var found = ourPositives.map(isFound);
 
-  // Remove path relativity to make globs make sense
-  ourGlob = toAbsoluteGlob(ourGlob, ourOpt);
   // Delete `root` after all resolving done
   delete ourOpt.root;
+  ourOpt.strictSlashes = false;
 
-  var globber = new glob.Glob(ourGlob, ourOpt);
-  this._globber = globber;
+  var matcher = anymatch(ourPositives, null, ourOpt);
 
-  var found = false;
+  var globber = walkdir(cwd, function (filepath, stat) {
+    var matchIdx = matcher(filepath, true);
+    if (matchIdx === -1 && stat.isDirectory()) {
+      matchIdx = matcher(filepath + '/', true);
+    }
+    if (matchIdx !== -1) {
+      found[matchIdx] = true;
 
-  globber.on('match', function (filepath) {
-    found = true;
-    var obj = {
-      cwd: cwd,
-      base: basePath,
-      path: removeTrailingSeparator(filepath),
-    };
-    if (!self.push(obj)) {
-      globber.pause();
+      // Extract base path from glob
+      var basePath = ourOpt.base || getBasePath(ourPositives[matchIdx], ourOpt);
+
+      var obj = {
+        cwd: cwd,
+        base: basePath,
+        path: removeTrailingSeparator(filepath),
+      };
+
+      var drained = self.push(obj);
+      if (!drained) {
+        globber.pause();
+      }
     }
   });
 
   globber.once('end', function () {
-    if (allowEmpty !== true && !found && globIsSingular(globber)) {
-      var err = new Error(globErrMessage1 + ourGlob + globErrMessage2);
+    found.forEach(function (matchFound, idx) {
+      if (allowEmpty !== true && !matchFound) {
+        var err = new Error(
+          globErrMessage1 + ourPositives[idx] + globErrMessage2
+        );
 
-      return self.destroy(err);
-    }
+        return self.destroy(err);
+      }
+    });
+    self.push(null);
+  });
 
+  this._globber = globber;
+
+  globber.once('end', function () {
     self.push(null);
   });
 
@@ -103,7 +123,7 @@ GlobStream.prototype._read = function () {
 GlobStream.prototype.destroy = function (err) {
   var self = this;
 
-  this._globber.abort();
+  this._globber.end();
 
   process.nextTick(function () {
     if (err) {
