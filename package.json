@@ -31,7 +31,7 @@
     "pumpify": "^2.0.1",
     "readable-stream": "^3.6.0",
     "remove-trailing-separator": "^1.1.0",
-    "to-absolute-glob": "^2.0.2",
+    "to-absolute-glob": "^3.0.0",
     "unique-stream": "^2.3.1"
   },
   "devDependencies": {
