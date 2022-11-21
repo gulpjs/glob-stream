@@ -60,18 +60,11 @@ function globStream(globs, opt) {
     throw new Error('Missing positive glob');
   }
 
-  // Create all individual streams
-
   // Then just pipe them to a single unique stream and return it
   var aggregate = new GlobStream(positives, negatives.concat(ignore), ourOpt);
   var uniqueStream = unique(ourOpt.uniqueBy);
 
   return pumpify.obj(aggregate, uniqueStream);
-
-  // function streamFromPositive(positive) {
-  //   var negativeGlobs = negatives.concat(ignore);
-  //   return
-  // }
 }
 
 module.exports = globStream;
