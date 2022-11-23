@@ -6,9 +6,12 @@ var Readable = require('readable-stream').Readable;
 var globParent = require('glob-parent');
 var toAbsoluteGlob = require('to-absolute-glob');
 var removeTrailingSeparator = require('remove-trailing-separator');
-var walkdir = require('walkdir');
 var anymatch = require('anymatch');
 var isGlob = require('is-glob');
+var fastq = require('fastq');
+var fs = require('fs');
+var EventEmitter = require('events');
+var path = require('path');
 
 var globErrMessage1 = 'File not found with singular glob: ';
 var globErrMessage2 = ' (if this was purposeful, use `allowEmpty` option)';
@@ -24,12 +27,71 @@ function isFound(glob) {
   return isGlob(glob);
 }
 
-function GlobStream(positives, negatives, opt) {
+function walkdir() {
+  var readdirOpts = {
+    withFileTypes: true,
+  };
+
+  var ee = new EventEmitter();
+
+  var queue = fastq(readdir, 1);
+  queue.drain = function () {
+    ee.emit('end');
+  };
+  queue.error(onError);
+
+  function onError(err) {
+    if (err) {
+      ee.emit('error', err);
+    }
+  }
+
+  ee.pause = function () {
+    queue.pause();
+  };
+  ee.resume = function () {
+    queue.resume();
+  };
+  ee.end = function () {
+    queue.kill();
+  };
+  ee.walk = function (filepath) {
+    queue.push(filepath);
+  };
+
+  function readdir(filepath, cb) {
+    fs.readdir(filepath, readdirOpts, onReaddir);
+
+    function onReaddir(err, dirents) {
+      if (err) {
+        return cb(err);
+      }
+
+      dirents.forEach(processDirent);
+
+      cb();
+    }
+
+    function processDirent(dirent) {
+      var nextpath = path.join(filepath, dirent.name);
+      ee.emit('path', nextpath, dirent);
+
+      if (dirent.isDirectory()) {
+        queue.push(nextpath);
+      }
+    }
+  }
+
+  return ee;
+}
+
+function GlobStream(globs, opt) {
   if (!(this instanceof GlobStream)) {
-    return new GlobStream(positives, negatives, opt);
+    return new GlobStream(globs, opt);
   }
 
   var ourOpt = Object.assign({}, opt);
+  var ignore = ourOpt.ignore;
 
   Readable.call(this, {
     objectMode: true,
@@ -45,36 +107,46 @@ function GlobStream(positives, negatives, opt) {
     return toAbsoluteGlob(glob, ourOpt);
   }
 
-  if (!Array.isArray(positives)) {
-    positives = [positives];
+  if (!Array.isArray(globs)) {
+    globs = [globs];
   }
 
+  // Normalize string `ignore` to array
+  if (typeof ignore === 'string') {
+    ignore = [ignore];
+  }
+  // Ensure `ignore` is an array
+  if (!Array.isArray(ignore)) {
+    ignore = [];
+  }
+
+  ourOpt.ignore = ignore.map(resolveGlob);
+
   // Remove path relativity to make globs make sense
-  var ourPositives = positives.map(resolveGlob);
-  var ourNegatives = negatives.map(resolveGlob);
-  ourOpt.ignore = ourNegatives;
+  var ourGlobs = globs.map(resolveGlob);
 
   var cwd = ourOpt.cwd;
   var allowEmpty = ourOpt.allowEmpty || false;
 
-  var found = ourPositives.map(isFound);
+  var found = ourGlobs.map(isFound);
 
   // Delete `root` after all resolving done
   delete ourOpt.root;
-  ourOpt.strictSlashes = false;
 
-  var matcher = anymatch(ourPositives, null, ourOpt);
+  var matcher = anymatch(ourGlobs, null, ourOpt);
 
-  var globber = walkdir(cwd, function (filepath, stat) {
+  var walker = walkdir();
+
+  walker.on('path', function (filepath, dirent) {
     var matchIdx = matcher(filepath, true);
-    if (matchIdx === -1 && stat.isDirectory()) {
+    if (matchIdx === -1 && dirent.isDirectory()) {
       matchIdx = matcher(filepath + '/', true);
     }
     if (matchIdx !== -1) {
       found[matchIdx] = true;
 
       // Extract base path from glob
-      var basePath = ourOpt.base || getBasePath(ourPositives[matchIdx], ourOpt);
+      var basePath = ourOpt.base || getBasePath(ourGlobs[matchIdx], ourOpt);
 
       var obj = {
         cwd: cwd,
@@ -84,17 +156,15 @@ function GlobStream(positives, negatives, opt) {
 
       var drained = self.push(obj);
       if (!drained) {
-        globber.pause();
+        walker.pause();
       }
     }
   });
 
-  globber.once('end', function () {
+  walker.once('end', function () {
     found.forEach(function (matchFound, idx) {
       if (allowEmpty !== true && !matchFound) {
-        var err = new Error(
-          globErrMessage1 + ourPositives[idx] + globErrMessage2
-        );
+        var err = new Error(globErrMessage1 + ourGlobs[idx] + globErrMessage2);
 
         return self.destroy(err);
       }
@@ -102,9 +172,9 @@ function GlobStream(positives, negatives, opt) {
     self.push(null);
   });
 
-  this._globber = globber;
+  this._walker = walker;
 
-  globber.once('end', function () {
+  walker.once('end', function () {
     self.push(null);
   });
 
@@ -112,18 +182,20 @@ function GlobStream(positives, negatives, opt) {
     self.destroy(err);
   }
 
-  globber.once('error', onError);
+  walker.once('error', onError);
+
+  walker.walk(cwd);
 }
 inherits(GlobStream, Readable);
 
 GlobStream.prototype._read = function () {
-  this._globber.resume();
+  this._walker.resume();
 };
 
 GlobStream.prototype.destroy = function (err) {
   var self = this;
 
-  this._globber.end();
+  this._walker.end();
 
   process.nextTick(function () {
     if (err) {

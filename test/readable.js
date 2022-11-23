@@ -26,11 +26,11 @@ describe('readable stream', function () {
       done();
     }
 
-    pipe([stream('notfound', [], { cwd: dir }), concat()], assert);
+    pipe([stream('notfound', { cwd: dir }), concat()], assert);
   });
 
   it('throws an error if you try to write to it', function (done) {
-    var gs = stream('notfound', [], { cwd: dir });
+    var gs = stream('notfound', { cwd: dir });
     gs.on('error', function () {});
 
     try {
@@ -48,7 +48,7 @@ describe('readable stream', function () {
       path: dir,
     };
 
-    var gs = stream('./fixtures/test.coffee', [], { cwd: dir });
+    var gs = stream('./fixtures/test.coffee', { cwd: dir });
 
     gs.push(stub);
 
@@ -73,7 +73,7 @@ describe('readable stream', function () {
     }
 
     pipe(
-      [stream('./fixtures/test.coffee', [], { cwd: dir }), concat(assert)],
+      [stream('./fixtures/test.coffee', { cwd: dir }), concat(assert)],
       done
     );
   });
@@ -104,16 +104,13 @@ describe('readable stream', function () {
       expect(pathObjs).toContainEqual(expected[2]);
     }
 
-    pipe(
-      [stream('./fixtures/**/*.dmc', [], { cwd: dir }), concat(assert)],
-      done
-    );
+    pipe([stream('./fixtures/**/*.dmc', { cwd: dir }), concat(assert)], done);
   });
 
   it('pauses the globber upon backpressure', function (done) {
-    var gs = stream('./fixtures/**/*.dmc', [], { cwd: dir, highWaterMark: 1 });
+    var gs = stream('./fixtures/**/*.dmc', { cwd: dir, highWaterMark: 1 });
 
-    var spy = sinon.spy(gs._globber, 'pause');
+    var spy = sinon.spy(gs._walker, 'pause');
 
     function waiter(pathObj, _, cb) {
       setTimeout(function () {
@@ -130,9 +127,8 @@ describe('readable stream', function () {
     pipe([gs, through.obj({ highWaterMark: 1 }, waiter), concat(assert)], done);
   });
 
-  // This is currently broken by walkdir
-  it.skip('destroys the stream with an error if no match is found', function (done) {
-    var gs = stream('notfound', []);
+  it('destroys the stream with an error if no match is found', function (done) {
+    var gs = stream('notfound', { cwd: dir });
 
     var spy = sinon.spy(gs, 'destroy');
 
@@ -146,13 +142,12 @@ describe('readable stream', function () {
     pipe([gs, concat()], assert);
   });
 
-  // This is currently broken by walkdir
-  it.skip('destroys the stream if node-glob errors', function (done) {
+  it('destroys the stream if node-glob errors', function (done) {
     var expectedError = new Error('Stubbed error');
 
-    var gs = stream('./fixtures/**/*.dmc', [], { cwd: dir, silent: true });
+    var gs = stream('./fixtures/**/*.dmc', { cwd: dir, silent: true });
 
-    function stubError(dirpath, cb) {
+    function stubError(dirpath, opts, cb) {
       cb(expectedError);
     }
 
