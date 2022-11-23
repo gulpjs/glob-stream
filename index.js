@@ -1,16 +1,17 @@
 'use strict';
 
-var isNegatedGlob = require('is-negated-glob');
+var fs = require('fs');
+var path = require('path');
+var EventEmitter = require('events');
+
+var fastq = require('fastq');
+var anymatch = require('anymatch');
 var Readable = require('readable-stream').Readable;
+var isGlob = require('is-glob');
 var globParent = require('glob-parent');
+var isNegatedGlob = require('is-negated-glob');
 var toAbsoluteGlob = require('to-absolute-glob');
 var removeTrailingSeparator = require('remove-trailing-separator');
-var anymatch = require('anymatch');
-var isGlob = require('is-glob');
-var fastq = require('fastq');
-var fs = require('fs');
-var EventEmitter = require('events');
-var path = require('path');
 
 var globErrMessage1 = 'File not found with singular glob: ';
 var globErrMessage2 = ' (if this was purposeful, use `allowEmpty` option)';
