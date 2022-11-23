@@ -15,7 +15,6 @@
   "main": "index.js",
   "files": [
     "index.js",
-    "readable.js",
     "LICENSE"
   ],
   "scripts": {
@@ -29,11 +28,9 @@
     "glob-parent": "^6.0.2",
     "is-glob": "^4.0.3",
     "is-negated-glob": "^1.0.0",
-    "pumpify": "^2.0.1",
     "readable-stream": "^3.6.0",
     "remove-trailing-separator": "^1.1.0",
-    "to-absolute-glob": "^3.0.0",
-    "unique-stream": "^2.3.1"
+    "to-absolute-glob": "^3.0.0"
   },
   "devDependencies": {
     "eslint": "^7.0.0",
