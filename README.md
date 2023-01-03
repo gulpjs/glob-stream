@@ -95,26 +95,6 @@ Default: `'path'`
 
 Any glob-related options are documented in [picomatch][picomatch-options-url].
 
-#### Globbing & Negation
-
-```js
-var stream = gs(['./**/*.js', '!./node_modules/**/*']);
-```
-
-Globs are executed in order, so negations should follow positive globs. For example:
-
-The following would **not** exclude any files:
-
-```js
-gs(['!b*.js', '*.js']);
-```
-
-However, this would exclude all files that started with `b`:
-
-```js
-gs(['*.js', '!b*.js']);
-```
-
 ## License
 
 MIT
