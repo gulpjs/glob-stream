@@ -2,6 +2,10 @@
 
 var expect = require('expect');
 var miss = require('mississippi');
+var sinon = require('sinon');
+
+// Need to wrap this to cause walker to emit an error
+var fs = require('fs');
 
 var globStream = require('../');
 
@@ -119,7 +123,7 @@ describe('glob-stream', function () {
 
     pipe(
       [
-        globStream('./fixtures/has (parens)/*.dmc', { cwd: dir }),
+        globStream('./fixtures/has \\(parens\\)/*.dmc', { cwd: dir }),
         concat(assert),
       ],
       done
@@ -213,7 +217,7 @@ describe('glob-stream', function () {
     );
   });
 
-  it('properly orders objects when given multiple paths and specified base', function (done) {
+  it('emits all objects (unordered) when given multiple paths and specified base', function (done) {
     var base = dir + '/fixtures';
 
     var expected = [
@@ -242,13 +246,15 @@ describe('glob-stream', function () {
 
     function assert(pathObjs) {
       expect(pathObjs.length).toEqual(3);
-      expect(pathObjs).toEqual(expected);
+      expect(pathObjs).toContainEqual(expected[0]);
+      expect(pathObjs).toContainEqual(expected[1]);
+      expect(pathObjs).toContainEqual(expected[2]);
     }
 
     pipe([globStream(paths, { cwd: base, base: base }), concat(assert)], done);
   });
 
-  it('properly orders objects when given multiple paths and cwdbase', function (done) {
+  it('emits all objects (unordered) when given multiple paths and cwdbase', function (done) {
     var base = dir + '/fixtures';
 
     var expected = [
@@ -277,7 +283,9 @@ describe('glob-stream', function () {
 
     function assert(pathObjs) {
       expect(pathObjs.length).toEqual(3);
-      expect(pathObjs).toEqual(expected);
+      expect(pathObjs).toContainEqual(expected[0]);
+      expect(pathObjs).toContainEqual(expected[1]);
+      expect(pathObjs).toContainEqual(expected[2]);
     }
 
     pipe(
@@ -286,7 +294,7 @@ describe('glob-stream', function () {
     );
   });
 
-  it('properly orders objects when given multiple globs with globstars', function (done) {
+  it('emits all objects (unordered) when given multiple globs with globstars', function (done) {
     var expected = [
       {
         cwd: dir,
@@ -324,13 +332,17 @@ describe('glob-stream', function () {
 
     function assert(pathObjs) {
       expect(pathObjs.length).toEqual(5);
-      expect(pathObjs).toEqual(expected);
+      expect(pathObjs).toContainEqual(expected[0]);
+      expect(pathObjs).toContainEqual(expected[1]);
+      expect(pathObjs).toContainEqual(expected[2]);
+      expect(pathObjs).toContainEqual(expected[3]);
+      expect(pathObjs).toContainEqual(expected[4]);
     }
 
     pipe([globStream(globs, { cwd: dir }), concat(assert)], done);
   });
 
-  it('properly orders objects when given multiple absolute paths and no cwd', function (done) {
+  it('emits all objects (unordered) when given multiple absolute paths and no cwd', function (done) {
     var expected = [
       {
         cwd: process.cwd(),
@@ -357,7 +369,9 @@ describe('glob-stream', function () {
 
     function assert(pathObjs) {
       expect(pathObjs.length).toEqual(3);
-      expect(pathObjs).toEqual(expected);
+      expect(pathObjs).toContainEqual(expected[0]);
+      expect(pathObjs).toContainEqual(expected[1]);
+      expect(pathObjs).toContainEqual(expected[2]);
     }
 
     pipe([globStream(paths), concat(assert)], done);
@@ -640,6 +654,7 @@ describe('glob-stream', function () {
 
   it('emits an error when a singular path in multiple paths not found', function (done) {
     function assert(err) {
+      expect(err).toEqual(expect.anything());
       expect(err.toString()).toMatch(/File not found with singular glob/);
       done();
     }
@@ -689,8 +704,6 @@ describe('options', function () {
     var defaultedOpts = {
       cwd: process.cwd(),
       dot: false,
-      silent: true,
-      nonull: false,
       cwdbase: false,
     };
 
@@ -703,33 +716,30 @@ describe('options', function () {
     pipe([stream, concat()], done);
   });
 
-  describe('silent', function () {
-    it('accepts a boolean', function (done) {
-      pipe(
-        [
-          globStream(dir + '/fixtures/stuff/run.dmc', { silent: false }),
-          concat(),
-        ],
-        done
-      );
-    });
-  });
+  it('throws on invalid options', function (done) {
+    expect(function () {
+      globStream('./fixtures/stuff/*.dmc', { cwd: 1234 });
+    }).toThrow('must be a string');
+    expect(function () {
+      globStream('./fixtures/stuff/*.dmc', { dot: 1234 });
+    }).toThrow('must be a boolean');
+    expect(function () {
+      globStream('./fixtures/stuff/*.dmc', { cwdbase: 1234 });
+    }).toThrow('must be a boolean');
+    expect(function () {
+      globStream('./fixtures/stuff/*.dmc', { uniqueBy: 1234 });
+    }).toThrow('must be a string or function');
+    expect(function () {
+      globStream('./fixtures/stuff/*.dmc', { allowEmpty: 1234 });
+    }).toThrow('must be a boolean');
+    expect(function () {
+      globStream('./fixtures/stuff/*.dmc', { base: 1234 });
+    }).toThrow('must be a string if specified');
+    expect(function () {
+      globStream('./fixtures/stuff/*.dmc', { ignore: 1234 });
+    }).toThrow('must be a string or array');
 
-  describe('nonull', function () {
-    it('accepts a boolean', function (done) {
-      pipe([globStream('notfound{a,b}', { nonull: true }), concat()], done);
-    });
-
-    it('does not have any effect on our results', function (done) {
-      function assert(pathObjs) {
-        expect(pathObjs.length).toEqual(0);
-      }
-
-      pipe(
-        [globStream('notfound{a,b}', { nonull: true }), concat(assert)],
-        done
-      );
-    });
+    done();
   });
 
   describe('ignore', function () {
@@ -799,7 +809,7 @@ describe('options', function () {
       );
     });
 
-    it('merges ignore option and negative globs', function (done) {
+    it('can use both ignore option and negative globs', function (done) {
       var globs = ['./fixtures/stuff/*.dmc', '!./fixtures/stuff/test.dmc'];
 
       function assert(pathObjs) {
@@ -814,5 +824,167 @@ describe('options', function () {
         done
       );
     });
+  });
+
+  it('emits an error if there are no matches', function (done) {
+    function assert(err) {
+      expect(err.message).toMatch(/^File not found with singular glob/g);
+      done();
+    }
+
+    pipe([globStream('notfound', { cwd: dir }), concat()], assert);
+  });
+
+  it('throws an error if you try to write to it', function (done) {
+    var gs = globStream('notfound', { cwd: dir });
+    gs.on('error', function () {});
+
+    try {
+      gs.write({});
+    } catch (err) {
+      expect(err).toEqual(expect.anything());
+      done();
+    }
+  });
+
+  it('does not throw an error if you push to it', function (done) {
+    var stub = {
+      cwd: dir,
+      base: dir,
+      path: dir,
+    };
+
+    var gs = globStream('./fixtures/test.coffee', { cwd: dir });
+
+    gs.push(stub);
+
+    function assert(pathObjs) {
+      expect(pathObjs.length).toEqual(2);
+      expect(pathObjs[0]).toEqual(stub);
+    }
+
+    pipe([gs, concat(assert)], done);
+  });
+
+  it('accepts a file path', function (done) {
+    var expected = {
+      cwd: dir,
+      base: dir + '/fixtures',
+      path: dir + '/fixtures/test.coffee',
+    };
+
+    function assert(pathObjs) {
+      expect(pathObjs.length).toBe(1);
+      expect(pathObjs[0]).toMatchObject(expected);
+    }
+
+    pipe(
+      [globStream('./fixtures/test.coffee', { cwd: dir }), concat(assert)],
+      done
+    );
+  });
+
+  it('accepts a glob', function (done) {
+    var expected = [
+      {
+        cwd: dir,
+        base: dir + '/fixtures',
+        path: dir + '/fixtures/has (parens)/test.dmc',
+      },
+      {
+        cwd: dir,
+        base: dir + '/fixtures',
+        path: dir + '/fixtures/stuff/run.dmc',
+      },
+      {
+        cwd: dir,
+        base: dir + '/fixtures',
+        path: dir + '/fixtures/stuff/test.dmc',
+      },
+    ];
+
+    function assert(pathObjs) {
+      expect(pathObjs.length).toBe(3);
+      expect(pathObjs).toContainEqual(expected[0]);
+      expect(pathObjs).toContainEqual(expected[1]);
+      expect(pathObjs).toContainEqual(expected[2]);
+    }
+
+    pipe(
+      [globStream('./fixtures/**/*.dmc', { cwd: dir }), concat(assert)],
+      done
+    );
+  });
+
+  it('pauses the globber upon backpressure', function (done) {
+    var gs = globStream('./fixtures/**/*.dmc', { cwd: dir, highWaterMark: 1 });
+
+    function waiter(pathObj, _, cb) {
+      setTimeout(function () {
+        cb(null, pathObj);
+      }, 500);
+    }
+
+    function assert(pathObjs) {
+      expect(pathObjs.length).toEqual(3);
+    }
+
+    pipe(
+      [gs, through2.obj({ highWaterMark: 1 }, waiter), concat(assert)],
+      done
+    );
+  });
+
+  it('destroys the stream with an error if no match is found', function (done) {
+    var gs = globStream('notfound', { cwd: dir });
+
+    var spy = sinon.spy(gs, 'destroy');
+
+    function assert(err) {
+      sinon.restore();
+      expect(spy.getCall(0).args[0]).toBe(err);
+      expect(err.toString()).toMatch(/File not found with singular glob/);
+      done();
+    }
+
+    pipe([gs, concat()], assert);
+  });
+
+  it('destroys the stream if walker errors', function (done) {
+    var expectedError = new Error('Stubbed error');
+
+    var gs = globStream('./fixtures/**/*.dmc', { cwd: dir });
+
+    function stubError(dirpath, opts, cb) {
+      cb(expectedError);
+    }
+
+    var spy = sinon.spy(gs, 'destroy');
+    sinon.stub(fs, 'readdir').callsFake(stubError);
+
+    function assert(err) {
+      sinon.restore();
+      expect(spy.called).toEqual(true);
+      expect(err).toBe(expectedError);
+      done();
+    }
+
+    pipe([gs, concat()], assert);
+  });
+
+  it('does not emit an error if stream is destroyed without an error', function (done) {
+    var gs = globStream('./fixtures/**/*.dmc', { cwd: dir });
+
+    var spy = sinon.spy();
+
+    gs.on('error', spy);
+
+    gs.on('close', function () {
+      sinon.restore();
+      expect(spy.called).toEqual(false);
+      done();
+    });
+
+    gs.destroy();
   });
 });

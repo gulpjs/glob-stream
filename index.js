@@ -1,79 +1,293 @@
 'use strict';
 
-var Combine = require('ordered-read-streams');
-var unique = require('unique-stream');
-var pumpify = require('pumpify');
+var fs = require('fs');
+var path = require('path');
+var EventEmitter = require('events');
+
+var fastq = require('fastq');
+var anymatch = require('anymatch');
+var Readable = require('readable-stream').Readable;
+var isGlob = require('is-glob');
+var globParent = require('glob-parent');
+var normalizePath = require('normalize-path');
 var isNegatedGlob = require('is-negated-glob');
+var toAbsoluteGlob = require('@gulpjs/to-absolute-glob');
 
-var GlobStream = require('./readable');
+var globErrMessage1 = 'File not found with singular glob: ';
+var globErrMessage2 = ' (if this was purposeful, use `allowEmpty` option)';
 
-function globStream(globs, opt) {
-  if (!opt) {
-    opt = {};
+function isFound(glob) {
+  // All globs are "found", while singular globs are only found when matched successfully
+  // This is due to the fact that a glob can match any number of files (0..Infinity) but
+  // a signular glob is always expected to match
+  return isGlob(glob);
+}
+
+function walkdir() {
+  var readdirOpts = {
+    withFileTypes: true,
+  };
+
+  var ee = new EventEmitter();
+
+  var queue = fastq(readdir, 1);
+  queue.drain = function () {
+    ee.emit('end');
+  };
+  queue.error(onError);
+
+  function onError(err) {
+    if (err) {
+      ee.emit('error', err);
+    }
   }
 
-  var ourOpt = Object.assign({}, opt);
-  var ignore = ourOpt.ignore;
+  ee.pause = function () {
+    queue.pause();
+  };
+  ee.resume = function () {
+    queue.resume();
+  };
+  ee.end = function () {
+    queue.kill();
+  };
+  ee.walk = function (filepath) {
+    queue.push(filepath);
+  };
 
-  ourOpt.cwd = typeof ourOpt.cwd === 'string' ? ourOpt.cwd : process.cwd();
-  ourOpt.dot = typeof ourOpt.dot === 'boolean' ? ourOpt.dot : false;
-  ourOpt.silent = typeof ourOpt.silent === 'boolean' ? ourOpt.silent : true;
-  ourOpt.cwdbase = typeof ourOpt.cwdbase === 'boolean' ? ourOpt.cwdbase : false;
-  ourOpt.uniqueBy =
-    typeof ourOpt.uniqueBy === 'string' || typeof ourOpt.uniqueBy === 'function'
-      ? ourOpt.uniqueBy
-      : 'path';
+  function readdir(filepath, cb) {
+    fs.readdir(filepath, readdirOpts, onReaddir);
 
-  if (ourOpt.cwdbase) {
-    ourOpt.base = ourOpt.cwd;
+    function onReaddir(err, dirents) {
+      if (err) {
+        return cb(err);
+      }
+
+      dirents.forEach(processDirent);
+
+      cb();
+    }
+
+    function processDirent(dirent) {
+      var nextpath = path.join(filepath, dirent.name);
+      ee.emit('path', nextpath, dirent);
+
+      if (dirent.isDirectory()) {
+        queue.push(nextpath);
+      }
+    }
   }
-  // Normalize string `ignore` to array
-  if (typeof ignore === 'string') {
-    ignore = [ignore];
-  }
-  // Ensure `ignore` is an array
-  if (!Array.isArray(ignore)) {
-    ignore = [];
-  }
 
-  // Only one glob no need to aggregate
-  if (!Array.isArray(globs)) {
-    globs = [globs];
-  }
+  return ee;
+}
 
-  var positives = [];
-  var negatives = [];
+function validateGlobs(globs) {
+  var hasPositiveGlob = false;
 
-  globs.forEach(sortGlobs);
+  globs.forEach(validateGlobs);
 
-  function sortGlobs(globString, index) {
+  function validateGlobs(globString, index) {
     if (typeof globString !== 'string') {
       throw new Error('Invalid glob at index ' + index);
     }
 
-    var glob = isNegatedGlob(globString);
-    var globArray = glob.negated ? negatives : positives;
-
-    globArray.push(glob.pattern);
+    var result = isNegatedGlob(globString);
+    if (result.negated === false) {
+      hasPositiveGlob = true;
+    }
   }
 
-  if (positives.length === 0) {
+  if (hasPositiveGlob === false) {
     throw new Error('Missing positive glob');
   }
+}
 
-  // Create all individual streams
-  var streams = positives.map(streamFromPositive);
-
-  // Then just pipe them to a single unique stream and return it
-  var aggregate = new Combine(streams);
-  var uniqueStream = unique(ourOpt.uniqueBy);
-
-  return pumpify.obj(aggregate, uniqueStream);
-
-  function streamFromPositive(positive) {
-    var negativeGlobs = negatives.concat(ignore);
-    return new GlobStream(positive, negativeGlobs, ourOpt);
+function validateOptions(opts) {
+  if (typeof opts.cwd !== 'string') {
+    throw new Error('The `cwd` option must be a string');
   }
+
+  if (typeof opts.dot !== 'boolean') {
+    throw new Error('The `dot` option must be a boolean');
+  }
+
+  if (typeof opts.cwdbase !== 'boolean') {
+    throw new Error('The `cwdbase` option must be a boolean');
+  }
+
+  if (
+    typeof opts.uniqueBy !== 'string' &&
+    typeof opts.uniqueBy !== 'function'
+  ) {
+    throw new Error('The `uniqueBy` option must be a string or function');
+  }
+
+  if (typeof opts.allowEmpty !== 'boolean') {
+    throw new Error('The `allowEmpty` option must be a boolean');
+  }
+
+  if (opts.base && typeof opts.base !== 'string') {
+    throw new Error('The `base` option must be a string if specified');
+  }
+
+  if (!Array.isArray(opts.ignore)) {
+    throw new Error('The `ignore` option must be a string or array');
+  }
+}
+
+function uniqueBy(comparator) {
+  var seen = new Set();
+
+  if (typeof comparator === 'string') {
+    return isUniqueByKey;
+  } else {
+    return isUniqueByFunc;
+  }
+
+  function isUnique(value) {
+    if (seen.has(value)) {
+      return false;
+    } else {
+      seen.add(value);
+      return true;
+    }
+  }
+
+  function isUniqueByKey(obj) {
+    return isUnique(obj[comparator]);
+  }
+
+  function isUniqueByFunc(obj) {
+    return isUnique(comparator(obj));
+  }
+}
+
+function globStream(globs, opt) {
+  if (!Array.isArray(globs)) {
+    globs = [globs];
+  }
+
+  validateGlobs(globs);
+
+  var ourOpt = Object.assign(
+    {},
+    {
+      highWaterMark: 16,
+      cwd: process.cwd(),
+      dot: false,
+      cwdbase: false,
+      uniqueBy: 'path',
+      allowEmpty: false,
+      ignore: [],
+    },
+    opt
+  );
+  // Normalize `ignore` to array
+  ourOpt.ignore =
+    typeof ourOpt.ignore === 'string' ? [ourOpt.ignore] : ourOpt.ignore;
+
+  validateOptions(ourOpt);
+
+  var base = ourOpt.base;
+  if (ourOpt.cwdbase) {
+    base = ourOpt.cwd;
+  }
+
+  var walker = walkdir();
+
+  var stream = new Readable({
+    objectMode: true,
+    highWaterMark: ourOpt.highWaterMark,
+    read: read,
+    destroy: destroy,
+  });
+
+  // Remove path relativity to make globs make sense
+  var ourGlobs = globs.map(resolveGlob);
+  ourOpt.ignore = ourOpt.ignore.map(resolveGlob);
+
+  var found = ourGlobs.map(isFound);
+
+  var matcher = anymatch(ourGlobs, null, ourOpt);
+
+  var isUnique = uniqueBy(ourOpt.uniqueBy);
+
+  walker.on('path', onPath);
+  walker.once('end', onEnd);
+  walker.once('error', onError);
+  walker.walk(ourOpt.cwd);
+
+  function read() {
+    walker.resume();
+  }
+
+  function destroy(err) {
+    walker.end();
+
+    process.nextTick(function () {
+      if (err) {
+        stream.emit('error', err);
+      }
+      stream.emit('close');
+    });
+  }
+
+  function resolveGlob(glob) {
+    return toAbsoluteGlob(glob, ourOpt);
+  }
+
+  function onPath(filepath, dirent) {
+    var matchIdx = matcher(filepath, true);
+    // If the matcher doesn't match (but it is a directory),
+    // we want to add a trailing separator to check the match again
+    if (matchIdx === -1 && dirent.isDirectory()) {
+      matchIdx = matcher(filepath + path.sep, true);
+    }
+    if (matchIdx !== -1) {
+      found[matchIdx] = true;
+
+      // Extract base path from glob
+      var basePath = base || globParent(ourGlobs[matchIdx]);
+
+      var obj = {
+        cwd: ourOpt.cwd,
+        base: basePath,
+        // We always want to normalize the path to posix-style slashes
+        path: normalizePath(filepath, true),
+      };
+
+      var unique = isUnique(obj);
+      if (unique) {
+        var drained = stream.push(obj);
+        if (!drained) {
+          walker.pause();
+        }
+      }
+    }
+  }
+
+  function onEnd() {
+    var destroyed = false;
+
+    found.forEach(function (matchFound, idx) {
+      if (ourOpt.allowEmpty !== true && !matchFound) {
+        destroyed = true;
+        var err = new Error(globErrMessage1 + ourGlobs[idx] + globErrMessage2);
+
+        return stream.destroy(err);
+      }
+    });
+
+    if (destroyed === false) {
+      stream.push(null);
+    }
+  }
+
+  function onError(err) {
+    stream.destroy(err);
+  }
+
+  return stream;
 }
 
 module.exports = globStream;
