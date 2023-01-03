@@ -10,7 +10,7 @@ var Readable = require('readable-stream').Readable;
 var isGlob = require('is-glob');
 var globParent = require('glob-parent');
 var isNegatedGlob = require('is-negated-glob');
-var toAbsoluteGlob = require('to-absolute-glob');
+var toAbsoluteGlob = require('@gulpjs/to-absolute-glob');
 var removeTrailingSeparator = require('remove-trailing-separator');
 
 var globErrMessage1 = 'File not found with singular glob: ';
