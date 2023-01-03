@@ -704,8 +704,6 @@ describe('options', function () {
     var defaultedOpts = {
       cwd: process.cwd(),
       dot: false,
-      silent: true,
-      nonull: false,
       cwdbase: false,
     };
 
@@ -718,33 +716,30 @@ describe('options', function () {
     pipe([stream, concat()], done);
   });
 
-  describe('silent', function () {
-    it('accepts a boolean', function (done) {
-      pipe(
-        [
-          globStream(dir + '/fixtures/stuff/run.dmc', { silent: false }),
-          concat(),
-        ],
-        done
-      );
-    });
-  });
+  it('throws on invalid options', function (done) {
+    expect(function () {
+      globStream('./fixtures/stuff/*.dmc', { cwd: 1234 });
+    }).toThrow('must be a string');
+    expect(function () {
+      globStream('./fixtures/stuff/*.dmc', { dot: 1234 });
+    }).toThrow('must be a boolean');
+    expect(function () {
+      globStream('./fixtures/stuff/*.dmc', { cwdbase: 1234 });
+    }).toThrow('must be a boolean');
+    expect(function () {
+      globStream('./fixtures/stuff/*.dmc', { uniqueBy: 1234 });
+    }).toThrow('must be a string or function');
+    expect(function () {
+      globStream('./fixtures/stuff/*.dmc', { allowEmpty: 1234 });
+    }).toThrow('must be a boolean');
+    expect(function () {
+      globStream('./fixtures/stuff/*.dmc', { base: 1234 });
+    }).toThrow('must be a string if specified');
+    expect(function () {
+      globStream('./fixtures/stuff/*.dmc', { ignore: 1234 });
+    }).toThrow('must be a string or array');
 
-  describe('nonull', function () {
-    it('accepts a boolean', function (done) {
-      pipe([globStream('notfound{a,b}', { nonull: true }), concat()], done);
-    });
-
-    it('does not have any effect on our results', function (done) {
-      function assert(pathObjs) {
-        expect(pathObjs.length).toEqual(0);
-      }
-
-      pipe(
-        [globStream('notfound{a,b}', { nonull: true }), concat(assert)],
-        done
-      );
-    });
+    done();
   });
 
   describe('ignore', function () {
@@ -921,10 +916,8 @@ describe('options', function () {
     );
   });
 
-  it.skip('pauses the globber upon backpressure', function (done) {
+  it('pauses the globber upon backpressure', function (done) {
     var gs = globStream('./fixtures/**/*.dmc', { cwd: dir, highWaterMark: 1 });
-
-    var spy = sinon.spy(gs._walker, 'pause');
 
     function waiter(pathObj, _, cb) {
       setTimeout(function () {
@@ -934,8 +927,6 @@ describe('options', function () {
 
     function assert(pathObjs) {
       expect(pathObjs.length).toEqual(3);
-      expect(spy.callCount).toEqual(2);
-      sinon.restore();
     }
 
     pipe(
@@ -959,10 +950,10 @@ describe('options', function () {
     pipe([gs, concat()], assert);
   });
 
-  it('destroys the stream if node-glob errors', function (done) {
+  it('destroys the stream if walker errors', function (done) {
     var expectedError = new Error('Stubbed error');
 
-    var gs = globStream('./fixtures/**/*.dmc', { cwd: dir, silent: true });
+    var gs = globStream('./fixtures/**/*.dmc', { cwd: dir });
 
     function stubError(dirpath, opts, cb) {
       cb(expectedError);
@@ -979,5 +970,21 @@ describe('options', function () {
     }
 
     pipe([gs, concat()], assert);
+  });
+
+  it('does not emit an error if stream is destroyed without an error', function (done) {
+    var gs = globStream('./fixtures/**/*.dmc', { cwd: dir });
+
+    var spy = sinon.spy();
+
+    gs.on('error', spy);
+
+    gs.on('close', function () {
+      sinon.restore();
+      expect(spy.called).toEqual(false);
+      done();
+    });
+
+    gs.destroy();
   });
 });
