@@ -237,6 +237,9 @@ function globStream(globs, opt) {
   }
 
   function onPath(filepath, dirent) {
+    // We always want to normalize the path to posix-style slashes
+    filepath = path.posix.normalize(filepath);
+
     var matchIdx = matcher(filepath, true);
     // If the matcher doesn't match (but it is a directory),
     // we want to add a trailing separator to check the match again
