@@ -9,9 +9,9 @@ var anymatch = require('anymatch');
 var Readable = require('readable-stream').Readable;
 var isGlob = require('is-glob');
 var globParent = require('glob-parent');
+var normalizePath = require('normalize-path');
 var isNegatedGlob = require('is-negated-glob');
 var toAbsoluteGlob = require('@gulpjs/to-absolute-glob');
-var removeTrailingSeparator = require('remove-trailing-separator');
 
 var globErrMessage1 = 'File not found with singular glob: ';
 var globErrMessage2 = ' (if this was purposeful, use `allowEmpty` option)';
@@ -237,9 +237,6 @@ function globStream(globs, opt) {
   }
 
   function onPath(filepath, dirent) {
-    // We always want to normalize the path to posix-style slashes
-    filepath = path.posix.normalize(filepath);
-
     var matchIdx = matcher(filepath, true);
     // If the matcher doesn't match (but it is a directory),
     // we want to add a trailing separator to check the match again
@@ -255,7 +252,8 @@ function globStream(globs, opt) {
       var obj = {
         cwd: ourOpt.cwd,
         base: basePath,
-        path: removeTrailingSeparator(filepath),
+        // We always want to normalize the path to posix-style slashes
+        path: normalizePath(filepath, true),
       };
 
       var unique = isUnique(obj);
