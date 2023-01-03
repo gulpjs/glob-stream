@@ -1,7 +1,7 @@
 {
   "name": "glob-stream",
   "version": "7.0.0",
-  "description": "A Readable Stream interface over node-glob.",
+  "description": "A Readable Stream interface over anymatch.",
   "author": "Gulp Team <team@gulpjs.com> (https://gulpjs.com/)",
   "contributors": [
     "Eric Schoffstall <yo@contra.io>",

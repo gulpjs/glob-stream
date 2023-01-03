@@ -8,7 +8,7 @@
 
 [![NPM version][npm-image]][npm-url] [![Downloads][downloads-image]][npm-url] [![Build Status][ci-image]][ci-url] [![Coveralls Status][coveralls-image]][coveralls-url]
 
-A [Readable Stream][readable-stream-url] interface over [node-glob][node-glob-url].
+A [Readable Stream][readable-stream-url] interface over [anymatch][anymatch-url].
 
 ## Usage
 
@@ -29,7 +29,7 @@ You can pass any combination of glob strings. One caveat is that you cannot **on
 
 ## API
 
-### `globStream(globs, options)`
+### `globStream(globs, [options])`
 
 Takes a glob string or an array of glob strings as the first argument and an options object as the second. Returns a stream of objects that contain `cwd`, `base` and `path` properties.
 
@@ -51,14 +51,6 @@ Type: `Boolean`
 
 Default: `false`
 
-##### `options.silent`
-
-Whether or not to suppress warnings on stderr from [node-glob][node-glob-url]. This is passed through to [node-glob][node-glob-url].
-
-Type: `Boolean`
-
-Default: `true`
-
 ##### `options.cwd`
 
 The current working directory that the glob is resolved against.
@@ -70,8 +62,6 @@ Default: `process.cwd()`
 ##### `options.root`
 
 The root path that the glob is resolved against.
-
-**Note: This is never passed to [node-glob][node-glob-url] because it is pre-resolved against your paths.**
 
 Type: `String`
 
@@ -103,7 +93,7 @@ Default: `'path'`
 
 ##### other
 
-Any glob-related options are documented in [node-glob][node-glob-url]. Those options are forwarded verbatim, with the exception of `root` and `ignore`. `root` is pre-resolved and `ignore` is joined with all negative globs.
+Any glob-related options are documented in [picomatch][picomatch-options-url].
 
 #### Globbing & Negation
 
@@ -130,7 +120,8 @@ gs(['*.js', '!b*.js']);
 MIT
 
 <!-- prettier-ignore-start -->
-[node-glob-url]: https://github.com/isaacs/node-glob
+[anymatch-url]: https://github.com/micromatch/anymatch
+[picomatch-options-url]: https://github.com/micromatch/picomatch#options
 [glob-parent-url]: https://github.com/es128/glob-parent
 [allow-empty-url]: #optionsallowempty
 [readable-stream-url]: https://nodejs.org/api/stream.html#stream_readable_streams
