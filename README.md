@@ -131,7 +131,7 @@ MIT
 [npm-image]: https://img.shields.io/npm/v/glob-stream.svg?style=flat-square
 
 [ci-url]: https://github.com/gulpjs/glob-stream/actions?query=workflow:dev
-[ci-image]: https://img.shields.io/github/workflow/status/gulpjs/glob-stream/dev?style=flat-square
+[ci-image]: https://img.shields.io/github/actions/workflow/status/gulpjs/glob-stream/dev.yml?style=flat-square
 
 [coveralls-url]: https://coveralls.io/r/gulpjs/glob-stream
 [coveralls-image]: https://img.shields.io/coveralls/gulpjs/glob-stream/master.svg?style=flat-square
