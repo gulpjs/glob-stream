@@ -1,5 +1,6 @@
 'use strict';
 
+var path = require('path');
 var expect = require('expect');
 var sinon = require('sinon');
 
@@ -1028,6 +1029,30 @@ function suite(moduleName) {
       });
 
       gs.destroy();
+    });
+
+    it('handles tons of files with double-star glob', function (done) {
+      var gs = globStream('./node_modules/**/LICENSE', {
+        cwd: path.resolve(__dirname, '../'),
+      });
+
+      function assert(results) {
+        expect(results.length).toBeGreaterThan(16);
+      }
+
+      stream.pipeline([gs, concat(assert)], done);
+    });
+
+    it('handles tons of files with single-star glob', function (done) {
+      var gs = globStream('./node_modules/*', {
+        cwd: path.resolve(__dirname, '../'),
+      });
+
+      function assert(results) {
+        expect(results.length).toBeGreaterThan(16);
+      }
+
+      stream.pipeline([gs, concat(assert)], done);
     });
   });
 }
