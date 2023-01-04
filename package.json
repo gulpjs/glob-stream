@@ -30,16 +30,16 @@
     "is-glob": "^4.0.3",
     "is-negated-glob": "^1.0.0",
     "normalize-path": "^3.0.0",
-    "readable-stream": "^3.6.0"
+    "streamx": "^2.12.5"
   },
   "devDependencies": {
     "eslint": "^7.0.0",
     "eslint-config-gulp": "^5.0.0",
     "eslint-plugin-node": "^11.1.0",
     "expect": "^27.0.0",
-    "mississippi": "^4.0.0",
     "mocha": "^8.0.0",
     "nyc": "^15.0.1",
+    "readable-stream": "^3.6.0",
     "sinon": "^9.2.3"
   },
   "nyc": {
