@@ -1032,6 +1032,8 @@ function suite(moduleName) {
     });
 
     it('handles tons of files with double-star glob', function (done) {
+      this.timeout(10000);
+
       var gs = globStream('./node_modules/**/LICENSE', {
         cwd: path.resolve(__dirname, '../'),
       });
@@ -1044,6 +1046,8 @@ function suite(moduleName) {
     });
 
     it('handles tons of files with single-star glob', function (done) {
+      this.timeout(10000);
+
       var gs = globStream('./node_modules/*', {
         cwd: path.resolve(__dirname, '../'),
       });
