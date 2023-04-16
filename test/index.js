@@ -13,6 +13,7 @@ function deWindows(p) {
   return p.replace(/\\/g, '/');
 }
 
+var cwd = deWindows(process.cwd());
 var dir = deWindows(__dirname);
 
 function suite(moduleName) {
@@ -357,18 +358,18 @@ function suite(moduleName) {
     it('emits all objects (unordered) when given multiple absolute paths and no cwd', function (done) {
       var expected = [
         {
-          cwd: process.cwd(),
+          cwd: cwd,
           base: dir + '/fixtures/whatsgoingon/hey/isaidhey/whatsgoingon',
           path:
             dir + '/fixtures/whatsgoingon/hey/isaidhey/whatsgoingon/test.txt',
         },
         {
-          cwd: process.cwd(),
+          cwd: cwd,
           base: dir + '/fixtures',
           path: dir + '/fixtures/test.coffee',
         },
         {
-          cwd: process.cwd(),
+          cwd: cwd,
           base: dir + '/fixtures/whatsgoingon',
           path: dir + '/fixtures/whatsgoingon/test.js',
         },
@@ -527,7 +528,7 @@ function suite(moduleName) {
 
     it('works with direct paths and no cwd', function (done) {
       var expected = {
-        cwd: process.cwd(),
+        cwd: cwd,
         base: dir + '/fixtures',
         path: dir + '/fixtures/test.coffee',
       };
@@ -545,12 +546,10 @@ function suite(moduleName) {
 
     it('works with a relative cwd', function (done) {
       var expected = {
-        cwd: process.cwd() + '/test',
+        cwd: cwd + '/test',
         base: dir + '/fixtures',
         path: dir + '/fixtures/test.coffee',
       };
-
-      var cwd = path.relative(process.cwd(), __dirname);
 
       function assert(pathObjs) {
         expect(pathObjs.length).toEqual(1);
@@ -559,7 +558,9 @@ function suite(moduleName) {
 
       stream.pipeline(
         [
-          globStream(dir + '/fixtures/test.coffee', { cwd: cwd }),
+          globStream(dir + '/fixtures/test.coffee', {
+            cwd: path.relative(process.cwd(), __dirname),
+          }),
           concat(assert),
         ],
         done
@@ -568,7 +569,7 @@ function suite(moduleName) {
 
     it('supports negative globs', function (done) {
       var expected = {
-        cwd: process.cwd(),
+        cwd: cwd,
         base: dir + '/fixtures/stuff',
         path: dir + '/fixtures/stuff/run.dmc',
       };
@@ -588,7 +589,7 @@ function suite(moduleName) {
 
     it('supports negative file paths', function (done) {
       var expected = {
-        cwd: process.cwd(),
+        cwd: cwd,
         base: dir + '/fixtures/stuff',
         path: dir + '/fixtures/stuff/run.dmc',
       };
@@ -717,7 +718,7 @@ function suite(moduleName) {
 
     it('resolves absolute paths when root option is given', function (done) {
       var expected = {
-        cwd: process.cwd(),
+        cwd: cwd,
         base: dir + '/fixtures',
         path: dir + '/fixtures/test.coffee',
       };
