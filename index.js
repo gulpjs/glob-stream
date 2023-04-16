@@ -187,6 +187,8 @@ function globStream(globs, opt) {
 
   validateOptions(ourOpt);
 
+  ourOpt.cwd = path.resolve(ourOpt.cwd);
+
   var base = ourOpt.base;
   if (ourOpt.cwdbase) {
     base = ourOpt.cwd;

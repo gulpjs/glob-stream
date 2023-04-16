@@ -543,6 +543,29 @@ function suite(moduleName) {
       );
     });
 
+    it('works with a relative cwd', function (done) {
+      var expected = {
+        cwd: process.cwd() + '/test',
+        base: dir + '/fixtures',
+        path: dir + '/fixtures/test.coffee',
+      };
+
+      var cwd = path.relative(process.cwd(), __dirname);
+
+      function assert(pathObjs) {
+        expect(pathObjs.length).toEqual(1);
+        expect(pathObjs[0]).toEqual(expected);
+      }
+
+      stream.pipeline(
+        [
+          globStream(dir + '/fixtures/test.coffee', { cwd: cwd }),
+          concat(assert),
+        ],
+        done
+      );
+    });
+
     it('supports negative globs', function (done) {
       var expected = {
         cwd: process.cwd(),
