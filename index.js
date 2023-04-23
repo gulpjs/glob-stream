@@ -6,7 +6,7 @@ var EventEmitter = require('events');
 
 var fastq = require('fastq');
 var anymatch = require('anymatch');
-var Readable = require('readable-stream').Readable;
+var Readable = require('streamx').Readable;
 var isGlob = require('is-glob');
 var globParent = require('glob-parent');
 var normalizePath = require('normalize-path');
@@ -172,7 +172,6 @@ function globStream(globs, opt) {
   var ourOpt = Object.assign(
     {},
     {
-      highWaterMark: 16,
       cwd: process.cwd(),
       dot: false,
       cwdbase: false,
@@ -188,6 +187,8 @@ function globStream(globs, opt) {
 
   validateOptions(ourOpt);
 
+  ourOpt.cwd = normalizePath(path.resolve(ourOpt.cwd), true);
+
   var base = ourOpt.base;
   if (ourOpt.cwdbase) {
     base = ourOpt.cwd;
@@ -196,10 +197,9 @@ function globStream(globs, opt) {
   var walker = walkdir();
 
   var stream = new Readable({
-    objectMode: true,
     highWaterMark: ourOpt.highWaterMark,
     read: read,
-    destroy: destroy,
+    predestroy: predestroy,
   });
 
   // Remove path relativity to make globs make sense
@@ -217,19 +217,13 @@ function globStream(globs, opt) {
   walker.once('error', onError);
   walker.walk(ourOpt.cwd);
 
-  function read() {
+  function read(cb) {
     walker.resume();
+    cb();
   }
 
-  function destroy(err) {
+  function predestroy() {
     walker.end();
-
-    process.nextTick(function () {
-      if (err) {
-        stream.emit('error', err);
-      }
-      stream.emit('close');
-    });
   }
 
   function resolveGlob(glob) {

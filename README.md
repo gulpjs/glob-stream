@@ -8,7 +8,7 @@
 
 [![NPM version][npm-image]][npm-url] [![Downloads][downloads-image]][npm-url] [![Build Status][ci-image]][ci-url] [![Coveralls Status][coveralls-image]][coveralls-url]
 
-A [Readable Stream][readable-stream-url] interface over [anymatch][anymatch-url].
+[Readable streamx][streamx-url] interface over [anymatch][anymatch-url].
 
 ## Usage
 
@@ -104,7 +104,7 @@ MIT
 [picomatch-options-url]: https://github.com/micromatch/picomatch#options
 [glob-parent-url]: https://github.com/es128/glob-parent
 [allow-empty-url]: #optionsallowempty
-[readable-stream-url]: https://nodejs.org/api/stream.html#stream_readable_streams
+[streamx-url]: https://github.com/streamxorg/streamx#readable-stream
 
 [downloads-image]: https://img.shields.io/npm/dm/glob-stream.svg?style=flat-square
 [npm-url]: https://www.npmjs.com/package/glob-stream
