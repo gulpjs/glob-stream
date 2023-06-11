@@ -45,7 +45,7 @@ Default: `false` (error upon no match)
 
 ##### `options.dot`
 
-Whether or not to treat dotfiles as regular files. This is passed through to [node-glob][node-glob-url].
+Whether or not to treat dotfiles as regular files. This is passed through to [anymatch][anymatch-url].
 
 Type: `Boolean`
 
