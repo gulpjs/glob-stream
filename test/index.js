@@ -736,6 +736,37 @@ function suite(moduleName) {
         done
       );
     });
+
+    it.only('traverses symlinked directories', function (done) {
+      var expected = [
+        {
+          cwd: dir,
+          base: dir + '/fixtures/symlinks',
+          path: dir + '/fixtures/symlinks/file-a.txt',
+        },
+        {
+          cwd: dir,
+          base: dir + '/fixtures/symlinks',
+          path:
+            dir +
+            '/fixtures/symlinks/symlink-dest/hey/isaidhey/whatsgoingon/test.txt',
+        },
+      ];
+
+      function assert(pathObjs) {
+        expect(pathObjs.length).toBe(3);
+        expect(pathObjs).toContainEqual(expected[0]);
+        expect(pathObjs).toContainEqual(expected[1]);
+      }
+
+      stream.pipeline(
+        [
+          globStream(['./fixtures/symlinks/**/*.txt'], { cwd: dir }),
+          concat(assert),
+        ],
+        done
+      );
+    });
   });
 
   describe('options', function () {
