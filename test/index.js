@@ -334,6 +334,18 @@ function suite(moduleName) {
           base: dir + '/fixtures',
           path: dir + '/fixtures/stuff/test.dmc',
         },
+        {
+          cwd: dir,
+          base: dir + '/fixtures',
+          path: dir + '/fixtures/symlinks/symlink-dest/test.js',
+        },
+        {
+          cwd: dir,
+          base: dir + '/fixtures',
+          path:
+            dir +
+            '/fixtures/symlinks/symlink-dest/hey/isaidhey/whatsgoingon/test.txt',
+        },
       ];
 
       var globs = [
@@ -344,12 +356,14 @@ function suite(moduleName) {
       ];
 
       function assert(pathObjs) {
-        expect(pathObjs.length).toEqual(5);
+        expect(pathObjs.length).toEqual(7);
         expect(pathObjs).toContainEqual(expected[0]);
         expect(pathObjs).toContainEqual(expected[1]);
         expect(pathObjs).toContainEqual(expected[2]);
         expect(pathObjs).toContainEqual(expected[3]);
         expect(pathObjs).toContainEqual(expected[4]);
+        expect(pathObjs).toContainEqual(expected[5]);
+        expect(pathObjs).toContainEqual(expected[6]);
       }
 
       stream.pipeline([globStream(globs, { cwd: dir }), concat(assert)], done);
@@ -737,7 +751,7 @@ function suite(moduleName) {
       );
     });
 
-    it.only('traverses symlinked directories', function (done) {
+    it('traverses symlinked directories', function (done) {
       var expected = [
         {
           cwd: dir,
@@ -754,7 +768,7 @@ function suite(moduleName) {
       ];
 
       function assert(pathObjs) {
-        expect(pathObjs.length).toBe(3);
+        expect(pathObjs.length).toBe(2);
         expect(pathObjs).toContainEqual(expected[0]);
         expect(pathObjs).toContainEqual(expected[1]);
       }
