@@ -1084,6 +1084,28 @@ function suite(moduleName) {
       stream.pipeline([gs, concat()], assert);
     });
 
+    it('destroys the stream if walker errors when following symlink', function (done) {
+      var expectedError = new Error('Stubbed error');
+
+      var gs = globStream('./fixtures/**/*.dmc', { cwd: dir });
+
+      function stubError(dirpath, cb) {
+        cb(expectedError);
+      }
+
+      var spy = sinon.spy(gs, 'destroy');
+      sinon.stub(fs, 'stat').callsFake(stubError);
+
+      function assert(err) {
+        sinon.restore();
+        expect(spy.called).toEqual(true);
+        expect(err).toBe(expectedError);
+        done();
+      }
+
+      stream.pipeline([gs, concat()], assert);
+    });
+
     it('does not emit an error if stream is destroyed without an error', function (done) {
       var gs = globStream('./fixtures/**/*.dmc', { cwd: dir });
 
