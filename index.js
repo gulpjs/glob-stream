@@ -70,7 +70,6 @@ function walkdir() {
 
     function processDirent(dirent) {
       var nextpath = path.join(filepath, dirent.name);
-
       ee.emit('path', nextpath, dirent);
 
       if (dirent.isDirectory()) {
