@@ -74,6 +74,17 @@ function walkdir() {
 
       if (dirent.isDirectory()) {
         queue.push(nextpath);
+      } else if (dirent.isSymbolicLink()) {
+        // If it's a symlink, check if the symlink points to a directory
+        fs.stat(nextpath, function (err, stats) {
+          if (err) {
+            return cb(err);
+          }
+
+          if (stats.isDirectory()) {
+            queue.push(nextpath);
+          }
+        });
       }
     }
   }

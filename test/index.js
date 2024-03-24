@@ -334,6 +334,18 @@ function suite(moduleName) {
           base: dir + '/fixtures',
           path: dir + '/fixtures/stuff/test.dmc',
         },
+        {
+          cwd: dir,
+          base: dir + '/fixtures',
+          path: dir + '/fixtures/symlinks/symlink-dest/test.js',
+        },
+        {
+          cwd: dir,
+          base: dir + '/fixtures',
+          path:
+            dir +
+            '/fixtures/symlinks/symlink-dest/hey/isaidhey/whatsgoingon/test.txt',
+        },
       ];
 
       var globs = [
@@ -344,12 +356,14 @@ function suite(moduleName) {
       ];
 
       function assert(pathObjs) {
-        expect(pathObjs.length).toEqual(5);
+        expect(pathObjs.length).toEqual(7);
         expect(pathObjs).toContainEqual(expected[0]);
         expect(pathObjs).toContainEqual(expected[1]);
         expect(pathObjs).toContainEqual(expected[2]);
         expect(pathObjs).toContainEqual(expected[3]);
         expect(pathObjs).toContainEqual(expected[4]);
+        expect(pathObjs).toContainEqual(expected[5]);
+        expect(pathObjs).toContainEqual(expected[6]);
       }
 
       stream.pipeline([globStream(globs, { cwd: dir }), concat(assert)], done);
@@ -736,6 +750,37 @@ function suite(moduleName) {
         done
       );
     });
+
+    it('traverses symlinked directories', function (done) {
+      var expected = [
+        {
+          cwd: dir,
+          base: dir + '/fixtures/symlinks',
+          path: dir + '/fixtures/symlinks/file-a.txt',
+        },
+        {
+          cwd: dir,
+          base: dir + '/fixtures/symlinks',
+          path:
+            dir +
+            '/fixtures/symlinks/symlink-dest/hey/isaidhey/whatsgoingon/test.txt',
+        },
+      ];
+
+      function assert(pathObjs) {
+        expect(pathObjs.length).toBe(2);
+        expect(pathObjs).toContainEqual(expected[0]);
+        expect(pathObjs).toContainEqual(expected[1]);
+      }
+
+      stream.pipeline(
+        [
+          globStream(['./fixtures/symlinks/**/*.txt'], { cwd: dir }),
+          concat(assert),
+        ],
+        done
+      );
+    });
   });
 
   describe('options', function () {
@@ -1028,6 +1073,28 @@ function suite(moduleName) {
 
       var spy = sinon.spy(gs, 'destroy');
       sinon.stub(fs, 'readdir').callsFake(stubError);
+
+      function assert(err) {
+        sinon.restore();
+        expect(spy.called).toEqual(true);
+        expect(err).toBe(expectedError);
+        done();
+      }
+
+      stream.pipeline([gs, concat()], assert);
+    });
+
+    it('destroys the stream if walker errors when following symlink', function (done) {
+      var expectedError = new Error('Stubbed error');
+
+      var gs = globStream('./fixtures/**/*.dmc', { cwd: dir });
+
+      function stubError(dirpath, cb) {
+        cb(expectedError);
+      }
+
+      var spy = sinon.spy(gs, 'destroy');
+      sinon.stub(fs, 'stat').callsFake(stubError);
 
       function assert(err) {
         sinon.restore();
