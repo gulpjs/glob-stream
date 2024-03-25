@@ -30,6 +30,7 @@
     "is-glob": "^4.0.3",
     "is-negated-glob": "^1.0.0",
     "normalize-path": "^3.0.0",
+    "now-and-later": "^3.0.0",
     "streamx": "^2.12.5"
   },
   "devDependencies": {
