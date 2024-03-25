@@ -1,5 +1,13 @@
 # Changelog
 
+### [8.0.1](https://www.github.com/gulpjs/glob-stream/compare/v8.0.0...v8.0.1) (2024-03-25)
+
+
+### Bug Fixes
+
+* Avoid pushing additional paths to queue when error occurs ([#124](https://www.github.com/gulpjs/glob-stream/issues/124)) ([8eaab85](https://www.github.com/gulpjs/glob-stream/commit/8eaab85cbc7254d2e74d308c822df50a9e7aaf4a))
+* Traverse symlink folders ([#122](https://www.github.com/gulpjs/glob-stream/issues/122)) ([d49d9bd](https://www.github.com/gulpjs/glob-stream/commit/d49d9bd8042650ce91c190ab0ec20be716b2fade))
+
 ## [8.0.0](https://www.github.com/gulpjs/glob-stream/compare/v7.0.0...v8.0.0) (2023-04-23)
 
 
