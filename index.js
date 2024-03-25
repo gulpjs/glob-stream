@@ -12,6 +12,7 @@ var globParent = require('glob-parent');
 var normalizePath = require('normalize-path');
 var isNegatedGlob = require('is-negated-glob');
 var toAbsoluteGlob = require('@gulpjs/to-absolute-glob');
+var mapSeries = require('now-and-later').mapSeries;
 
 var globErrMessage1 = 'File not found with singular glob: ';
 var globErrMessage2 = ' (if this was purposeful, use `allowEmpty` option)';
@@ -55,6 +56,14 @@ function walkdir() {
     queue.push(filepath);
   };
 
+  function isDefined(value) {
+    return typeof value !== 'undefined';
+  }
+
+  function queuePush(value) {
+    queue.push(value);
+  }
+
   function readdir(filepath, cb) {
     fs.readdir(filepath, readdirOpts, onReaddir);
 
@@ -63,18 +72,28 @@ function walkdir() {
         return cb(err);
       }
 
-      dirents.forEach(processDirent);
+      mapSeries(dirents, processDirents, function (err, dirs) {
+        if (err) {
+          return cb(err);
+        }
 
-      cb();
+        dirs.filter(isDefined).forEach(queuePush);
+
+        cb();
+      });
     }
 
-    function processDirent(dirent) {
+    function processDirents(dirent, key, cb) {
       var nextpath = path.join(filepath, dirent.name);
       ee.emit('path', nextpath, dirent);
 
       if (dirent.isDirectory()) {
-        queue.push(nextpath);
-      } else if (dirent.isSymbolicLink()) {
+        cb(null, nextpath);
+
+        return;
+      }
+
+      if (dirent.isSymbolicLink()) {
         // If it's a symlink, check if the symlink points to a directory
         fs.stat(nextpath, function (err, stats) {
           if (err) {
@@ -82,10 +101,16 @@ function walkdir() {
           }
 
           if (stats.isDirectory()) {
-            queue.push(nextpath);
+            cb(null, nextpath);
+          } else {
+            cb();
           }
         });
+
+        return;
       }
+
+      cb();
     }
   }
 
