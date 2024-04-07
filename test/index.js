@@ -407,8 +407,6 @@ function suite(moduleName) {
         tmp + '/glob-stream-*.txt',
       ];
 
-      console.log(paths);
-
       function assert(pathObjs) {
         fs.unlinkSync(testFile, "test");
         expect(pathObjs.length).toEqual(4);
