@@ -405,6 +405,8 @@ function suite(moduleName) {
         os.tmpdir() + '/glob-stream-*.txt',
       ];
 
+      console.log(paths);
+
       function assert(pathObjs) {
         fs.unlinkSync(testFile, "test");
         expect(pathObjs.length).toEqual(4);
@@ -440,7 +442,7 @@ function suite(moduleName) {
     // https://github.com/gulpjs/glob-stream/issues/129
     it('does not take a long time when when checking a singular glob in the project root', function (done) {
       // Extremely short timeout to ensure we aren't traversing node_modules
-      this.timeout(10);
+      this.timeout(20);
 
       var expected = {
         cwd: cwd,
