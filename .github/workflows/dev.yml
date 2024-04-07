@@ -54,6 +54,8 @@ jobs:
 
       - name: Run tests
         run: npm test
+        env:
+          TEMP: ${{ runner.temp }}
 
       - name: Coveralls
         uses: coverallsapp/github-action@v1.1.2
