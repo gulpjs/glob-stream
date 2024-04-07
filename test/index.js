@@ -6,6 +6,7 @@ var sinon = require('sinon');
 
 // Need to wrap this to cause walker to emit an error
 var fs = require('fs');
+var os = require('os');
 
 var globStream = require('../');
 
@@ -370,6 +371,9 @@ function suite(moduleName) {
     });
 
     it('emits all objects (unordered) when given multiple absolute paths and no cwd', function (done) {
+      var testFile = path.join(os.tmpdir(), "glob-stream-test.txt");
+      fs.writeFileSync(testFile, "test");
+
       var expected = [
         {
           cwd: cwd,
@@ -387,22 +391,69 @@ function suite(moduleName) {
           base: dir + '/fixtures/whatsgoingon',
           path: dir + '/fixtures/whatsgoingon/test.js',
         },
+        {
+          cwd: cwd,
+          base: deWindows(os.tmpdir()),
+          path: deWindows(os.tmpdir()) + '/glob-stream-test.txt',
+        }
       ];
 
       var paths = [
         dir + '/fixtures/whatsgoingon/hey/isaidhey/whatsgoingon/test.txt',
         dir + '/fixtures/test.coffee',
         dir + '/fixtures/whatsgoingon/test.js',
+        os.tmpdir() + '/glob-stream-*.txt',
       ];
 
       function assert(pathObjs) {
-        expect(pathObjs.length).toEqual(3);
+        fs.unlinkSync(testFile, "test");
+        expect(pathObjs.length).toEqual(4);
         expect(pathObjs).toContainEqual(expected[0]);
         expect(pathObjs).toContainEqual(expected[1]);
         expect(pathObjs).toContainEqual(expected[2]);
+        expect(pathObjs).toContainEqual(expected[3]);
       }
 
       stream.pipeline([globStream(paths), concat(assert)], done);
+    });
+
+    it('resolves globs when process.chdir() changes the cwd', function (done) {
+      var prevCwd = process.cwd();
+      process.chdir('test/fixtures/stuff');
+
+      var expected = {
+        cwd: dir + '/fixtures/stuff',
+        base: dir + '/fixtures',
+        path: dir + '/fixtures/test.coffee',
+      };
+
+      function assert(pathObjs) {
+        process.chdir(prevCwd);
+
+        expect(pathObjs.length).toEqual(1);
+        expect(pathObjs[0]).toEqual(expected);
+      }
+
+      stream.pipeline([globStream(['../*.coffee']), concat(assert)], done);
+    });
+
+    // https://github.com/gulpjs/glob-stream/issues/129
+    it('does not take a long time when when checking a singular glob in the project root', function (done) {
+      // Extremely short timeout to ensure we aren't traversing node_modules
+      this.timeout(10);
+
+      var expected = {
+        cwd: cwd,
+        base: cwd,
+        path: cwd + '/package.json',
+      };
+
+      function assert(pathObjs) {
+        expect(pathObjs.length).toEqual(1);
+        expect(pathObjs[0]).toEqual(expected);
+      }
+
+      stream.pipeline([globStream(['./package.json']), concat(assert)], done);
     });
 
     it('removes duplicate objects from the stream using default (path) filter', function (done) {

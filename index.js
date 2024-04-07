@@ -31,7 +31,7 @@ function walkdir() {
 
   var ee = new EventEmitter();
 
-  var queue = fastq(readdir, 1);
+  var queue = fastq(process, 1);
   queue.drain = function () {
     ee.emit('end');
   };
@@ -52,20 +52,39 @@ function walkdir() {
   ee.end = function () {
     queue.kill();
   };
-  ee.walk = function (filepath) {
-    queue.push(filepath);
-  };
+  ee.walk = walk;
+  ee.exists = exists;
 
   function isDefined(value) {
     return typeof value !== 'undefined';
   }
 
-  function queuePush(value) {
-    queue.push(value);
+  function walk(path) {
+    queue.push({ action: 'walk', path: path });
   }
 
-  function readdir(filepath, cb) {
-    fs.readdir(filepath, readdirOpts, onReaddir);
+  function exists(path) {
+    queue.push({ action: 'exists', path: path });
+  }
+
+  function process(data, cb) {
+    if (data.action === 'walk') {
+      fs.readdir(data.path, readdirOpts, onReaddir);
+    } else {
+      fs.stat(data.path, onStat);
+    }
+
+    function onStat(err, stat) {
+      if (err) {
+        // Ignore errors but also don't emit the path
+        return cb();
+      }
+
+      // `stat` has `isDirectory()` which is what we use from Dirent
+      ee.emit('path', data.path, stat);
+
+      cb();
+    }
 
     function onReaddir(err, dirents) {
       if (err) {
@@ -77,14 +96,14 @@ function walkdir() {
           return cb(err);
         }
 
-        dirs.filter(isDefined).forEach(queuePush);
+        dirs.filter(isDefined).forEach(walk);
 
         cb();
       });
     }
 
     function processDirents(dirent, key, cb) {
-      var nextpath = path.join(filepath, dirent.name);
+      var nextpath = path.join(data.path, dirent.name);
       ee.emit('path', nextpath, dirent);
 
       if (dirent.isDirectory()) {
@@ -136,6 +155,10 @@ function validateGlobs(globs) {
   if (hasPositiveGlob === false) {
     throw new Error('Missing positive glob');
   }
+}
+
+function isPositiveGlob(glob) {
+  return !isNegatedGlob(glob).negated;
 }
 
 function validateOptions(opts) {
@@ -251,7 +274,19 @@ function globStream(globs, opt) {
   walker.on('path', onPath);
   walker.once('end', onEnd);
   walker.once('error', onError);
-  walker.walk(ourOpt.cwd);
+  ourGlobs.forEach(function (glob) {
+    if (isGlob(glob)) {
+      // We only want to walk the glob-parent directories of any positive glob
+      // to reduce the amount of files have to check.
+      if (isPositiveGlob(glob)) {
+        var base = globParent(glob);
+        walker.walk(base);
+      }
+    } else {
+      // If the strig is not a glob, we just check for the existence of it.
+      walker.exists(glob);
+    }
+  });
 
   function read(cb) {
     walker.resume();
