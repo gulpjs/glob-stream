@@ -55,7 +55,7 @@ jobs:
       - name: Run tests
         run: npm test
         env:
-          TMPDIR: ${{ runner.temp }}
+          TEMP: ${{ runner.temp }}
 
       - name: Coveralls
         uses: coverallsapp/github-action@v1.1.2
