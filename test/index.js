@@ -374,6 +374,8 @@ function suite(moduleName) {
       var testFile = path.join(os.tmpdir(), "glob-stream-test.txt");
       fs.writeFileSync(testFile, "test");
 
+      var tmp = deWindows(os.tmpdir());
+
       var expected = [
         {
           cwd: cwd,
@@ -393,8 +395,8 @@ function suite(moduleName) {
         },
         {
           cwd: cwd,
-          base: deWindows(os.tmpdir()),
-          path: deWindows(os.tmpdir()) + '/glob-stream-test.txt',
+          base: tmp,
+          path: tmp + '/glob-stream-test.txt',
         }
       ];
 
@@ -402,7 +404,7 @@ function suite(moduleName) {
         dir + '/fixtures/whatsgoingon/hey/isaidhey/whatsgoingon/test.txt',
         dir + '/fixtures/test.coffee',
         dir + '/fixtures/whatsgoingon/test.js',
-        os.tmpdir() + '/glob-stream-*.txt',
+        tmp + '/glob-stream-*.txt',
       ];
 
       console.log(paths);
