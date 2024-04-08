@@ -370,9 +370,32 @@ function suite(moduleName) {
       stream.pipeline([globStream(globs, { cwd: dir }), concat(assert)], done);
     });
 
+    // By default, we only run this in CI since it takes so long
+    it('does not stack overflow if there are an insane amount of files', function (done) {
+      if (process.env.CI !== "true") {
+        this.skip();
+      }
+
+      this.timeout(0);
+      var largeDir = path.join(dir, 'fixtures/too-many');
+      fs.mkdirSync(largeDir, { recursive: true });
+
+      for (var i = 0; i < 100000; i++) {
+        fs.writeFileSync(path.join(largeDir, 'file-' + i + '.txt'), "test-" + i)
+      }
+
+      function assert(pathObjs) {
+        fs.rmSync(largeDir, { recursive: true });
+
+        expect(pathObjs.length).toEqual(100000);
+      }
+
+      stream.pipeline([globStream(largeDir + '/*.txt'), concat(assert)], done);
+    });
+
     it('emits all objects (unordered) when given multiple absolute paths and no cwd', function (done) {
-      var testFile = path.join(os.tmpdir(), "glob-stream-test.txt");
-      fs.writeFileSync(testFile, "test");
+      var testFile = path.join(os.tmpdir(), 'glob-stream-test.txt');
+      fs.writeFileSync(testFile, 'test');
 
       var tmp = deWindows(os.tmpdir());
 
@@ -408,7 +431,7 @@ function suite(moduleName) {
       ];
 
       function assert(pathObjs) {
-        fs.unlinkSync(testFile, "test");
+        fs.unlinkSync(testFile, 'test');
         expect(pathObjs.length).toEqual(4);
         expect(pathObjs).toContainEqual(expected[0]);
         expect(pathObjs).toContainEqual(expected[1]);
@@ -818,7 +841,6 @@ function suite(moduleName) {
             dir +
             '/fixtures/symlinks/symlink-dest/hey/isaidhey/whatsgoingon/test.txt',
         },
-
         {
           cwd: dir,
           base: dir + '/fixtures/symlinks',
@@ -829,7 +851,6 @@ function suite(moduleName) {
           base: dir + '/fixtures/symlinks',
           path: dir + '/fixtures/symlinks/folder-b/folder-b-file.txt',
         },
-
         // It should follow these circular symlinks, but not infinitely
         {
           cwd: dir,
@@ -840,15 +861,6 @@ function suite(moduleName) {
           cwd: dir,
           base: dir + '/fixtures/symlinks',
           path: dir + '/fixtures/symlinks/folder-b/link-to-a/folder-a-file.txt',
-        },
-
-        // And it should follow a symlink to a parent directory (circular symlink) without blowing up
-        {
-          cwd: dir,
-          base: dir + '/fixtures/symlinks',
-          path:
-            dir +
-            '/fixtures/symlinks/symlink-dest/hey/isaidhey/whatsgoingon/test.txt',
         },
       ];
 
