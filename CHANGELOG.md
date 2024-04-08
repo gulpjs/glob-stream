@@ -1,5 +1,14 @@
 # Changelog
 
+### [8.0.2](https://www.github.com/gulpjs/glob-stream/compare/v8.0.1...v8.0.2) (2024-04-08)
+
+
+### Bug Fixes
+
+* Avoid blowing the call stack when processing many files ([#133](https://www.github.com/gulpjs/glob-stream/issues/133)) ([bb21c9d](https://www.github.com/gulpjs/glob-stream/commit/bb21c9dc14b52ff275e5c4ab3e2c3c7de9dd63f8))
+* Avoid following circular symlinks ([#126](https://www.github.com/gulpjs/glob-stream/issues/126)) ([cf8b197](https://www.github.com/gulpjs/glob-stream/commit/cf8b1971a239e165a61654dffeac546faae449fc))
+* Only traverse directories that can match the glob base ([#131](https://www.github.com/gulpjs/glob-stream/issues/131)) ([8e74e21](https://www.github.com/gulpjs/glob-stream/commit/8e74e21840fd38cef4cbce050c99690349b4ee92))
+
 ### [8.0.1](https://www.github.com/gulpjs/glob-stream/compare/v8.0.0...v8.0.1) (2024-03-25)
 
 
