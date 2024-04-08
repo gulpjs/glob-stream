@@ -385,7 +385,7 @@ function suite(moduleName) {
       }
 
       function assert(pathObjs) {
-        fs.rmSync(largeDir, { recursive: true });
+        fs.rmdirSync(largeDir, { recursive: true, force: true });
 
         expect(pathObjs.length).toEqual(100000);
       }
