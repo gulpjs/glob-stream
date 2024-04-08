@@ -385,7 +385,10 @@ function suite(moduleName) {
       }
 
       function assert(pathObjs) {
-        fs.rmdirSync(largeDir, { recursive: true, force: true });
+        for (var i = 0; i < 100000; i++) {
+          fs.unlinkSync(path.join(largeDir, 'file-' + i + '.txt'))
+        }
+        fs.rmdirSync(largeDir);
 
         expect(pathObjs.length).toEqual(100000);
       }
