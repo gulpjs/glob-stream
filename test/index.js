@@ -818,12 +818,48 @@ function suite(moduleName) {
             dir +
             '/fixtures/symlinks/symlink-dest/hey/isaidhey/whatsgoingon/test.txt',
         },
+
+        {
+          cwd: dir,
+          base: dir + '/fixtures/symlinks',
+          path: dir + '/fixtures/symlinks/folder-a/folder-a-file.txt',
+        },
+        {
+          cwd: dir,
+          base: dir + '/fixtures/symlinks',
+          path: dir + '/fixtures/symlinks/folder-b/folder-b-file.txt',
+        },
+
+        // It should follow these circular symlinks, but not infinitely
+        {
+          cwd: dir,
+          base: dir + '/fixtures/symlinks',
+          path: dir + '/fixtures/symlinks/folder-a/link-to-b/folder-b-file.txt',
+        },
+        {
+          cwd: dir,
+          base: dir + '/fixtures/symlinks',
+          path: dir + '/fixtures/symlinks/folder-b/link-to-a/folder-a-file.txt',
+        },
+
+        // And it should follow a symlink to a parent directory (circular symlink) without blowing up
+        {
+          cwd: dir,
+          base: dir + '/fixtures/symlinks',
+          path:
+            dir +
+            '/fixtures/symlinks/symlink-dest/hey/isaidhey/whatsgoingon/test.txt',
+        },
       ];
 
       function assert(pathObjs) {
-        expect(pathObjs.length).toBe(2);
+        expect(pathObjs.length).toBe(6);
         expect(pathObjs).toContainEqual(expected[0]);
         expect(pathObjs).toContainEqual(expected[1]);
+        expect(pathObjs).toContainEqual(expected[2]);
+        expect(pathObjs).toContainEqual(expected[3]);
+        expect(pathObjs).toContainEqual(expected[4]);
+        expect(pathObjs).toContainEqual(expected[5]);
       }
 
       stream.pipeline(

@@ -24,6 +24,21 @@ function isFound(glob) {
   return isGlob(glob);
 }
 
+function getSymlinkInfo(filepath, cb) {
+  fs.realpath(filepath, function (err, realPath) {
+    if (err) return cb(err);
+
+    fs.lstat(realPath, function (err, lstat) {
+      if (err) return cb(err);
+
+      cb(null, {
+        destinationPath: realPath,
+        destinationStat: lstat,
+      });
+    });
+  });
+}
+
 function walkdir() {
   var readdirOpts = {
     withFileTypes: true,
@@ -114,12 +129,15 @@ function walkdir() {
 
       if (dirent.isSymbolicLink()) {
         // If it's a symlink, check if the symlink points to a directory
-        fs.stat(nextpath, function (err, stats) {
+        getSymlinkInfo(nextpath, function (err, info) {
           if (err) {
             return cb(err);
           }
 
-          if (stats.isDirectory()) {
+          if (
+            info.destinationStat.isDirectory() &&
+            !nextpath.startsWith(info.destinationPath + path.sep) // don't follow circular symlinks
+          ) {
             cb(null, nextpath);
           } else {
             cb();
