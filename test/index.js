@@ -393,7 +393,9 @@ function suite(moduleName) {
         expect(pathObjs.length).toEqual(100000);
       }
 
-      stream.pipeline([globStream(largeDir + '/*.txt'), concat(assert)], done);
+      var glob = deWindows(largeDir) + '/*.txt';
+
+      stream.pipeline([globStream(glob), concat(assert)], done);
     });
 
     it('emits all objects (unordered) when given multiple absolute paths and no cwd', function (done) {
