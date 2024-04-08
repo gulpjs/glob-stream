@@ -370,9 +370,9 @@ function suite(moduleName) {
       stream.pipeline([globStream(globs, { cwd: dir }), concat(assert)], done);
     });
 
-    // By default, we only run this in CI since it takes so long
+    // By default, we only run this in non-Windows CI since it takes so long
     it('does not stack overflow if there are an insane amount of files', function (done) {
-      if (process.env.CI !== "true") {
+      if (process.env.CI !== "true" || os.platform() ===  'win32') {
         this.skip();
       }
 
