@@ -12,7 +12,6 @@ var globParent = require('glob-parent');
 var normalizePath = require('normalize-path');
 var isNegatedGlob = require('is-negated-glob');
 var toAbsoluteGlob = require('@gulpjs/to-absolute-glob');
-var mapSeries = require('now-and-later').mapSeries;
 
 var globErrMessage1 = 'File not found with singular glob: ';
 var globErrMessage2 = ' (if this was purposeful, use `allowEmpty` option)';
@@ -24,21 +23,6 @@ function isFound(glob) {
   return isGlob(glob);
 }
 
-function getSymlinkInfo(filepath, cb) {
-  fs.realpath(filepath, function (err, realPath) {
-    if (err) return cb(err);
-
-    fs.lstat(realPath, function (err, lstat) {
-      if (err) return cb(err);
-
-      cb(null, {
-        destinationPath: realPath,
-        destinationStat: lstat,
-      });
-    });
-  });
-}
-
 function walkdir() {
   var readdirOpts = {
     withFileTypes: true,
@@ -46,7 +30,7 @@ function walkdir() {
 
   var ee = new EventEmitter();
 
-  var queue = fastq(process, 1);
+  var queue = fastq(onAction, 1);
   queue.drain = function () {
     ee.emit('end');
   };
@@ -69,10 +53,7 @@ function walkdir() {
   };
   ee.walk = walk;
   ee.exists = exists;
-
-  function isDefined(value) {
-    return typeof value !== 'undefined';
-  }
+  ee.resolve = resolve;
 
   function walk(path) {
     queue.push({ action: 'walk', path: path });
@@ -82,11 +63,41 @@ function walkdir() {
     queue.push({ action: 'exists', path: path });
   }
 
-  function process(data, cb) {
+  function resolve(path) {
+    queue.push({ action: 'resolve', path: path });
+  }
+
+  function resolveSymlink(symlinkPath, cb) {
+    fs.realpath(symlinkPath, function (err, realpath) {
+      if (err) {
+        return cb(err);
+      }
+
+      fs.lstat(realpath, function (err, stat) {
+        if (err) {
+          return cb(err);
+        }
+
+        if (stat.isDirectory() && !symlinkPath.startsWith(realpath + path.sep)) {
+          walk(symlinkPath);
+        }
+
+        cb();
+      })
+    });
+  }
+
+  function onAction(data, cb) {
     if (data.action === 'walk') {
-      fs.readdir(data.path, readdirOpts, onReaddir);
-    } else {
-      fs.stat(data.path, onStat);
+      return fs.readdir(data.path, readdirOpts, onReaddir);
+    }
+
+    if (data.action === 'exists') {
+      return fs.stat(data.path, onStat);
+    }
+
+    if (data.action === 'resolve') {
+      return resolveSymlink(data.path, cb);
     }
 
     function onStat(err, stat) {
@@ -106,48 +117,22 @@ function walkdir() {
         return cb(err);
       }
 
-      mapSeries(dirents, processDirents, function (err, dirs) {
-        if (err) {
-          return cb(err);
-        }
+      dirents.forEach(processDirent);
 
-        dirs.filter(isDefined).forEach(walk);
-
-        cb();
-      });
+      cb();
     }
 
-    function processDirents(dirent, key, cb) {
+    function processDirent(dirent) {
       var nextpath = path.join(data.path, dirent.name);
       ee.emit('path', nextpath, dirent);
 
       if (dirent.isDirectory()) {
-        cb(null, nextpath);
-
-        return;
+        return walk(nextpath);
       }
 
       if (dirent.isSymbolicLink()) {
-        // If it's a symlink, check if the symlink points to a directory
-        getSymlinkInfo(nextpath, function (err, info) {
-          if (err) {
-            return cb(err);
-          }
-
-          if (
-            info.destinationStat.isDirectory() &&
-            !nextpath.startsWith(info.destinationPath + path.sep) // don't follow circular symlinks
-          ) {
-            cb(null, nextpath);
-          } else {
-            cb();
-          }
-        });
-
-        return;
+        return resolve(nextpath);
       }
-
-      cb();
     }
   }
 
