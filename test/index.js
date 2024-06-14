@@ -887,6 +887,22 @@ function suite(moduleName) {
         done
       );
     });
+
+    it('does not end prematurely', function (done) {
+      var gs = globStream(['./non-existent-file'], { cwd: dir, allowEmpty: true });
+
+      function setup() {
+        stream.pipeline(
+          [
+            gs,
+            concat(),
+          ],
+          done
+        );
+      }
+
+      setTimeout(setup, 10);
+    });
   });
 
   describe('options', function () {
