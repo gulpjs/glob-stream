@@ -51,9 +51,14 @@ function walkdir() {
   ee.end = function () {
     queue.kill();
   };
+  ee.prewalk = prewalk;
   ee.walk = walk;
   ee.exists = exists;
   ee.resolve = resolve;
+
+  function prewalk(path) {
+    queue.push({ action: 'prewalk', path: path });
+  }
 
   function walk(path) {
     queue.push({ action: 'walk', path: path });
@@ -88,6 +93,10 @@ function walkdir() {
   }
 
   function onAction(data, cb) {
+    if (data.action === 'prewalk') {
+      return fs.stat(data.path, onPrewalkStat);
+    }
+
     if (data.action === 'walk') {
       return fs.readdir(data.path, readdirOpts, onReaddir);
     }
@@ -98,6 +107,17 @@ function walkdir() {
 
     if (data.action === 'resolve') {
       return resolveSymlink(data.path, cb);
+    }
+
+    function onPrewalkStat(err, stat) {
+      if (err) {
+        // Ignore errors but also don't walk this route
+        return cb();
+      }
+
+      ee.walk(data.path);
+
+      cb();
     }
 
     function onStat(err, stat) {
@@ -283,7 +303,7 @@ function globStream(globs, opt) {
       // to reduce the amount of files have to check.
       if (isPositiveGlob(glob)) {
         var base = globParent(glob);
-        walker.walk(base);
+        walker.prewalk(base);
       }
     } else {
       // If the strig is not a glob, we just check for the existence of it.
