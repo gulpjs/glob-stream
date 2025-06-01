@@ -289,7 +289,7 @@ function globStream(globs, opt) {
           walker.walk(base);
         }
       } else {
-        // If the strig is not a glob, we just check for the existence of it.
+        // If the string is not a glob, we just check for the existence of it.
         walker.exists(glob);
       }
     });

@@ -889,19 +889,28 @@ function suite(moduleName) {
     });
 
     it('does not end prematurely', function (done) {
-      var gs = globStream(['./non-existent-file'], { cwd: dir, allowEmpty: true });
+      var gs = globStream(['./fixtures/*.js'], { cwd: dir });
 
-      function setup() {
+      function delayed() {
         stream.pipeline(
           [
             gs,
+            new stream.Transform({
+              objectMode: true,
+              transform: function(data, enc, cb) {
+                if (typeof enc === 'function') {
+                  cb = enc;
+                }
+                cb(null, data);
+              }
+            }),
             concat(),
           ],
           done
         );
       }
 
-      setTimeout(setup, 10);
+      setTimeout(delayed, 10);
     });
   });
 
