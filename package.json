@@ -1,6 +1,6 @@
 {
   "name": "glob-stream",
-  "version": "8.0.2",
+  "version": "8.0.3",
   "description": "Readable streamx interface over anymatch.",
   "author": "Gulp Team <team@gulpjs.com> (https://gulpjs.com/)",
   "contributors": [

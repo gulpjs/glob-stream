@@ -1,5 +1,12 @@
 # Changelog
 
+### [8.0.3](https://www.github.com/gulpjs/glob-stream/compare/v8.0.2...v8.0.3) (2025-06-01)
+
+
+### Bug Fixes
+
+* Do not start and end the stream prematurely ([#136](https://www.github.com/gulpjs/glob-stream/issues/136)) ([9d36482](https://www.github.com/gulpjs/glob-stream/commit/9d364824a925cf10b30ea3cb4f91f7c0cf44784f))
+
 ### [8.0.2](https://www.github.com/gulpjs/glob-stream/compare/v8.0.1...v8.0.2) (2024-04-08)
 
 
