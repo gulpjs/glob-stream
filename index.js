@@ -261,6 +261,7 @@ function globStream(globs, opt) {
   var stream = new Readable({
     highWaterMark: ourOpt.highWaterMark,
     read: read,
+    open: open,
     predestroy: predestroy,
   });
 
@@ -277,19 +278,23 @@ function globStream(globs, opt) {
   walker.on('path', onPath);
   walker.once('end', onEnd);
   walker.once('error', onError);
-  ourGlobs.forEach(function (glob) {
-    if (isGlob(glob)) {
-      // We only want to walk the glob-parent directories of any positive glob
-      // to reduce the amount of files have to check.
-      if (isPositiveGlob(glob)) {
-        var base = globParent(glob);
-        walker.walk(base);
+
+  function open(cb) {
+    ourGlobs.forEach(function (glob) {
+      if (isGlob(glob)) {
+        // We only want to walk the glob-parent directories of any positive glob
+        // to reduce the amount of files have to check.
+        if (isPositiveGlob(glob)) {
+          var base = globParent(glob);
+          walker.walk(base);
+        }
+      } else {
+        // If the string is not a glob, we just check for the existence of it.
+        walker.exists(glob);
       }
-    } else {
-      // If the strig is not a glob, we just check for the existence of it.
-      walker.exists(glob);
-    }
-  });
+    });
+    cb();
+  }
 
   function read(cb) {
     walker.resume();
