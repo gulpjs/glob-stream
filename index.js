@@ -149,8 +149,7 @@ function validateGlobs(globs) {
       throw new Error('Invalid glob at index ' + index);
     }
 
-    var result = isNegatedGlob(globString);
-    if (result.negated === false) {
+    if (isPositiveGlob(globString)) {
       hasPositiveGlob = true;
     }
   }
