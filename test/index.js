@@ -101,6 +101,20 @@ function suite(moduleName) {
       );
     });
 
+    it('does not emit an error if glob base directory does not exist', function (done) {
+      function assert(pathObjs) {
+        expect(pathObjs.length).toEqual(0);
+      }
+
+      stream.pipeline(
+        [
+          globStream('./fixtures/not-exists/*', { cwd: dir }),
+          concat(assert),
+        ],
+        done
+      );
+    });
+
     it('streams only objects with file paths from a non-directory glob', function (done) {
       var expected = {
         cwd: dir,
