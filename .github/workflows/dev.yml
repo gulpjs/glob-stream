@@ -33,7 +33,7 @@ jobs:
       matrix:
         # Node 10 is removed until Streamx restores compatibility
         node: [12, 14, 16, 18, 20, 22, 24]
-        os: [ubuntu-latest, windows-latest, macos-13]
+        os: [ubuntu-latest, windows-latest, macos-15-intel]
 
     steps:
       - name: Clone repository
