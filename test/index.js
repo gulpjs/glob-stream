@@ -436,12 +436,44 @@ function suite(moduleName) {
       ];
 
       function assert(pathObjs) {
-        fs.unlinkSync(testFile, 'test');
+        fs.unlinkSync(testFile);
         expect(pathObjs.length).toEqual(4);
         expect(pathObjs).toContainEqual(expected[0]);
         expect(pathObjs).toContainEqual(expected[1]);
         expect(pathObjs).toContainEqual(expected[2]);
         expect(pathObjs).toContainEqual(expected[3]);
+      }
+
+      stream.pipeline([globStream(paths), concat(assert)], done);
+    });
+
+    it('skips directories with invalid permission', function (done) {
+      var testFile = path.join(os.tmpdir(), 'glob-stream-test.txt');
+      fs.writeFileSync(testFile, 'test');
+
+      var testDir = path.join(os.tmpdir(), 'glob-stream-private-dir');
+      // eslint-disable-next-line node/no-unsupported-features/es-syntax
+      fs.mkdirSync(testDir, { recursive: true, mode: 0o200 });
+
+      var tmp = deWindows(os.tmpdir());
+
+      var expected = [
+        {
+          cwd: cwd,
+          base: tmp,
+          path: tmp + '/glob-stream-test.txt',
+        },
+      ];
+
+      var paths = [
+        tmp + '/glob-stream-*.txt',
+      ];
+
+      function assert(pathObjs) {
+        fs.unlinkSync(testFile);
+        fs.rmdirSync(testDir);
+        expect(pathObjs.length).toEqual(1);
+        expect(pathObjs).toContainEqual(expected[0]);
       }
 
       stream.pipeline([globStream(paths), concat(assert)], done);

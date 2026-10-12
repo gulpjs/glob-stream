@@ -114,7 +114,13 @@ function walkdir() {
 
     function onReaddir(err, dirents) {
       if (err) {
-        return cb(err);
+        if (err.code === "EACCES") {
+          // Ignore access errors on directories since we must
+          // not have permission so don't emit the path
+          return cb();
+        } else {
+          return cb(err);
+        }
       }
 
       dirents.forEach(processDirent);
