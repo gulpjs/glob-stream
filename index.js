@@ -115,12 +115,18 @@ function walkdir() {
     function onReaddir(err, dirents) {
       if (err) {
         if (err.code === "EACCES") {
-          // Ignore access errors on directories since we must
+          // Ignore EACCES errors on directories since we must
           // not have permission so don't emit the path
           return cb();
-        } else {
-          return cb(err);
         }
+
+        if (err.code === "ENOENT") {
+          // Ignore ENOENT errors because a base directoty might
+          // not exist so just don't emit the path
+          return cb();
+        }
+
+        return cb(err);
       }
 
       dirents.forEach(processDirent);
