@@ -1,5 +1,14 @@
 # Changelog
 
+### [8.0.4](https://www.github.com/gulpjs/glob-stream/compare/v8.0.3...v8.0.4) (2026-10-13)
+
+
+### Bug Fixes
+
+* Correctly track found globs against positive globs only ([#150](https://www.github.com/gulpjs/glob-stream/issues/150)) ([2112789](https://www.github.com/gulpjs/glob-stream/commit/2112789b724bf22ff4b11c142b967d6eda439691))
+* Ignore directories with invalid permissions ([#146](https://www.github.com/gulpjs/glob-stream/issues/146)) ([003120b](https://www.github.com/gulpjs/glob-stream/commit/003120b450450bd3cd21f164fe8476972cbdd1ab))
+* Ignore no-entry errors when reading directories ([#148](https://www.github.com/gulpjs/glob-stream/issues/148)) ([b34ad6d](https://www.github.com/gulpjs/glob-stream/commit/b34ad6d8da2f78318ec2a085c06ba10ca607a9cf))
+
 ### [8.0.3](https://www.github.com/gulpjs/glob-stream/compare/v8.0.2...v8.0.3) (2025-06-01)
 
 
