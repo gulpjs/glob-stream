@@ -279,9 +279,12 @@ function globStream(globs, opt) {
 
   // Remove path relativity to make globs make sense
   var ourGlobs = globs.map(resolveGlob);
+  // Used to track found globs since anymatch separates them into 2 arrays
+  // and only returns the index of the positive match;
+  var positiveGlobs = ourGlobs.filter(isPositiveGlob);
   ourOpt.ignore = ourOpt.ignore.map(resolveGlob);
 
-  var found = ourGlobs.map(isFound);
+  var found = positiveGlobs.map(isFound);
 
   var matcher = anymatch(ourGlobs, null, ourOpt);
 
@@ -292,14 +295,12 @@ function globStream(globs, opt) {
   walker.once('error', onError);
 
   function open(cb) {
-    ourGlobs.forEach(function (glob) {
+    positiveGlobs.forEach(function (glob) {
       if (isGlob(glob)) {
         // We only want to walk the glob-parent directories of any positive glob
         // to reduce the amount of files have to check.
-        if (isPositiveGlob(glob)) {
-          var base = globParent(glob);
-          walker.walk(base);
-        }
+        var base = globParent(glob);
+        walker.walk(base);
       } else {
         // If the string is not a glob, we just check for the existence of it.
         walker.exists(glob);
@@ -332,7 +333,7 @@ function globStream(globs, opt) {
       found[matchIdx] = true;
 
       // Extract base path from glob
-      var basePath = base || globParent(ourGlobs[matchIdx]);
+      var basePath = base || globParent(positiveGlobs[matchIdx]);
 
       var obj = {
         cwd: ourOpt.cwd,
@@ -357,7 +358,7 @@ function globStream(globs, opt) {
     found.forEach(function (matchFound, idx) {
       if (ourOpt.allowEmpty !== true && !matchFound) {
         destroyed = true;
-        var err = new Error(globErrMessage1 + ourGlobs[idx] + globErrMessage2);
+        var err = new Error(globErrMessage1 + positiveGlobs[idx] + globErrMessage2);
 
         return stream.destroy(err);
       }
