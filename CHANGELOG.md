@@ -1,5 +1,16 @@
 # Changelog
 
+## [9.0.0](https://github.com/gulpjs/glob-stream/compare/v8.0.4...v9.0.0) (2026-10-15)
+
+
+### ⚠ BREAKING CHANGES
+
+* Normalize repository, dropping Node <26.1.0 ([#151](https://github.com/gulpjs/glob-stream/issues/151))
+
+### Miscellaneous Chores
+
+* Normalize repository, dropping Node &lt;26.1.0 ([#151](https://github.com/gulpjs/glob-stream/issues/151)) ([1d36d1a](https://github.com/gulpjs/glob-stream/commit/1d36d1a0330378068f1227ed99773aff01b88dd5))
+
 ### [8.0.4](https://www.github.com/gulpjs/glob-stream/compare/v8.0.3...v8.0.4) (2026-10-13)
 
 
