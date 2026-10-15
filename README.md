@@ -13,11 +13,9 @@
 ## Usage
 
 ```js
-var gs = require('glob-stream');
+var gs = require("glob-stream");
 
-var readable = gs('./files/**/*.coffee', {
-  /* options */
-});
+var readable = gs("./files/**/*.coffee", {/* options */});
 
 var writable =
   /* your WriteableStream */

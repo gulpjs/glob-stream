@@ -1,20 +1,20 @@
-'use strict';
+"use strict";
 
-var fs = require('fs');
-var path = require('path');
-var EventEmitter = require('events');
+var fs = require("fs");
+var path = require("path");
+var EventEmitter = require("events");
 
-var fastq = require('fastq');
-var anymatch = require('anymatch');
-var Readable = require('streamx').Readable;
-var isGlob = require('is-glob');
-var globParent = require('glob-parent');
-var normalizePath = require('normalize-path');
-var isNegatedGlob = require('is-negated-glob');
-var toAbsoluteGlob = require('@gulpjs/to-absolute-glob');
+var fastq = require("fastq");
+var anymatch = require("anymatch");
+var Readable = require("streamx").Readable;
+var isGlob = require("is-glob");
+var globParent = require("glob-parent");
+var normalizePath = require("normalize-path");
+var isNegatedGlob = require("is-negated-glob");
+var toAbsoluteGlob = require("@gulpjs/to-absolute-glob");
 
-var globErrMessage1 = 'File not found with singular glob: ';
-var globErrMessage2 = ' (if this was purposeful, use `allowEmpty` option)';
+var globErrMessage1 = "File not found with singular glob: ";
+var globErrMessage2 = " (if this was purposeful, use `allowEmpty` option)";
 
 function isFound(glob) {
   // All globs are "found", while singular globs are only found when matched successfully
@@ -32,13 +32,13 @@ function walkdir() {
 
   var queue = fastq(onAction, 1);
   queue.drain = function () {
-    ee.emit('end');
+    ee.emit("end");
   };
   queue.error(onError);
 
   function onError(err) {
     if (err) {
-      ee.emit('error', err);
+      ee.emit("error", err);
     }
   }
 
@@ -56,15 +56,15 @@ function walkdir() {
   ee.resolve = resolve;
 
   function walk(path) {
-    queue.push({ action: 'walk', path: path });
+    queue.push({ action: "walk", path: path });
   }
 
   function exists(path) {
-    queue.push({ action: 'exists', path: path });
+    queue.push({ action: "exists", path: path });
   }
 
   function resolve(path) {
-    queue.push({ action: 'resolve', path: path });
+    queue.push({ action: "resolve", path: path });
   }
 
   function resolveSymlink(symlinkPath, cb) {
@@ -78,25 +78,28 @@ function walkdir() {
           return cb(err);
         }
 
-        if (stat.isDirectory() && !symlinkPath.startsWith(realpath + path.sep)) {
+        if (
+          stat.isDirectory() &&
+          !symlinkPath.startsWith(realpath + path.sep)
+        ) {
           walk(symlinkPath);
         }
 
         cb();
-      })
+      });
     });
   }
 
   function onAction(data, cb) {
-    if (data.action === 'walk') {
+    if (data.action === "walk") {
       return fs.readdir(data.path, readdirOpts, onReaddir);
     }
 
-    if (data.action === 'exists') {
+    if (data.action === "exists") {
       return fs.stat(data.path, onStat);
     }
 
-    if (data.action === 'resolve') {
+    if (data.action === "resolve") {
       return resolveSymlink(data.path, cb);
     }
 
@@ -107,7 +110,7 @@ function walkdir() {
       }
 
       // `stat` has `isDirectory()` which is what we use from Dirent
-      ee.emit('path', data.path, stat);
+      ee.emit("path", data.path, stat);
 
       cb();
     }
@@ -136,7 +139,7 @@ function walkdir() {
 
     function processDirent(dirent) {
       var nextpath = path.join(data.path, dirent.name);
-      ee.emit('path', nextpath, dirent);
+      ee.emit("path", nextpath, dirent);
 
       if (dirent.isDirectory()) {
         return walk(nextpath);
@@ -157,8 +160,8 @@ function validateGlobs(globs) {
   globs.forEach(validateGlobs);
 
   function validateGlobs(globString, index) {
-    if (typeof globString !== 'string') {
-      throw new Error('Invalid glob at index ' + index);
+    if (typeof globString !== "string") {
+      throw new Error("Invalid glob at index " + index);
     }
 
     var result = isNegatedGlob(globString);
@@ -168,7 +171,7 @@ function validateGlobs(globs) {
   }
 
   if (hasPositiveGlob === false) {
-    throw new Error('Missing positive glob');
+    throw new Error("Missing positive glob");
   }
 }
 
@@ -177,42 +180,42 @@ function isPositiveGlob(glob) {
 }
 
 function validateOptions(opts) {
-  if (typeof opts.cwd !== 'string') {
-    throw new Error('The `cwd` option must be a string');
+  if (typeof opts.cwd !== "string") {
+    throw new Error("The `cwd` option must be a string");
   }
 
-  if (typeof opts.dot !== 'boolean') {
-    throw new Error('The `dot` option must be a boolean');
+  if (typeof opts.dot !== "boolean") {
+    throw new Error("The `dot` option must be a boolean");
   }
 
-  if (typeof opts.cwdbase !== 'boolean') {
-    throw new Error('The `cwdbase` option must be a boolean');
+  if (typeof opts.cwdbase !== "boolean") {
+    throw new Error("The `cwdbase` option must be a boolean");
   }
 
   if (
-    typeof opts.uniqueBy !== 'string' &&
-    typeof opts.uniqueBy !== 'function'
+    typeof opts.uniqueBy !== "string" &&
+    typeof opts.uniqueBy !== "function"
   ) {
-    throw new Error('The `uniqueBy` option must be a string or function');
+    throw new Error("The `uniqueBy` option must be a string or function");
   }
 
-  if (typeof opts.allowEmpty !== 'boolean') {
-    throw new Error('The `allowEmpty` option must be a boolean');
+  if (typeof opts.allowEmpty !== "boolean") {
+    throw new Error("The `allowEmpty` option must be a boolean");
   }
 
-  if (opts.base && typeof opts.base !== 'string') {
-    throw new Error('The `base` option must be a string if specified');
+  if (opts.base && typeof opts.base !== "string") {
+    throw new Error("The `base` option must be a string if specified");
   }
 
   if (!Array.isArray(opts.ignore)) {
-    throw new Error('The `ignore` option must be a string or array');
+    throw new Error("The `ignore` option must be a string or array");
   }
 }
 
 function uniqueBy(comparator) {
   var seen = new Set();
 
-  if (typeof comparator === 'string') {
+  if (typeof comparator === "string") {
     return isUniqueByKey;
   } else {
     return isUniqueByFunc;
@@ -249,15 +252,15 @@ function globStream(globs, opt) {
       cwd: process.cwd(),
       dot: false,
       cwdbase: false,
-      uniqueBy: 'path',
+      uniqueBy: "path",
       allowEmpty: false,
       ignore: [],
     },
-    opt
+    opt,
   );
   // Normalize `ignore` to array
   ourOpt.ignore =
-    typeof ourOpt.ignore === 'string' ? [ourOpt.ignore] : ourOpt.ignore;
+    typeof ourOpt.ignore === "string" ? [ourOpt.ignore] : ourOpt.ignore;
 
   validateOptions(ourOpt);
 
@@ -290,9 +293,9 @@ function globStream(globs, opt) {
 
   var isUnique = uniqueBy(ourOpt.uniqueBy);
 
-  walker.on('path', onPath);
-  walker.once('end', onEnd);
-  walker.once('error', onError);
+  walker.on("path", onPath);
+  walker.once("end", onEnd);
+  walker.once("error", onError);
 
   function open(cb) {
     positiveGlobs.forEach(function (glob) {
@@ -358,7 +361,9 @@ function globStream(globs, opt) {
     found.forEach(function (matchFound, idx) {
       if (ourOpt.allowEmpty !== true && !matchFound) {
         destroyed = true;
-        var err = new Error(globErrMessage1 + positiveGlobs[idx] + globErrMessage2);
+        var err = new Error(
+          globErrMessage1 + positiveGlobs[idx] + globErrMessage2,
+        );
 
         return stream.destroy(err);
       }

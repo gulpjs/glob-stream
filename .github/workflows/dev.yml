@@ -20,8 +20,8 @@ jobs:
       - name: Prettier
         uses: gulpjs/prettier_action@v3.0
         with:
-          commit_message: 'Build: Run prettier'
-          prettier_options: '--write .'
+          commit_message: "Build: Run prettier"
+          prettier_options: "--write ."
 
   test:
     name: Tests for Node ${{ matrix.node }} on ${{ matrix.os }}
