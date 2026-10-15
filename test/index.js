@@ -466,7 +466,6 @@ function suite(moduleName) {
       fs.writeFileSync(testFile, "test");
 
       var testDir = path.join(os.tmpdir(), "glob-stream-private-dir");
-      // eslint-disable-next-line node/no-unsupported-features/es-syntax
       fs.mkdirSync(testDir, { recursive: true, mode: 0o200 });
 
       var tmp = deWindows(os.tmpdir());
