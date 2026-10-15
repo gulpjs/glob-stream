@@ -118,9 +118,9 @@ MIT
 [npm-url]: https://www.npmjs.com/package/glob-stream
 [npm-image]: https://img.shields.io/npm/v/glob-stream.svg?style=flat-square
 
-[ci-url]: https://github.com/gulpjs/globe-stream/actions/workflows/dev.yml
-[ci-image]: https://img.shields.io/github/actions/workflow/status/gulpjs/globe-stream/dev.yml?style=flat-square
+[ci-url]: https://github.com/gulpjs/glob-stream/actions/workflows/dev.yml
+[ci-image]: https://img.shields.io/github/actions/workflow/status/gulpjs/glob-stream/dev.yml?style=flat-square
 
-[coveralls-url]: https://coveralls.io/r/gulpjs/globe-stream
-[coveralls-image]: https://img.shields.io/coveralls/gulpjs/globe-stream/main.svg?style=flat-square
+[coveralls-url]: https://coveralls.io/r/gulpjs/glob-stream
+[coveralls-image]: https://img.shields.io/coveralls/gulpjs/glob-stream/main.svg?style=flat-square
 <!-- prettier-ignore-end -->

@@ -8,21 +8,6 @@ env:
   CI: true
 
 jobs:
-  prettier:
-    name: Format code
-    runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'push' }}
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Prettier
-        uses: gulpjs/prettier_action@v3.0
-        with:
-          commit_message: "Build: Run prettier"
-          prettier_options: "--write ."
-
   test:
     name: Tests for Node ${{ matrix.node }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
