@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="http://gulpjs.com">
+  <a href="https://gulpjs.com">
     <img height="257" width="114" src="https://raw.githubusercontent.com/gulpjs/artwork/master/gulp-2x.png">
   </a>
 </p>
@@ -95,6 +95,16 @@ Default: `'path'`
 
 Any glob-related options are documented in [picomatch][picomatch-options-url].
 
+## Strict No LLM / No AI Policy
+
+No LLMs for issues.
+
+No LLMs for patches / pull requests.
+
+No LLMs for comments on the bug tracker, including translation.
+
+English is encouraged, but not required. You are welcome to post in your native language and rely on others to have their own translation tools of choice to interpret your words.
+
 ## License
 
 MIT
@@ -110,9 +120,9 @@ MIT
 [npm-url]: https://www.npmjs.com/package/glob-stream
 [npm-image]: https://img.shields.io/npm/v/glob-stream.svg?style=flat-square
 
-[ci-url]: https://github.com/gulpjs/glob-stream/actions?query=workflow:dev
-[ci-image]: https://img.shields.io/github/actions/workflow/status/gulpjs/glob-stream/dev.yml?style=flat-square
+[ci-url]: https://github.com/gulpjs/globe-stream/actions/workflows/dev.yml
+[ci-image]: https://img.shields.io/github/actions/workflow/status/gulpjs/globe-stream/dev.yml?style=flat-square
 
-[coveralls-url]: https://coveralls.io/r/gulpjs/glob-stream
-[coveralls-image]: https://img.shields.io/coveralls/gulpjs/glob-stream/master.svg?style=flat-square
+[coveralls-url]: https://coveralls.io/r/gulpjs/globe-stream
+[coveralls-image]: https://img.shields.io/coveralls/gulpjs/globe-stream/main.svg?style=flat-square
 <!-- prettier-ignore-end -->
