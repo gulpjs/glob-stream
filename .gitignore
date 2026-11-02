@@ -68,3 +68,4 @@ test.xunit
 
 # Massive, generated directory
 test/fixtures/too-many/
+test/lcov.info
