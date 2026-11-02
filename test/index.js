@@ -5,7 +5,7 @@ var path = require("node:path");
 var fs = require("node:fs");
 var os = require("node:os");
 var assert = require("node:assert");
-var { before, describe, it } = require("node:test");
+var { describe, it } = require("node:test");
 var { assertExtras } = require("./support");
 
 var globStream = require("../");
@@ -16,7 +16,6 @@ function deWindows(p) {
 
 var cwd = deWindows(process.cwd());
 var dir = deWindows(__dirname);
-var byPath = (a, b) => a.path.localeCompare(b.path);
 
 function suite(moduleName) {
   var stream = require(moduleName);
@@ -1331,7 +1330,7 @@ function suite(moduleName) {
         cb(expectedError);
       }
       var spy = t.mock.method(gs, "destroy");
-      var spyfs = t.mock.method(fs, "stat", stubError);
+      t.mock.method(fs, "stat", stubError);
 
       function assertion(err) {
         assert.strictEqual(spy.mock.callCount() > 0, true);
