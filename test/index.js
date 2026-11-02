@@ -1309,8 +1309,8 @@ function suite(moduleName) {
       function stubError(dirpath, opts, cb) {
         cb(expectedError);
       }
-
-      var spy = t.mock.method(fs, "readdir", stubError);
+      var spy = t.mock.method(gs, "destroy");
+      t.mock.method(fs, "readdir", stubError);
 
       function assertion(err) {
         assert.strictEqual(spy.mock.callCount() > 0, true);
