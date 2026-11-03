@@ -6,6 +6,7 @@ var fs = require("node:fs");
 var os = require("node:os");
 var assert = require("node:assert");
 var { describe, it } = require("node:test");
+
 var { assertExtras } = require("./support");
 
 var globStream = require("../");
@@ -505,9 +506,9 @@ function suite(moduleName) {
     });
 
     // https://github.com/gulpjs/glob-stream/issues/129
-    // Extremely short timeout to ensure we aren't traversing node_modules
     it(
       "does not take a long time when when checking a singular glob in the project root",
+      // Extremely short timeout to ensure we aren't traversing node_modules
       { timeout: 20 },
       function (t, done) {
         var expected = {
@@ -837,19 +838,19 @@ function suite(moduleName) {
     });
 
     it("throws on invalid glob argument", function () {
-      assert.throws(globStream.bind(globStream, 42, { cwd: dir }), {
+      assert.throws(() => globStream(42, { cwd: dir }), {
         message: /Invalid glob .* 0/,
       });
-      assert.throws(globStream.bind(globStream, [".", 42], { cwd: dir }), {
+      assert.throws(() => globStream([".", 42], { cwd: dir }), {
         message: /Invalid glob .* 1/,
       });
     });
 
     it("throws on missing positive glob", function () {
-      assert.throws(globStream.bind(globStream, "!c", { cwd: dir }), {
+      assert.throws(() => globStream("!c", { cwd: dir }), {
         message: /Missing positive glob/,
       });
-      assert.throws(globStream.bind(globStream, ["!a", "!b"], { cwd: dir }), {
+      assert.throws(() => globStream(["!a", "!b"], { cwd: dir }), {
         message: /Missing positive glob/,
       });
     });
@@ -1344,7 +1345,7 @@ function suite(moduleName) {
     it("does not emit an error if stream is destroyed without an error", function (t, done) {
       var gs = globStream("./fixtures/**/*.dmc", { cwd: dir });
 
-      var spy = t.mock.fn(() => true);
+      var spy = t.mock.fn(() => {});
 
       gs.on("error", spy);
 
