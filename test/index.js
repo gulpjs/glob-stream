@@ -186,7 +186,7 @@ function suite(moduleName) {
       }
 
       await pipeline(
-        globStream("./fixtures/has \\(parens\\)/*.dmc", { cwd: dir }),
+        globStream("./fixtures/has (parens)/*.dmc", { cwd: dir }),
         concat(assertion),
       );
     });
@@ -247,7 +247,7 @@ function suite(moduleName) {
       }
 
       await pipeline(
-        globStream("./fixtures/has \\[brackets\\]/*.foo", { cwd: dir }),
+        globStream("./fixtures/has [[]brackets]/*.foo", { cwd: dir }),
         concat(assertion),
       );
     });
@@ -633,8 +633,7 @@ function suite(moduleName) {
       );
     });
 
-    // TODO: This is broken with current implementation but is fixed with `fs.glob`
-    it.skip("removes dotfiles that match negative globs with dot extglob", async (t) => {
+    it("removes dotfiles that match negative globs with dot extglob", async (t) => {
       var expected = [];
 
       function assertion(pathObjs) {
@@ -914,7 +913,7 @@ function suite(moduleName) {
       await pipeline(gs, concat());
     });
 
-    it("throws on invalid options", function (t) {
+    it("throws on invalid options", (t) => {
       t.assert.throws(
         () => globStream("./fixtures/stuff/*.dmc", { cwd: 1234 }),
         {
@@ -992,8 +991,7 @@ function suite(moduleName) {
         );
       });
 
-      // TODO: This is broken with current implementation but is fixed with `fs.glob`
-      it.skip("supports the ignore option with dot extglob", async (t) => {
+      it("supports the ignore option with dot extglob", async (t) => {
         var expected = [];
 
         function assertion(pathObjs) {
@@ -1136,36 +1134,6 @@ function suite(moduleName) {
         }),
         concat(assertion),
       );
-    });
-
-    it("destroys the stream if walker errors", async (t) => {
-      var expectedError = new Error("Stubbed error");
-
-      var gs = globStream("./fixtures/**/*.dmc", { cwd: dir });
-
-      function stubError(dirpath, opts, cb) {
-        cb(expectedError);
-      }
-      var spy = t.mock.method(gs, "destroy");
-      t.mock.method(fs, "readdir", stubError);
-
-      await t.assert.rejects(pipeline(gs, concat()), expectedError);
-      t.assert.strictEqual(spy.mock.callCount() > 0, true);
-    });
-
-    it("destroys the stream if walker errors when following symlink", async (t) => {
-      var expectedError = new Error("Stubbed error");
-
-      var gs = globStream("./fixtures/**/*.dmc", { cwd: dir });
-
-      function stubError(dirpath, cb) {
-        cb(expectedError);
-      }
-      var spy = t.mock.method(gs, "destroy");
-      t.mock.method(fs, "stat", stubError);
-
-      await t.assert.rejects(pipeline(gs, concat()), expectedError);
-      t.assert.strictEqual(spy.mock.callCount() > 0, true);
     });
 
     it("does not emit an error if stream is destroyed without an error", (t, done) => {
