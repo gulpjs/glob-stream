@@ -23,7 +23,7 @@ var writable =
   readable.pipe(writable);
 ```
 
-You can pass any combination of glob strings. One caveat is that you cannot **only** pass a negative glob, you must give it at least one positive glob so it knows where to start. If given a non-glob path (also referred to as a singular glob), only one file will be emitted. If given a singular glob and no files match, an error is emitted (see also [`options.allowEmpty`][allow-empty-url]).
+You can pass any combination of glob strings. One caveat is that you cannot **only** pass a negative glob, you must give it at least one positive glob so it knows where to start. If given a non-glob path (also referred to as a singular glob), a maximum of one file will be emitted.
 
 ## API
 
@@ -32,14 +32,6 @@ You can pass any combination of glob strings. One caveat is that you cannot **on
 Takes a glob string or an array of glob strings as the first argument and an options object as the second. Returns a stream of objects that contain `cwd`, `base` and `path` properties.
 
 #### Options
-
-##### `options.allowEmpty`
-
-Whether or not to error upon an empty singular glob.
-
-Type: `Boolean`
-
-Default: `false` (error upon no match)
 
 ##### `options.dot`
 
@@ -110,10 +102,11 @@ MIT
 <!-- prettier-ignore-start -->
 [anymatch-url]: https://github.com/micromatch/anymatch
 [picomatch-options-url]: https://github.com/micromatch/picomatch#options
-[glob-parent-url]: https://github.com/es128/glob-parent
-[allow-empty-url]: #optionsallowempty
+[glob-parent-url]: https://github.com/gulpjs/glob-parent
 [streamx-url]: https://github.com/streamxorg/streamx#readable-stream
+<!-- prettier-ignore-end -->
 
+<!-- prettier-ignore-start -->
 [downloads-image]: https://img.shields.io/npm/dm/glob-stream.svg?style=flat-square
 [npm-url]: https://www.npmjs.com/package/glob-stream
 [npm-image]: https://img.shields.io/npm/v/glob-stream.svg?style=flat-square
