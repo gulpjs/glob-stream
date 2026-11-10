@@ -855,15 +855,6 @@ function suite(moduleName) {
       });
     });
 
-    it("emits an error when file not found on singular path", function (t, done) {
-      function assertion(err) {
-        assert.match(err.toString(), /File not found with singular glob/);
-        done();
-      }
-
-      stream.pipeline([globStream("notfound"), concat()], assertion);
-    });
-
     it("does not emit an error when file not found on glob containing {}", function (t, done) {
       function assertion(err) {
         assert.ifError(err);
@@ -873,46 +864,13 @@ function suite(moduleName) {
       stream.pipeline([globStream("notfound{a,b}"), concat()], assertion);
     });
 
-    it("does not emit an error on singular path when allowEmpty is true", function (t, done) {
+    it("does not emit an error on singular path", function (t, done) {
       function assertion(err) {
         assert.ifError(err);
         done();
       }
 
-      stream.pipeline(
-        [globStream("notfound", { allowEmpty: true }), concat()],
-        assertion,
-      );
-    });
-
-    it("emits an error when a singular path in multiple paths not found", function (t, done) {
-      function assertion(err) {
-        assert.match(err.toString(), /File not found with singular glob/);
-        done();
-      }
-
-      stream.pipeline(
-        [
-          globStream(["notfound", "./fixtures/whatsgoingon"], { cwd: dir }),
-          concat(),
-        ],
-        assertion,
-      );
-    });
-
-    it("emits an error when a singular path in multiple paths/globs not found", function (t, done) {
-      function assertion(err) {
-        assert.match(err.toString(), /File not found with singular glob/);
-        done();
-      }
-
-      stream.pipeline(
-        [
-          globStream(["notfound", "./fixtures/*.coffee"], { cwd: dir }),
-          concat(),
-        ],
-        assertion,
-      );
+      stream.pipeline([globStream("notfound"), concat()], assertion);
     });
 
     it("resolves absolute paths when root option is given", function (t, done) {
@@ -1050,10 +1008,6 @@ function suite(moduleName) {
         },
       );
       assert.throws(
-        () => globStream("./fixtures/stuff/*.dmc", { allowEmpty: 1234 }),
-        { message: /must be a boolean/ },
-      );
-      assert.throws(
         () => globStream("./fixtures/stuff/*.dmc", { base: 1234 }),
         {
           message: /must be a string if specified/,
@@ -1152,18 +1106,6 @@ function suite(moduleName) {
           done,
         );
       });
-    });
-
-    it("emits an error if there are no matches", function (t, done) {
-      function assertion(err) {
-        assert.match(err.message, /^File not found with singular glob/g);
-        done();
-      }
-
-      stream.pipeline(
-        [globStream("notfound", { cwd: dir }), concat()],
-        assertion,
-      );
     });
 
     it("throws an error if you try to write to it", function (t, done) {
@@ -1272,34 +1214,6 @@ function suite(moduleName) {
         ],
         done,
       );
-    });
-
-    it("destroys the stream with an error if no match is found", function (t, done) {
-      var gs = globStream("notfound", { cwd: dir });
-
-      var spy = t.mock.method(gs, "destroy");
-
-      function assertion(err) {
-        assert.strictEqual(spy.mock.calls[0].arguments[0], err);
-        assert.match(err.toString(), /File not found with singular glob/);
-        done();
-      }
-
-      stream.pipeline([gs, concat()], assertion);
-    });
-
-    it("destroys the stream with an error if no match is found with multiple singular globs", function (t, done) {
-      var gs = globStream(["notfound", "notfound2"], { cwd: dir });
-
-      var spy = t.mock.method(gs, "destroy");
-
-      function assertion(err) {
-        assert.strictEqual(spy.mock.calls[0].arguments[0], err);
-        assert.match(err.toString(), /File not found with singular glob/);
-        done();
-      }
-
-      stream.pipeline([gs, concat()], assertion);
     });
 
     it("destroys the stream if walker errors", function (t, done) {

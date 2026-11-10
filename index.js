@@ -13,16 +13,6 @@ var normalizePath = require("normalize-path");
 var isNegatedGlob = require("is-negated-glob");
 var toAbsoluteGlob = require("@gulpjs/to-absolute-glob");
 
-var globErrMessage1 = "File not found with singular glob: ";
-var globErrMessage2 = " (if this was purposeful, use `allowEmpty` option)";
-
-function isFound(glob) {
-  // All globs are "found", while singular globs are only found when matched successfully
-  // This is due to the fact that a glob can match any number of files (0..Infinity) but
-  // a signular glob is always expected to match
-  return isGlob(glob);
-}
-
 function walkdir() {
   var readdirOpts = {
     withFileTypes: true,
@@ -199,10 +189,6 @@ function validateOptions(opts) {
     throw new Error("The `uniqueBy` option must be a string or function");
   }
 
-  if (typeof opts.allowEmpty !== "boolean") {
-    throw new Error("The `allowEmpty` option must be a boolean");
-  }
-
   if (opts.base && typeof opts.base !== "string") {
     throw new Error("The `base` option must be a string if specified");
   }
@@ -253,7 +239,6 @@ function globStream(globs, opt) {
       dot: false,
       cwdbase: false,
       uniqueBy: "path",
-      allowEmpty: false,
       ignore: [],
     },
     opt,
@@ -286,8 +271,6 @@ function globStream(globs, opt) {
   // and only returns the index of the positive match;
   var positiveGlobs = ourGlobs.filter(isPositiveGlob);
   ourOpt.ignore = ourOpt.ignore.map(resolveGlob);
-
-  var found = positiveGlobs.map(isFound);
 
   var matcher = anymatch(ourGlobs, null, ourOpt);
 
@@ -333,8 +316,6 @@ function globStream(globs, opt) {
       matchIdx = matcher(filepath + path.sep, true);
     }
     if (matchIdx !== -1) {
-      found[matchIdx] = true;
-
       // Extract base path from glob
       var basePath = base || globParent(positiveGlobs[matchIdx]);
 
@@ -356,22 +337,7 @@ function globStream(globs, opt) {
   }
 
   function onEnd() {
-    var destroyed = false;
-
-    found.forEach(function (matchFound, idx) {
-      if (ourOpt.allowEmpty !== true && !matchFound) {
-        destroyed = true;
-        var err = new Error(
-          globErrMessage1 + positiveGlobs[idx] + globErrMessage2,
-        );
-
-        return stream.destroy(err);
-      }
-    });
-
-    if (destroyed === false) {
-      stream.push(null);
-    }
+    stream.push(null);
   }
 
   function onError(err) {
