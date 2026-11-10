@@ -870,10 +870,7 @@ function suite(moduleName) {
         done();
       }
 
-      stream.pipeline(
-        [globStream("notfound"), concat()],
-        assertion,
-      );
+      stream.pipeline([globStream("notfound"), concat()], assertion);
     });
 
     it("resolves absolute paths when root option is given", function (t, done) {
