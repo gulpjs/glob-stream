@@ -41,14 +41,6 @@ Type: `String`
 
 Default: `process.cwd()`
 
-##### `options.root`
-
-The root path that the glob is resolved against.
-
-Type: `String`
-
-Default: `undefined` (use the filesystem root)
-
 ##### `options.base`
 
 The absolute segment of the glob path that isn't a glob. This value is attached to each glob object and is useful for relative pathing.

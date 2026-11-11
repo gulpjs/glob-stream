@@ -240,6 +240,8 @@ function globStream(globs, opt) {
     {
       // TODO: Remove when using `fs.glob` where this is unsupported
       dot: false,
+      // TODO: Remove when no longer using `@gulpjs/to-absolute-glob`
+      root: undefined,
     },
   );
   // Normalize `ignore` to array
