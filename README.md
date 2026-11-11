@@ -33,14 +33,6 @@ Takes a glob string or an array of glob strings as the first argument and an opt
 
 #### Options
 
-##### `options.dot`
-
-Whether or not to treat dotfiles as regular files. This is passed through to [anymatch][anymatch-url].
-
-Type: `Boolean`
-
-Default: `false`
-
 ##### `options.cwd`
 
 The current working directory that the glob is resolved against.

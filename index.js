@@ -174,10 +174,6 @@ function validateOptions(opts) {
     throw new Error("The `cwd` option must be a string");
   }
 
-  if (typeof opts.dot !== "boolean") {
-    throw new Error("The `dot` option must be a boolean");
-  }
-
   if (typeof opts.cwdbase !== "boolean") {
     throw new Error("The `cwdbase` option must be a boolean");
   }
@@ -236,12 +232,15 @@ function globStream(globs, opt) {
     {},
     {
       cwd: process.cwd(),
-      dot: false,
       cwdbase: false,
       uniqueBy: "path",
       ignore: [],
     },
     opt,
+    {
+      // TODO: Remove when using `fs.glob` where this is unsupported
+      dot: false,
+    },
   );
   // Normalize `ignore` to array
   ourOpt.ignore =
