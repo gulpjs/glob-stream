@@ -1,13 +1,31 @@
 "use strict";
 
-var path = require("node:path");
-// Need to wrap this to cause walker to emit an error
 var fs = require("node:fs");
 var os = require("node:os");
-var assert = require("node:assert");
-var { describe, it } = require("node:test");
+var path = require("node:path");
+var { AssertionError } = require("node:assert");
+var { isDeepStrictEqual } = require("node:util");
+var { assert, describe, it, getTestContext } = require("node:test");
 
-var { assertExtras } = require("./support");
+assert.register("containsAllEqual", (actual, expected) => {
+  const t = getTestContext();
+
+  t.assert.strictEqual(actual.length, expected.length);
+
+  for (const exp of expected) {
+    const found = actual.some((pathObj) => isDeepStrictEqual(pathObj, exp));
+    t.assert.ok(
+      found,
+      // We create an assertion error to have a deepStrictEqual diff on the pathObj that is not specified
+      new AssertionError({
+        actual: undefined,
+        expected: exp,
+        operator: "deepStrictEqual",
+        diff: "simple",
+      }),
+    );
+  }
+});
 
 var globStream = require("../");
 
@@ -46,15 +64,16 @@ function suite(moduleName) {
 
   describe("glob-stream (with " + moduleName + ")", function () {
     it("streams a single object when given a directory path", function (t, done) {
-      var expected = {
-        cwd: dir,
-        base: dir + "/fixtures",
-        path: dir + "/fixtures/whatsgoingon",
-      };
+      var expected = [
+        {
+          cwd: dir,
+          base: dir + "/fixtures",
+          path: dir + "/fixtures/whatsgoingon",
+        },
+      ];
 
       function assertion(pathObjs) {
-        assert.strictEqual(pathObjs.length, 1);
-        assert.deepStrictEqual(pathObjs[0], expected);
+        t.assert.containsAllEqual(pathObjs, expected);
       }
 
       stream.pipeline(
@@ -67,15 +86,16 @@ function suite(moduleName) {
     });
 
     it("streams a single object when given a file path", function (t, done) {
-      var expected = {
-        cwd: dir,
-        base: dir + "/fixtures",
-        path: dir + "/fixtures/test.coffee",
-      };
+      var expected = [
+        {
+          cwd: dir,
+          base: dir + "/fixtures",
+          path: dir + "/fixtures/test.coffee",
+        },
+      ];
 
       function assertion(pathObjs) {
-        assert.strictEqual(pathObjs.length, 1);
-        assert.deepStrictEqual(pathObjs[0], expected);
+        t.assert.containsAllEqual(pathObjs, expected);
       }
 
       stream.pipeline(
@@ -85,15 +105,16 @@ function suite(moduleName) {
     });
 
     it("streams only objects with directory paths when given a directory glob", function (t, done) {
-      var expected = {
-        cwd: dir,
-        base: dir + "/fixtures/whatsgoingon",
-        path: dir + "/fixtures/whatsgoingon/hey",
-      };
+      var expected = [
+        {
+          cwd: dir,
+          base: dir + "/fixtures/whatsgoingon",
+          path: dir + "/fixtures/whatsgoingon/hey",
+        },
+      ];
 
       function assertion(pathObjs) {
-        assert.strictEqual(pathObjs.length, 1);
-        assert.deepStrictEqual(pathObjs[0], expected);
+        t.assert.containsAllEqual(pathObjs, expected);
       }
 
       stream.pipeline(
@@ -106,8 +127,10 @@ function suite(moduleName) {
     });
 
     it("does not emit an error if glob base directory does not exist", function (t, done) {
+      var expected = [];
+
       function assertion(pathObjs) {
-        assert.strictEqual(pathObjs.length, 0);
+        t.assert.containsAllEqual(pathObjs, expected);
       }
 
       stream.pipeline(
@@ -120,15 +143,16 @@ function suite(moduleName) {
     });
 
     it("streams only objects with file paths from a non-directory glob", function (t, done) {
-      var expected = {
-        cwd: dir,
-        base: dir + "/fixtures",
-        path: dir + "/fixtures/test.coffee",
-      };
+      var expected = [
+        {
+          cwd: dir,
+          base: dir + "/fixtures",
+          path: dir + "/fixtures/test.coffee",
+        },
+      ];
 
       function assertion(pathObjs) {
-        assert.strictEqual(pathObjs.length, 1);
-        assert.deepStrictEqual(pathObjs[0], expected);
+        t.assert.containsAllEqual(pathObjs, expected);
       }
 
       stream.pipeline(
@@ -140,15 +164,16 @@ function suite(moduleName) {
     it("properly handles ( ) in cwd path", function (t, done) {
       var cwd = dir + "/fixtures/has (parens)";
 
-      var expected = {
-        cwd: cwd,
-        base: cwd,
-        path: cwd + "/test.dmc",
-      };
+      var expected = [
+        {
+          cwd: cwd,
+          base: cwd,
+          path: cwd + "/test.dmc",
+        },
+      ];
 
       function assertion(pathObjs) {
-        assert.strictEqual(pathObjs.length, 1);
-        assertExtras.containsAllEqual(pathObjs, [expected]);
+        t.assert.containsAllEqual(pathObjs, expected);
       }
 
       stream.pipeline(
@@ -158,15 +183,16 @@ function suite(moduleName) {
     });
 
     it("sets the correct base when ( ) in glob", function (t, done) {
-      var expected = {
-        cwd: dir,
-        base: dir + "/fixtures/has (parens)",
-        path: dir + "/fixtures/has (parens)/test.dmc",
-      };
+      var expected = [
+        {
+          cwd: dir,
+          base: dir + "/fixtures/has (parens)",
+          path: dir + "/fixtures/has (parens)/test.dmc",
+        },
+      ];
 
       function assertion(pathObjs) {
-        assert.strictEqual(pathObjs.length, 1);
-        assertExtras.containsAllEqual(pathObjs, [expected]);
+        t.assert.containsAllEqual(pathObjs, expected);
       }
 
       stream.pipeline(
@@ -193,8 +219,7 @@ function suite(moduleName) {
       ];
 
       function assertion(pathObjs) {
-        assert.strictEqual(pathObjs.length, 2);
-        assertExtras.containsAllEqual(pathObjs, expected);
+        t.assert.containsAllEqual(pathObjs, expected);
       }
 
       stream.pipeline(
@@ -206,15 +231,16 @@ function suite(moduleName) {
     it("properly handles [ ] in cwd path", function (t, done) {
       var cwd = dir + "/fixtures/has [brackets]";
 
-      var expected = {
-        cwd: cwd,
-        base: cwd,
-        path: cwd + "/test.foo",
-      };
+      var expected = [
+        {
+          cwd: cwd,
+          base: cwd,
+          path: cwd + "/test.foo",
+        },
+      ];
 
       function assertion(pathObjs) {
-        assert.strictEqual(pathObjs.length, 1);
-        assertExtras.containsAllEqual(pathObjs, [expected]);
+        t.assert.containsAllEqual(pathObjs, expected);
       }
 
       stream.pipeline(
@@ -224,15 +250,16 @@ function suite(moduleName) {
     });
 
     it("sets the correct base when [ ] in glob", function (t, done) {
-      var expected = {
-        cwd: dir,
-        base: dir + "/fixtures/has [brackets]",
-        path: dir + "/fixtures/has [brackets]/test.foo",
-      };
+      var expected = [
+        {
+          cwd: dir,
+          base: dir + "/fixtures/has [brackets]",
+          path: dir + "/fixtures/has [brackets]/test.foo",
+        },
+      ];
 
       function assertion(pathObjs) {
-        assert.strictEqual(pathObjs.length, 1);
-        assertExtras.containsAllEqual(pathObjs, [expected]);
+        t.assert.containsAllEqual(pathObjs, expected);
       }
 
       stream.pipeline(
@@ -272,8 +299,7 @@ function suite(moduleName) {
       ];
 
       function assertion(pathObjs) {
-        assert.strictEqual(pathObjs.length, 3);
-        assertExtras.containsAllEqual(pathObjs, expected);
+        t.assert.containsAllEqual(pathObjs, expected);
       }
 
       stream.pipeline(
@@ -310,8 +336,7 @@ function suite(moduleName) {
       ];
 
       function assertion(pathObjs) {
-        assert.strictEqual(pathObjs.length, 3);
-        assertExtras.containsAllEqual(pathObjs, expected);
+        t.assert.containsAllEqual(pathObjs, expected);
       }
 
       stream.pipeline(
@@ -370,8 +395,7 @@ function suite(moduleName) {
       ];
 
       function assertion(pathObjs) {
-        assert.strictEqual(pathObjs.length, 7);
-        assertExtras.containsAllEqual(pathObjs, expected);
+        t.assert.containsAllEqual(pathObjs, expected);
       }
 
       stream.pipeline(
@@ -401,7 +425,7 @@ function suite(moduleName) {
           }
           fs.rmdirSync(largeDir);
 
-          assert.strictEqual(pathObjs.length, 100000);
+          t.assert.strictEqual(pathObjs.length, 100000);
         }
 
         var glob = deWindows(largeDir) + "/*.txt";
@@ -449,8 +473,8 @@ function suite(moduleName) {
 
       function assertion(pathObjs) {
         fs.unlinkSync(testFile);
-        assert.strictEqual(pathObjs.length, 4);
-        assertExtras.containsAllEqual(pathObjs, expected);
+
+        t.assert.containsAllEqual(pathObjs, expected);
       }
 
       stream.pipeline([globStream(paths), concat(assertion)], done);
@@ -478,8 +502,8 @@ function suite(moduleName) {
       function assertion(pathObjs) {
         fs.unlinkSync(testFile);
         fs.rmdirSync(testDir);
-        assert.strictEqual(pathObjs.length, 1);
-        assertExtras.containsAllEqual(pathObjs, expected);
+
+        t.assert.containsAllEqual(pathObjs, expected);
       }
 
       stream.pipeline([globStream(paths), concat(assertion)], done);
@@ -489,17 +513,18 @@ function suite(moduleName) {
       var prevCwd = process.cwd();
       process.chdir("test/fixtures/stuff");
 
-      var expected = {
-        cwd: dir + "/fixtures/stuff",
-        base: dir + "/fixtures",
-        path: dir + "/fixtures/test.coffee",
-      };
+      var expected = [
+        {
+          cwd: dir + "/fixtures/stuff",
+          base: dir + "/fixtures",
+          path: dir + "/fixtures/test.coffee",
+        },
+      ];
 
       function assertion(pathObjs) {
         process.chdir(prevCwd);
 
-        assert.strictEqual(pathObjs.length, 1);
-        assertExtras.containsAllEqual(pathObjs, [expected]);
+        t.assert.containsAllEqual(pathObjs, expected);
       }
 
       stream.pipeline([globStream(["../*.coffee"]), concat(assertion)], done);
@@ -511,15 +536,16 @@ function suite(moduleName) {
       // Extremely short timeout to ensure we aren't traversing node_modules
       { timeout: 20 },
       function (t, done) {
-        var expected = {
-          cwd: cwd,
-          base: cwd,
-          path: cwd + "/package.json",
-        };
+        var expected = [
+          {
+            cwd: cwd,
+            base: cwd,
+            path: cwd + "/package.json",
+          },
+        ];
 
         function assertion(pathObjs) {
-          assert.strictEqual(pathObjs.length, 1);
-          assert.deepStrictEqual(pathObjs[0], expected);
+          t.assert.containsAllEqual(pathObjs, expected);
         }
 
         stream.pipeline(
@@ -530,15 +556,16 @@ function suite(moduleName) {
     );
 
     it("removes duplicate objects from the stream using default (path) filter", function (t, done) {
-      var expected = {
-        cwd: dir,
-        base: dir + "/fixtures",
-        path: dir + "/fixtures/test.coffee",
-      };
+      var expected = [
+        {
+          cwd: dir,
+          base: dir + "/fixtures",
+          path: dir + "/fixtures/test.coffee",
+        },
+      ];
 
       function assertion(pathObjs) {
-        assert.strictEqual(pathObjs.length, 1);
-        assertExtras.containsAllEqual(pathObjs, [expected]);
+        t.assert.containsAllEqual(pathObjs, expected);
       }
 
       stream.pipeline(
@@ -553,25 +580,23 @@ function suite(moduleName) {
     });
 
     it("removes duplicate objects from the stream using custom string filter", function (t, done) {
-      var expected = {
-        cwd: dir,
-        base: dir + "/fixtures/stuff",
-        path: dir + "/fixtures/stuff/run.dmc",
-      };
+      var expected = [
+        {
+          cwd: dir,
+          base: dir + "/fixtures/stuff",
+          path: dir + "/fixtures/stuff/run.dmc",
+        },
+      ];
 
       function assertion(pathObjs) {
-        assert.strictEqual(pathObjs.length, 1);
-        assertExtras.containsAllEqual(pathObjs, [expected]);
+        t.assert.containsAllEqual(pathObjs, expected);
       }
 
       stream.pipeline(
         [
           globStream(
             ["./fixtures/stuff/run.dmc", "./fixtures/stuff/test.dmc"],
-            {
-              cwd: dir,
-              uniqueBy: "base",
-            },
+            { cwd: dir, uniqueBy: "base" },
           ),
           concat(assertion),
         ],
@@ -598,8 +623,7 @@ function suite(moduleName) {
       };
 
       function assertion(pathObjs) {
-        assert.strictEqual(pathObjs.length, 2);
-        assertExtras.containsAllEqual(pathObjs, expected);
+        t.assert.containsAllEqual(pathObjs, expected);
       }
 
       stream.pipeline(
@@ -615,8 +639,10 @@ function suite(moduleName) {
     });
 
     it("ignores dotfiles without dot extglob", function (t, done) {
+      var expected = [];
+
       function assertion(pathObjs) {
-        assert.strictEqual(pathObjs.length, 0);
+        t.assert.containsAllEqual(pathObjs, expected);
       }
 
       stream.pipeline(
@@ -626,15 +652,16 @@ function suite(moduleName) {
     });
 
     it("finds dotfiles with dot extglob", function (t, done) {
-      var expected = {
-        cwd: dir,
-        base: dir + "/fixtures",
-        path: dir + "/fixtures/.swag",
-      };
+      var expected = [
+        {
+          cwd: dir,
+          base: dir + "/fixtures",
+          path: dir + "/fixtures/.swag",
+        },
+      ];
 
       function assertion(pathObjs) {
-        assert.strictEqual(pathObjs.length, 1);
-        assertExtras.containsAllEqual(pathObjs, [expected]);
+        t.assert.containsAllEqual(pathObjs, expected);
       }
 
       stream.pipeline(
@@ -645,8 +672,10 @@ function suite(moduleName) {
 
     // TODO: This is broken with current implementation but is fixed with `fs.glob`
     it.skip("removes dotfiles that match negative globs with dot extglob", function (t, done) {
+      var expected = [];
+
       function assertion(pathObjs) {
-        assert.strictEqual(pathObjs.length, 0);
+        t.assert.containsAllEqual(pathObjs, expected);
       }
 
       stream.pipeline(
@@ -659,15 +688,16 @@ function suite(moduleName) {
     });
 
     it("works with direct paths and no cwd", function (t, done) {
-      var expected = {
-        cwd: cwd,
-        base: dir + "/fixtures",
-        path: dir + "/fixtures/test.coffee",
-      };
+      var expected = [
+        {
+          cwd: cwd,
+          base: dir + "/fixtures",
+          path: dir + "/fixtures/test.coffee",
+        },
+      ];
 
       function assertion(pathObjs) {
-        assert.strictEqual(pathObjs.length, 1);
-        assertExtras.containsAllEqual(pathObjs, [expected]);
+        t.assert.containsAllEqual(pathObjs, expected);
       }
 
       stream.pipeline(
@@ -677,15 +707,16 @@ function suite(moduleName) {
     });
 
     it("works with a relative cwd", function (t, done) {
-      var expected = {
-        cwd: cwd + "/test",
-        base: dir + "/fixtures",
-        path: dir + "/fixtures/test.coffee",
-      };
+      var expected = [
+        {
+          cwd: cwd + "/test",
+          base: dir + "/fixtures",
+          path: dir + "/fixtures/test.coffee",
+        },
+      ];
 
       function assertion(pathObjs) {
-        assert.strictEqual(pathObjs.length, 1);
-        assertExtras.containsAllEqual(pathObjs, [expected]);
+        t.assert.containsAllEqual(pathObjs, expected);
       }
 
       stream.pipeline(
@@ -700,11 +731,13 @@ function suite(moduleName) {
     });
 
     it("supports negative globs", function (t, done) {
-      var expected = {
-        cwd: cwd,
-        base: dir + "/fixtures/stuff",
-        path: dir + "/fixtures/stuff/run.dmc",
-      };
+      var expected = [
+        {
+          cwd: cwd,
+          base: dir + "/fixtures/stuff",
+          path: dir + "/fixtures/stuff/run.dmc",
+        },
+      ];
 
       var globs = [
         dir + "/fixtures/stuff/*.dmc",
@@ -712,19 +745,20 @@ function suite(moduleName) {
       ];
 
       function assertion(pathObjs) {
-        assert.strictEqual(pathObjs.length, 1);
-        assertExtras.containsAllEqual(pathObjs, [expected]);
+        t.assert.containsAllEqual(pathObjs, expected);
       }
 
       stream.pipeline([globStream(globs), concat(assertion)], done);
     });
 
     it("supports negative file paths", function (t, done) {
-      var expected = {
-        cwd: cwd,
-        base: dir + "/fixtures/stuff",
-        path: dir + "/fixtures/stuff/run.dmc",
-      };
+      var expected = [
+        {
+          cwd: cwd,
+          base: dir + "/fixtures/stuff",
+          path: dir + "/fixtures/stuff/run.dmc",
+        },
+      ];
 
       var paths = [
         dir + "/fixtures/stuff/*.dmc",
@@ -732,8 +766,7 @@ function suite(moduleName) {
       ];
 
       function assertion(pathObjs) {
-        assert.strictEqual(pathObjs.length, 1);
-        assertExtras.containsAllEqual(pathObjs, [expected]);
+        t.assert.containsAllEqual(pathObjs, expected);
       }
 
       stream.pipeline([globStream(paths), concat(assertion)], done);
@@ -741,7 +774,7 @@ function suite(moduleName) {
 
     it("does not error when a negative glob removes all matches from a positive glob", function (t, done) {
       function assertion(pathObjs) {
-        assert.strictEqual(pathObjs.length, 0);
+        t.assert.strictEqual(pathObjs.length, 0);
       }
 
       stream.pipeline(
@@ -754,6 +787,8 @@ function suite(moduleName) {
     });
 
     it("applies all negative globs to each positive glob", function (t, done) {
+      var expected = [];
+
       var globs = [
         "./fixtures/stuff/*",
         "!./fixtures/stuff/*.dmc",
@@ -761,7 +796,7 @@ function suite(moduleName) {
       ];
 
       function assertion(pathObjs) {
-        assert.strictEqual(pathObjs.length, 0);
+        t.assert.containsAllEqual(pathObjs, expected);
       }
 
       stream.pipeline(
@@ -791,8 +826,7 @@ function suite(moduleName) {
       ];
 
       function assertion(pathObjs) {
-        assert.strictEqual(pathObjs.length, 2);
-        assertExtras.containsAllEqual(pathObjs, expected);
+        t.assert.containsAllEqual(pathObjs, expected);
       }
 
       stream.pipeline(
@@ -822,8 +856,7 @@ function suite(moduleName) {
       ];
 
       function assertion(pathObjs) {
-        assert.strictEqual(pathObjs.length, 2);
-        assertExtras.containsAllEqual(pathObjs, expected);
+        t.assert.containsAllEqual(pathObjs, expected);
       }
 
       stream.pipeline(
@@ -832,27 +865,27 @@ function suite(moduleName) {
       );
     });
 
-    it("throws on invalid glob argument", function () {
-      assert.throws(() => globStream(42, { cwd: dir }), {
+    it("throws on invalid glob argument", function (t) {
+      t.assert.throws(() => globStream(42, { cwd: dir }), {
         message: /Invalid glob .* 0/,
       });
-      assert.throws(() => globStream([".", 42], { cwd: dir }), {
+      t.assert.throws(() => globStream([".", 42], { cwd: dir }), {
         message: /Invalid glob .* 1/,
       });
     });
 
-    it("throws on missing positive glob", function () {
-      assert.throws(() => globStream("!c", { cwd: dir }), {
+    it("throws on missing positive glob", function (t) {
+      t.assert.throws(() => globStream("!c", { cwd: dir }), {
         message: /Missing positive glob/,
       });
-      assert.throws(() => globStream(["!a", "!b"], { cwd: dir }), {
+      t.assert.throws(() => globStream(["!a", "!b"], { cwd: dir }), {
         message: /Missing positive glob/,
       });
     });
 
     it("does not emit an error when file not found on glob containing {}", function (t, done) {
       function assertion(err) {
-        assert.ifError(err);
+        t.assert.ifError(err);
         done();
       }
 
@@ -861,7 +894,7 @@ function suite(moduleName) {
 
     it("does not emit an error on singular path", function (t, done) {
       function assertion(err) {
-        assert.ifError(err);
+        t.assert.ifError(err);
         done();
       }
 
@@ -869,15 +902,16 @@ function suite(moduleName) {
     });
 
     it("resolves absolute paths when root option is given", function (t, done) {
-      var expected = {
-        cwd: cwd,
-        base: dir + "/fixtures",
-        path: dir + "/fixtures/test.coffee",
-      };
+      var expected = [
+        {
+          cwd: cwd,
+          base: dir + "/fixtures",
+          path: dir + "/fixtures/test.coffee",
+        },
+      ];
 
       function assertion(pathObjs) {
-        assert.strictEqual(pathObjs.length, 1);
-        assertExtras.containsAllEqual(pathObjs, [expected]);
+        t.assert.containsAllEqual(pathObjs, expected);
       }
 
       stream.pipeline(
@@ -927,8 +961,7 @@ function suite(moduleName) {
       ];
 
       function assertion(pathObjs) {
-        assert.strictEqual(pathObjs.length, 6);
-        assertExtras.containsAllEqual(pathObjs, expected);
+        t.assert.containsAllEqual(pathObjs, expected);
       }
 
       stream.pipeline(
@@ -976,35 +1009,38 @@ function suite(moduleName) {
       var opts = {};
 
       var gs = globStream(dir + "/fixtures/stuff/run.dmc", opts);
-      assert.strictEqual(Object.keys(opts).length, 0);
-      assert.notDeepStrictEqual(opts, defaultedOpts);
+      t.assert.strictEqual(Object.keys(opts).length, 0);
+      t.assert.notDeepStrictEqual(opts, defaultedOpts);
 
       stream.pipeline([gs, concat()], done);
     });
 
-    it("throws on invalid options", function () {
-      assert.throws(() => globStream("./fixtures/stuff/*.dmc", { cwd: 1234 }), {
-        message: /must be a string/,
-      });
-      assert.throws(
+    it("throws on invalid options", function (t) {
+      t.assert.throws(
+        () => globStream("./fixtures/stuff/*.dmc", { cwd: 1234 }),
+        {
+          message: /must be a string/,
+        },
+      );
+      t.assert.throws(
         () => globStream("./fixtures/stuff/*.dmc", { cwdbase: 1234 }),
         {
           message: /must be a boolean/,
         },
       );
-      assert.throws(
+      t.assert.throws(
         () => globStream("./fixtures/stuff/*.dmc", { uniqueBy: 1234 }),
         {
           message: /must be a string or function/,
         },
       );
-      assert.throws(
+      t.assert.throws(
         () => globStream("./fixtures/stuff/*.dmc", { base: 1234 }),
         {
           message: /must be a string if specified/,
         },
       );
-      assert.throws(
+      t.assert.throws(
         () => globStream("./fixtures/stuff/*.dmc", { ignore: 1234 }),
         {
           message: /must be a string or array/,
@@ -1014,15 +1050,16 @@ function suite(moduleName) {
 
     describe("ignore", function () {
       it("accepts a string (in addition to array)", function (t, done) {
-        var expected = {
-          cwd: dir,
-          base: dir + "/fixtures/stuff",
-          path: dir + "/fixtures/stuff/run.dmc",
-        };
+        var expected = [
+          {
+            cwd: dir,
+            base: dir + "/fixtures/stuff",
+            path: dir + "/fixtures/stuff/run.dmc",
+          },
+        ];
 
         function assertion(pathObjs) {
-          assert.strictEqual(pathObjs.length, 1);
-          assertExtras.containsAllEqual(pathObjs, [expected]);
+          t.assert.containsAllEqual(pathObjs, expected);
         }
 
         stream.pipeline(
@@ -1038,15 +1075,16 @@ function suite(moduleName) {
       });
 
       it("supports the ignore option instead of negation", function (t, done) {
-        var expected = {
-          cwd: dir,
-          base: dir + "/fixtures/stuff",
-          path: dir + "/fixtures/stuff/run.dmc",
-        };
+        var expected = [
+          {
+            cwd: dir,
+            base: dir + "/fixtures/stuff",
+            path: dir + "/fixtures/stuff/run.dmc",
+          },
+        ];
 
         function assertion(pathObjs) {
-          assert.strictEqual(pathObjs.length, 1);
-          assertExtras.containsAllEqual(pathObjs, [expected]);
+          t.assert.containsAllEqual(pathObjs, expected);
         }
 
         stream.pipeline(
@@ -1063,8 +1101,10 @@ function suite(moduleName) {
 
       // TODO: This is broken with current implementation but is fixed with `fs.glob`
       it.skip("supports the ignore option with dot extglob", function (t, done) {
+        var expected = [];
+
         function assertion(pathObjs) {
-          assert.strictEqual(pathObjs.length, 0);
+          t.assert.containsAllEqual(pathObjs, expected);
         }
 
         stream.pipeline(
@@ -1080,10 +1120,12 @@ function suite(moduleName) {
       });
 
       it("can use both ignore option and negative globs", function (t, done) {
+        var expected = [];
+
         var globs = ["./fixtures/stuff/*.dmc", "!./fixtures/stuff/test.dmc"];
 
         function assertion(pathObjs) {
-          assert.strictEqual(pathObjs.length, 0);
+          t.assert.containsAllEqual(pathObjs, expected);
         }
 
         stream.pipeline(
@@ -1099,16 +1141,11 @@ function suite(moduleName) {
       });
     });
 
-    it("throws an error if you try to write to it", function (t, done) {
+    it("throws an error if you try to write to it", function (t) {
       var gs = globStream("notfound", { cwd: dir });
       gs.on("error", function () {});
 
-      try {
-        gs.write({});
-      } catch (err) {
-        assert.ok(err);
-        done();
-      }
+      t.assert.throws(() => gs.write({}));
     });
 
     it("does not throw an error if you push to it", function (t, done) {
@@ -1118,28 +1155,37 @@ function suite(moduleName) {
         path: dir,
       };
 
+      var expected = [
+        stub,
+        {
+          cwd: dir,
+          base: dir + "/fixtures",
+          path: dir + "/fixtures/test.coffee",
+        },
+      ];
+
       var gs = globStream("./fixtures/test.coffee", { cwd: dir });
 
       gs.push(stub);
 
       function assertion(pathObjs) {
-        assert.strictEqual(pathObjs.length, 2);
-        assert.strictEqual(pathObjs[0], stub);
+        t.assert.containsAllEqual(pathObjs, expected);
       }
 
       stream.pipeline([gs, concat(assertion)], done);
     });
 
     it("accepts a file path", function (t, done) {
-      var expected = {
-        cwd: dir,
-        base: dir + "/fixtures",
-        path: dir + "/fixtures/test.coffee",
-      };
+      var expected = [
+        {
+          cwd: dir,
+          base: dir + "/fixtures",
+          path: dir + "/fixtures/test.coffee",
+        },
+      ];
 
       function assertion(pathObjs) {
-        assert.strictEqual(pathObjs.length, 1);
-        assertExtras.containsAllEqual(pathObjs, [expected]);
+        t.assert.containsAllEqual(pathObjs, expected);
       }
 
       stream.pipeline(
@@ -1168,8 +1214,7 @@ function suite(moduleName) {
       ];
 
       function assertion(pathObjs) {
-        assert.strictEqual(pathObjs.length, 3);
-        assertExtras.containsAllEqual(pathObjs, expected);
+        t.assert.containsAllEqual(pathObjs, expected);
       }
 
       stream.pipeline(
@@ -1191,7 +1236,7 @@ function suite(moduleName) {
       }
 
       function assertion(pathObjs) {
-        assert.strictEqual(pathObjs.length, 3);
+        t.assert.strictEqual(pathObjs.length, 3);
       }
 
       stream.pipeline(
@@ -1219,8 +1264,8 @@ function suite(moduleName) {
       t.mock.method(fs, "readdir", stubError);
 
       function assertion(err) {
-        assert.strictEqual(spy.mock.callCount() > 0, true);
-        assert.strictEqual(err, expectedError);
+        t.assert.strictEqual(spy.mock.callCount() > 0, true);
+        t.assert.strictEqual(err, expectedError);
         done();
       }
 
@@ -1239,8 +1284,8 @@ function suite(moduleName) {
       t.mock.method(fs, "stat", stubError);
 
       function assertion(err) {
-        assert.strictEqual(spy.mock.callCount() > 0, true);
-        assert.strictEqual(err, expectedError);
+        t.assert.strictEqual(spy.mock.callCount() > 0, true);
+        t.assert.strictEqual(err, expectedError);
         done();
       }
 
@@ -1255,7 +1300,7 @@ function suite(moduleName) {
       gs.on("error", spy);
 
       gs.on("close", function () {
-        assert.strictEqual(spy.mock.callCount() > 0, false);
+        t.assert.strictEqual(spy.mock.callCount() > 0, false);
         done();
       });
 
@@ -1271,7 +1316,7 @@ function suite(moduleName) {
         });
 
         function assertion(results) {
-          assert.strictEqual(results.length > 16, true);
+          t.assert.strictEqual(results.length > 16, true);
         }
 
         stream.pipeline([gs, concat(assertion)], done);
@@ -1287,7 +1332,7 @@ function suite(moduleName) {
         });
 
         function assertion(results) {
-          assert.strictEqual(results.length > 16, true);
+          t.assert.strictEqual(results.length > 16, true);
         }
 
         stream.pipeline([gs, concat(assertion)], done);
