@@ -1,5 +1,26 @@
 # Changelog
 
+## [9.0.0](https://github.com/gulpjs/glob-stream/compare/v8.0.4...v9.0.0) (2026-11-11)
+
+
+### ⚠ BREAKING CHANGES
+
+* Remove `root` option, absolute globs are from filesystem root ([#160](https://github.com/gulpjs/glob-stream/issues/160))
+* Remove `dot` option, require explicit dot extglob to find dotfiles ([#157](https://github.com/gulpjs/glob-stream/issues/157))
+* No longer error on unmatched singular glob, remove `allowEmpty` option ([#156](https://github.com/gulpjs/glob-stream/issues/156))
+* Normalize repository, dropping Node <26.1.0 ([#151](https://github.com/gulpjs/glob-stream/issues/151))
+
+### Features
+
+* No longer error on unmatched singular glob, remove `allowEmpty` option ([#156](https://github.com/gulpjs/glob-stream/issues/156)) ([d53b5b4](https://github.com/gulpjs/glob-stream/commit/d53b5b49e7e8dfcfb584ac76195beeb8bdd806d5))
+* Remove `dot` option, require explicit dot extglob to find dotfiles ([#157](https://github.com/gulpjs/glob-stream/issues/157)) ([11b5cc1](https://github.com/gulpjs/glob-stream/commit/11b5cc1e062cdbb2d616a18433531b50235605bd))
+* Remove `root` option, absolute globs are from filesystem root ([#160](https://github.com/gulpjs/glob-stream/issues/160)) ([6f2655c](https://github.com/gulpjs/glob-stream/commit/6f2655c09a4b793b6d40038652155d3757d35298))
+
+
+### Miscellaneous Chores
+
+* Normalize repository, dropping Node &lt;26.1.0 ([#151](https://github.com/gulpjs/glob-stream/issues/151)) ([1d36d1a](https://github.com/gulpjs/glob-stream/commit/1d36d1a0330378068f1227ed99773aff01b88dd5))
+
 ### [8.0.4](https://www.github.com/gulpjs/glob-stream/compare/v8.0.3...v8.0.4) (2026-10-13)
 
 
