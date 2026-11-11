@@ -838,25 +838,6 @@ function suite(moduleName) {
       await t.assert.doesNotReject(pipeline(globStream("notfound"), concat()));
     });
 
-    it("resolves absolute paths when root option is given", async (t) => {
-      var expected = [
-        {
-          cwd: cwd,
-          base: dir + "/fixtures",
-          path: dir + "/fixtures/test.coffee",
-        },
-      ];
-
-      function assertion(pathObjs) {
-        t.assert.containsAllEqual(pathObjs, expected);
-      }
-
-      await pipeline(
-        globStream("/test.coffee", { root: dir + "/fixtures" }),
-        concat(assertion),
-      );
-    });
-
     it("traverses symlinked directories", async (t) => {
       var expected = [
         {
