@@ -92,14 +92,6 @@ function uniqueBy(comparator) {
   }
 }
 
-async function* concat(...iters) {
-  for (var iter of iters) {
-    for await (const value of iter) {
-      yield value;
-    }
-  }
-}
-
 function globStream(globs, opt) {
   if (!Array.isArray(globs)) {
     globs = [globs];
@@ -113,6 +105,7 @@ function globStream(globs, opt) {
       cwd: process.cwd(),
       cwdbase: false,
       uniqueBy: "path",
+      // TODO: deprecate `ignore` option
       ignore: [],
     },
     opt,
@@ -140,14 +133,16 @@ function globStream(globs, opt) {
 
   var positiveGlobs = globs.filter(isPositiveGlob);
   var negativeGlobs = globs.filter(isNegatedGlob).map((glob) => glob.slice(1));
+  // TODO: Support explicit `exclude` option
   ourOpt.exclude = [...negativeGlobs, ...ourOpt.ignore];
 
   var isUnique = uniqueBy(ourOpt.uniqueBy);
 
-  function makeGen(glob /* string */, opts) {
-    const globber = fs.promises.glob(glob, opts);
-    const iter = globber[Symbol.asyncIterator]();
-    async function* generate() {
+  async function* globber(globs, opts) {
+    for (const glob of globs) {
+      const globber = fs.promises.glob(glob, opts);
+      const iter = globber[Symbol.asyncIterator]();
+
       for await (const dirent of iter) {
         // Node.js hates this "one weird trick"
         const internalSymbols = Object.getOwnPropertySymbols(dirent);
@@ -178,12 +173,9 @@ function globStream(globs, opt) {
         }
       }
     }
-    return generate();
   }
 
-  var iters = positiveGlobs.map((glob) => makeGen(glob, ourOpt));
-
-  return Readable.from(concat(...iters));
+  return Readable.from(globber(positiveGlobs, ourOpt));
 }
 
 module.exports = globStream;
