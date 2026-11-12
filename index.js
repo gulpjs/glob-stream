@@ -2,7 +2,7 @@
 
 var fs = require("node:fs");
 var path = require("node:path");
-var Readable = require("node:stream").Readable;
+var { Readable } = require("node:stream");
 
 var globParent = require("glob-parent");
 var normalizePath = require("normalize-path");
@@ -26,10 +26,6 @@ function validateGlobs(globs) {
   if (hasPositiveGlob === false) {
     throw new Error("Missing positive glob");
   }
-}
-
-function isStatsSymbol(sym) {
-  return sym.description === "stats";
 }
 
 function isNegatedGlob(glob) {
