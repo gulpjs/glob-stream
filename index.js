@@ -144,9 +144,6 @@ function globStream(globs, opt) {
       const iter = globber[Symbol.asyncIterator]();
 
       for await (const dirent of iter) {
-        // Node.js hates this "one weird trick"
-        const internalSymbols = Object.getOwnPropertySymbols(dirent);
-        const statsSymbol = internalSymbols.find(isStatsSymbol);
         const filepath = path.join(dirent.parentPath, dirent.name);
 
         // Extract base path from glob
@@ -158,13 +155,7 @@ function globStream(globs, opt) {
           base: normalizePath(basePath, true),
           path: normalizePath(filepath, true),
         };
-        // Attaching stats as non-enumerable because they are a performance improvement for gulp
-        // They might not be there so we don't want to make it part of the public API
-        // TODO: Maybe this should be some sort of "stat cache" attached to the glob-stream instance
-        Object.defineProperty(obj, "stats", {
-          value: dirent[statsSymbol],
-          enumerable: false,
-        });
+        // TODO: Add some sort of "stat cache" for performance improvements if stats exist on file
 
         // TODO: Attach to opts so this can be hoisted outside the function?
         var unique = isUnique(obj);
