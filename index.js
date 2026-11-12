@@ -2,8 +2,8 @@
 
 var fs = require("node:fs");
 var path = require("node:path");
-var { Readable } = require("node:stream");
 
+var { Readable } = require("streamx");
 var globParent = require("glob-parent");
 var normalizePath = require("normalize-path");
 var toAbsoluteGlob = require("@gulpjs/to-absolute-glob");

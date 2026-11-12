@@ -30,14 +30,14 @@
   "dependencies": {
     "@gulpjs/to-absolute-glob": "^4.0.0",
     "glob-parent": "gulpjs/glob-parent#7fe577bb1046a36b08a345ded4f716f82cf0124a",
-    "normalize-path": "^3.0.0"
+    "normalize-path": "^3.0.0",
+    "streamx": "^2.12.5"
   },
   "devDependencies": {
     "eslint": "10.11.0",
     "eslint-config-gulp": "7.0.0",
     "prettier": "3.9.6",
-    "readable-stream": "^3.6.0",
-    "streamx": "^2.12.5"
+    "readable-stream": "^3.6.0"
   },
   "keywords": [
     "glob",
