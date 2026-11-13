@@ -249,7 +249,7 @@ function suite(moduleName) {
       }
 
       await pipeline(
-        globStream(`//?/${dir}/fixtures/*.coffee`),
+        globStream("fixtures/*.coffee", { cwd: path.toNamespacedPath(dir) }),
         concat(assertion),
       );
     });
