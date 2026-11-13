@@ -960,6 +960,7 @@ function suite(moduleName) {
         ];
 
         function assertion(pathObjs) {
+          console.log(pathObjs);
           t.assert.containsAllEqual(pathObjs, expected);
         }
 
