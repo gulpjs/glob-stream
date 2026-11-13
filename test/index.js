@@ -235,26 +235,6 @@ function suite(moduleName) {
       await pipeline(globStream("*.foo", { cwd: cwd }), concat(assertion));
     });
 
-    it("(win) supports UNC paths", { skip: !isWin32 }, async (t) => {
-      var expected = [
-        {
-          cwd: dir,
-          base: dir + "/fixtures",
-          path: dir + "/fixtures/test.coffee",
-        },
-      ];
-
-      function assertion(pathObjs) {
-        console.log(pathObjs);
-        t.assert.containsAllEqual(pathObjs, expected);
-      }
-
-      await pipeline(
-        globStream("fixtures/*.coffee", { cwd: path.toNamespacedPath(dir) }),
-        concat(assertion),
-      );
-    });
-
     // Node glob does not seem to support `\\[` as an escaped bracket
     it("sets the correct base when [ is escaped by [[] in glob", async (t) => {
       var expected = [
@@ -967,6 +947,27 @@ function suite(moduleName) {
           message: /must be a string or array/,
         },
       );
+    });
+
+    describe("cwd", () => {
+      it("(win) accepts UNC paths", { skip: !isWin32 }, async (t) => {
+        var expected = [
+          {
+            cwd: `//?/${dir}`,
+            base: `//?/${dir}/fixtures`,
+            path: `//?/${dir}/fixtures/test.coffee`,
+          },
+        ];
+
+        function assertion(pathObjs) {
+          t.assert.containsAllEqual(pathObjs, expected);
+        }
+
+        await pipeline(
+          globStream("fixtures/*.coffee", { cwd: `//?//${dir}` }),
+          concat(assertion),
+        );
+      });
     });
 
     describe("ignore", () => {
