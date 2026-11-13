@@ -38,6 +38,8 @@ function deWindows(p) {
 var cwd = deWindows(process.cwd());
 var dir = deWindows(__dirname);
 
+var isWin32 = os.platform() === "win32";
+
 function suite(moduleName) {
   var { PassThrough, Transform, Writable } = require(moduleName);
 
@@ -231,6 +233,22 @@ function suite(moduleName) {
       }
 
       await pipeline(globStream("*.foo", { cwd: cwd }), concat(assertion));
+    });
+
+    it("(win) supports UNC paths", { skip: !isWin32 }, async (t) => {
+      var expected = [
+        {
+          cwd: dir,
+          base: dir + "/fixtures",
+          path: dir + "/fixtures/test.coffee",
+        },
+      ];
+
+      function assertion(pathObjs) {
+        t.assert.containsAllEqual(pathObjs, expected);
+      }
+
+      await pipeline(globStream(`//?/${cwd}/*.coffee`), concat(assertion));
     });
 
     // Node glob does not seem to support `\\[` as an escaped bracket
