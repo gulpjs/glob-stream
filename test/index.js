@@ -248,10 +248,10 @@ function suite(moduleName) {
         t.assert.containsAllEqual(pathObjs, expected);
       }
 
-      var glob = `//?/${cwd}/*.coffee`;
-      console.log(glob, path.toNamespacedPath(cwd));
-
-      await pipeline(globStream(glob), concat(assertion));
+      await pipeline(
+        globStream(`//?/${dir}/fixtures/*.coffee`),
+        concat(assertion),
+      );
     });
 
     // Node glob does not seem to support `\\[` as an escaped bracket
