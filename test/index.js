@@ -233,7 +233,8 @@ function suite(moduleName) {
       await pipeline(globStream("*.foo", { cwd: cwd }), concat(assertion));
     });
 
-    it("sets the correct base when [ ] in glob", async (t) => {
+    // Node glob does not seem to support `\\[` as an escaped bracket
+    it("sets the correct base when [ is escaped by [[] in glob", async (t) => {
       var expected = [
         {
           cwd: dir,

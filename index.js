@@ -4,9 +4,8 @@ var fs = require("node:fs");
 var path = require("node:path");
 
 var { Readable } = require("streamx");
-var globParent = require("glob-parent");
+var globParent = require("glob-parent").default;
 var normalizePath = require("normalize-path");
-var toAbsoluteGlob = require("@gulpjs/to-absolute-glob");
 
 function validateGlobs(globs) {
   var hasPositiveGlob = false;
@@ -138,12 +137,13 @@ function globStream(globs, opt) {
     for (const glob of globs) {
       const globber = fs.promises.glob(glob, opts);
       const iter = globber[Symbol.asyncIterator]();
+      const parent = globParent(glob, opts);
 
       for await (const dirent of iter) {
         const filepath = path.join(dirent.parentPath, dirent.name);
 
         // Extract base path from glob
-        var basePath = base || globParent(toAbsoluteGlob(glob, opts));
+        var basePath = base || parent;
 
         var obj = {
           // We always want to normalize the properties to posix-style slashes
