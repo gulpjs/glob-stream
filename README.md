@@ -8,7 +8,7 @@
 
 [![NPM version][npm-image]][npm-url] [![Downloads][downloads-image]][npm-url] [![Build Status][ci-image]][ci-url] [![Coveralls Status][coveralls-image]][coveralls-url]
 
-[Readable streamx][streamx-url] interface over [anymatch][anymatch-url].
+[Readable streamx][streamx-url] interface over [Node's globbing][fs-glob-url].
 
 ## Usage
 
@@ -65,10 +65,6 @@ Type: `String` or `Function`
 
 Default: `'path'`
 
-##### other
-
-Any glob-related options are documented in [picomatch][picomatch-options-url].
-
 ## Strict No LLM / No AI Policy
 
 No LLMs for issues.
@@ -84,8 +80,7 @@ English is encouraged, but not required. You are welcome to post in your native 
 MIT
 
 <!-- prettier-ignore-start -->
-[anymatch-url]: https://github.com/micromatch/anymatch
-[picomatch-options-url]: https://github.com/micromatch/picomatch#options
+[fs-glob-url]: https://nodejs.org/docs/latest-v26.x/api/fs.html#fspromisesglobpattern-options
 [glob-parent-url]: https://github.com/gulpjs/glob-parent
 [streamx-url]: https://github.com/streamxorg/streamx#readable-stream
 <!-- prettier-ignore-end -->

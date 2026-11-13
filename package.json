@@ -1,7 +1,7 @@
 {
   "name": "glob-stream",
   "version": "8.0.4",
-  "description": "Readable streamx interface over anymatch.",
+  "description": "Readable streamx interface over Node's globbing.",
   "author": "Gulp Team <team@gulpjs.com> (https://gulpjs.com/)",
   "contributors": [
     "Eric Schoffstall <yo@contra.io>",
@@ -28,12 +28,7 @@
     "test": "node --test --experimental-test-coverage --test-reporter=spec --test-reporter-destination=stdout --test-reporter=lcov --test-reporter-destination=test/lcov.info \"test/*.js\""
   },
   "dependencies": {
-    "@gulpjs/to-absolute-glob": "^4.0.0",
-    "anymatch": "^3.1.3",
-    "fastq": "^1.13.0",
-    "glob-parent": "^6.0.2",
-    "is-glob": "^4.0.3",
-    "is-negated-glob": "^1.0.0",
+    "glob-parent": "gulpjs/glob-parent#1fa0155c10c13360fc62cdf7da7cb4ec9e34a02f",
     "normalize-path": "^3.0.0",
     "streamx": "^2.12.5"
   },
