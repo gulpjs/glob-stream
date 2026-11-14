@@ -9,7 +9,6 @@ var anymatch = require("anymatch");
 var Readable = require("streamx").Readable;
 var isGlob = require("is-glob");
 var globParent = require("glob-parent");
-var normalizePath = require("normalize-path");
 var isNegatedGlob = require("is-negated-glob");
 var toAbsoluteGlob = require("@gulpjs/to-absolute-glob");
 
@@ -250,7 +249,7 @@ function globStream(globs, opt) {
 
   validateOptions(ourOpt);
 
-  ourOpt.cwd = normalizePath(path.resolve(ourOpt.cwd), true);
+  ourOpt.cwd = path.resolve(ourOpt.cwd);
 
   var base = ourOpt.base;
   if (ourOpt.cwdbase) {
@@ -321,10 +320,9 @@ function globStream(globs, opt) {
       var basePath = base || globParent(positiveGlobs[matchIdx]);
 
       var obj = {
-        cwd: ourOpt.cwd,
-        base: basePath,
-        // We always want to normalize the path to posix-style slashes
-        path: normalizePath(filepath, true),
+        cwd: path.normalize(ourOpt.cwd),
+        base: path.normalize(basePath),
+        path: path.normalize(filepath),
       };
 
       var unique = isUnique(obj);
