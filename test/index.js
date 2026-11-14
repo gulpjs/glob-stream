@@ -35,8 +35,12 @@ function deWindows(p) {
   return p.replace(/\\/g, "/");
 }
 
-var cwd = deWindows(process.cwd());
+// For globs
 var dir = deWindows(__dirname);
+
+// For filepaths
+var cwd = process.cwd();
+var dirname = __dirname
 
 function suite(moduleName) {
   var { PassThrough, Transform, Writable } = require(moduleName);
@@ -64,13 +68,13 @@ function suite(moduleName) {
     });
   }
 
-  describe("glob-stream (with " + moduleName + ")", () => {
+  describe(`glob-stream (with ${moduleName})`, () => {
     it("streams a single object when given a directory path", async (t) => {
       var expected = [
         {
-          cwd: dir,
-          base: dir + "/fixtures",
-          path: dir + "/fixtures/whatsgoingon",
+          cwd: dirname,
+          base: path.join(dirname, "/fixtures"),
+          path: path.join(dirname, "/fixtures/whatsgoingon"),
         },
       ];
 
@@ -79,7 +83,7 @@ function suite(moduleName) {
       }
 
       await pipeline(
-        globStream("./fixtures/whatsgoingon", { cwd: dir }),
+        globStream("./fixtures/whatsgoingon", { cwd: dirname }),
         concat(assertion),
       );
     });
@@ -87,9 +91,9 @@ function suite(moduleName) {
     it("streams a single object when given a file path", async (t) => {
       var expected = [
         {
-          cwd: dir,
-          base: dir + "/fixtures",
-          path: dir + "/fixtures/test.coffee",
+          cwd: dirname,
+          base: path.join(dirname, "/fixtures"),
+          path: path.join(dirname, "/fixtures/test.coffee"),
         },
       ];
 
@@ -98,7 +102,7 @@ function suite(moduleName) {
       }
 
       await pipeline(
-        globStream("./fixtures/test.coffee", { cwd: dir }),
+        globStream("./fixtures/test.coffee", { cwd: dirname }),
         concat(assertion),
       );
     });
@@ -106,9 +110,9 @@ function suite(moduleName) {
     it("streams only objects with directory paths when given a directory glob", async (t) => {
       var expected = [
         {
-          cwd: dir,
-          base: dir + "/fixtures/whatsgoingon",
-          path: dir + "/fixtures/whatsgoingon/hey",
+          cwd: dirname,
+          base: path.join(dirname, "/fixtures/whatsgoingon"),
+          path: path.join(dirname, "/fixtures/whatsgoingon/hey"),
         },
       ];
 
@@ -117,7 +121,7 @@ function suite(moduleName) {
       }
 
       await pipeline(
-        globStream("./fixtures/whatsgoingon/*/", { cwd: dir }),
+        globStream("./fixtures/whatsgoingon/*/", { cwd: dirname }),
         concat(assertion),
       );
     });
@@ -130,7 +134,7 @@ function suite(moduleName) {
       }
 
       await pipeline(
-        globStream("./fixtures/not-exists/*", { cwd: dir }),
+        globStream("./fixtures/not-exists/*", { cwd: dirname }),
         concat(assertion),
       );
     });
@@ -138,9 +142,9 @@ function suite(moduleName) {
     it("streams only objects with file paths from a non-directory glob", async (t) => {
       var expected = [
         {
-          cwd: dir,
-          base: dir + "/fixtures",
-          path: dir + "/fixtures/test.coffee",
+          cwd: dirname,
+          base: path.join(dirname, "/fixtures"),
+          path: path.join(dirname, "/fixtures/test.coffee"),
         },
       ];
 
@@ -149,19 +153,19 @@ function suite(moduleName) {
       }
 
       await pipeline(
-        globStream("./fixtures/*.coffee", { cwd: dir }),
+        globStream("./fixtures/*.coffee", { cwd: dirname }),
         concat(assertion),
       );
     });
 
     it("properly handles ( ) in cwd path", async (t) => {
-      var cwd = dir + "/fixtures/has (parens)";
+      var cwd = path.join(dirname, "/fixtures/has (parens)");
 
       var expected = [
         {
           cwd: cwd,
           base: cwd,
-          path: cwd + "/test.dmc",
+          path: path.join(cwd, "/test.dmc"),
         },
       ];
 
@@ -175,9 +179,9 @@ function suite(moduleName) {
     it("sets the correct base when ( ) in glob", async (t) => {
       var expected = [
         {
-          cwd: dir,
-          base: dir + "/fixtures/has (parens)",
-          path: dir + "/fixtures/has (parens)/test.dmc",
+          cwd: dirname,
+          base: path.join(dirname, "/fixtures/has (parens)"),
+          path: path.join(dirname, "/fixtures/has (parens)/test.dmc"),
         },
       ];
 
@@ -186,7 +190,7 @@ function suite(moduleName) {
       }
 
       await pipeline(
-        globStream("./fixtures/has \\(parens\\)/*.dmc", { cwd: dir }),
+        globStream("./fixtures/has \\(parens\\)/*.dmc", { cwd: dirname }),
         concat(assertion),
       );
     });
@@ -194,14 +198,14 @@ function suite(moduleName) {
     it("finds files in paths that contain ( ) or [ ] when they match the glob", async (t) => {
       var expected = [
         {
-          cwd: dir,
-          base: dir + "/fixtures",
-          path: dir + "/fixtures/has (parens)/test.dmc",
+          cwd: dirname,
+          base: path.join(dirname, "/fixtures"),
+          path: path.join(dirname, "/fixtures/has (parens)/test.dmc"),
         },
         {
-          cwd: dir,
-          base: dir + "/fixtures",
-          path: dir + "/fixtures/has [brackets]/test.foo",
+          cwd: dirname,
+          base: path.join(dirname, "/fixtures"),
+          path: path.join(dirname, "/fixtures/has [brackets]/test.foo"),
         },
       ];
 
@@ -210,19 +214,19 @@ function suite(moduleName) {
       }
 
       await pipeline(
-        globStream("./fixtures/has*/*", { cwd: dir }),
+        globStream("./fixtures/has*/*", { cwd: dirname }),
         concat(assertion),
       );
     });
 
     it("properly handles [ ] in cwd path", async (t) => {
-      var cwd = dir + "/fixtures/has [brackets]";
+      var cwd = path.join(dir, "/fixtures/has [brackets]");
 
       var expected = [
         {
           cwd: cwd,
           base: cwd,
-          path: cwd + "/test.foo",
+          path: path.join(cwd, "/test.foo"),
         },
       ];
 
@@ -236,9 +240,9 @@ function suite(moduleName) {
     it("sets the correct base when [ ] in glob", async (t) => {
       var expected = [
         {
-          cwd: dir,
-          base: dir + "/fixtures/has [brackets]",
-          path: dir + "/fixtures/has [brackets]/test.foo",
+          cwd: dirname,
+          base: path.join(dirname, "/fixtures/has [brackets]"),
+          path: path.join(dirname, "/fixtures/has [brackets]/test.foo"),
         },
       ];
 
@@ -247,33 +251,33 @@ function suite(moduleName) {
       }
 
       await pipeline(
-        globStream("./fixtures/has \\[brackets\\]/*.foo", { cwd: dir }),
+        globStream("./fixtures/has \\[brackets\\]/*.foo", { cwd: dirname }),
         concat(assertion),
       );
     });
 
     it("emits all objects (unordered) when given multiple paths and specified base", async (t) => {
-      var base = dir + "/fixtures";
+      var base = path.join(dir, "/fixtures");
 
       var expected = [
         {
           cwd: base,
           base: base,
-          path: base + "/whatsgoingon/hey/isaidhey/whatsgoingon/test.txt",
+          path: path.join(base, "/whatsgoingon/hey/isaidhey/whatsgoingon/test.txt"),
         },
         {
           cwd: base,
           base: base,
-          path: base + "/test.coffee",
+          path: path.join(base, "/test.coffee"),
         },
         {
           cwd: base,
           base: base,
-          path: base + "/whatsgoingon/test.js",
+          path: path.join(base, "/whatsgoingon/test.js"),
         },
       ];
 
-      var paths = [
+      var globs = [
         "./whatsgoingon/hey/isaidhey/whatsgoingon/test.txt",
         "./test.coffee",
         "./whatsgoingon/test.js",
@@ -284,33 +288,33 @@ function suite(moduleName) {
       }
 
       await pipeline(
-        globStream(paths, { cwd: base, base: base }),
+        globStream(globs, { cwd: base, base: base }),
         concat(assertion),
       );
     });
 
     it("emits all objects (unordered) when given multiple paths and cwdbase", async (t) => {
-      var base = dir + "/fixtures";
+      var base = path.join(dir, "/fixtures");
 
       var expected = [
         {
           cwd: base,
           base: base,
-          path: base + "/whatsgoingon/hey/isaidhey/whatsgoingon/test.txt",
+          path: path.join(base, "/whatsgoingon/hey/isaidhey/whatsgoingon/test.txt"),
         },
         {
           cwd: base,
           base: base,
-          path: base + "/test.coffee",
+          path: path.join(base, "/test.coffee"),
         },
         {
           cwd: base,
           base: base,
-          path: base + "/whatsgoingon/test.js",
+          path: path.join(base, "/whatsgoingon/test.js"),
         },
       ];
 
-      var paths = [
+      var globs = [
         "./whatsgoingon/hey/isaidhey/whatsgoingon/test.txt",
         "./test.coffee",
         "./whatsgoingon/test.js",
@@ -321,7 +325,7 @@ function suite(moduleName) {
       }
 
       await pipeline(
-        globStream(paths, { cwd: base, cwdbase: true }),
+        globStream(globs, { cwd: base, cwdbase: true }),
         concat(assertion),
       );
     });
@@ -329,42 +333,39 @@ function suite(moduleName) {
     it("emits all objects (unordered) when given multiple globs with globstars", async (t) => {
       var expected = [
         {
-          cwd: dir,
-          base: dir + "/fixtures",
-          path:
-            dir + "/fixtures/whatsgoingon/hey/isaidhey/whatsgoingon/test.txt",
+          cwd: dirname,
+          base: path.join(dirname, "/fixtures"),
+          path: path.join(dir, "/fixtures/whatsgoingon/hey/isaidhey/whatsgoingon/test.txt"),
         },
         {
-          cwd: dir,
-          base: dir + "/fixtures",
-          path: dir + "/fixtures/test.coffee",
+          cwd: dirname,
+          base: path.join(dirname, "/fixtures"),
+          path: path.join(dirname, "/fixtures/test.coffee"),
         },
         {
-          cwd: dir,
-          base: dir + "/fixtures",
-          path: dir + "/fixtures/whatsgoingon/test.js",
+          cwd: dirname,
+          base: path.join(dirname, "/fixtures"),
+          path: path.join(dirname, "/fixtures/whatsgoingon/test.js"),
         },
         {
-          cwd: dir,
-          base: dir + "/fixtures",
-          path: dir + "/fixtures/has (parens)/test.dmc",
+          cwd: dirname,
+          base: path.join(dirname, "/fixtures"),
+          path: path.join(dirname, "/fixtures/has (parens)/test.dmc"),
         },
         {
-          cwd: dir,
-          base: dir + "/fixtures",
-          path: dir + "/fixtures/stuff/test.dmc",
+          cwd: dirname,
+          base: path.join(dirname, "/fixtures"),
+          path: path.join(dirname, "/fixtures/stuff/test.dmc"),
         },
         {
-          cwd: dir,
-          base: dir + "/fixtures",
-          path: dir + "/fixtures/symlinks/symlink-dest/test.js",
+          cwd: dirname,
+          base: path.join(dirname, "/fixtures"),
+          path: path.join(dirname, "/fixtures/symlinks/symlink-dest/test.js"),
         },
         {
-          cwd: dir,
-          base: dir + "/fixtures",
-          path:
-            dir +
-            "/fixtures/symlinks/symlink-dest/hey/isaidhey/whatsgoingon/test.txt",
+          cwd: dirname,
+          base: path.join(dirname, "/fixtures"),
+          path: path.join(dir, "/fixtures/symlinks/symlink-dest/hey/isaidhey/whatsgoingon/test.txt"),
         },
       ];
 
@@ -379,7 +380,7 @@ function suite(moduleName) {
         t.assert.containsAllEqual(pathObjs, expected);
       }
 
-      await pipeline(globStream(globs, { cwd: dir }), concat(assertion));
+      await pipeline(globStream(globs, { cwd: dirname }), concat(assertion));
     });
 
     // By default, we only run this in non-Windows CI since it takes so long
@@ -392,61 +393,60 @@ function suite(moduleName) {
 
         for (var i = 0; i < 100000; i++) {
           fs.writeFileSync(
-            path.join(largeDir, "file-" + i + ".txt"),
-            "test-" + i,
+            path.join(largeDir, `file-${i}.txt`),
+            `test-${i}`,
           );
         }
 
         function assertion(pathObjs) {
           for (var i = 0; i < 100000; i++) {
-            fs.unlinkSync(path.join(largeDir, "file-" + i + ".txt"));
+            fs.unlinkSync(path.join(largeDir, `file-${i}.txt`));
           }
           fs.rmdirSync(largeDir);
 
           t.assert.strictEqual(pathObjs.length, 100000);
         }
 
-        var glob = deWindows(largeDir) + "/*.txt";
+        var glob = `${deWindows(largeDir)}/*.txt`;
 
         await pipeline(globStream(glob), concat(assertion));
       },
     );
 
     it("emits all objects (unordered) when given multiple absolute paths and no cwd", async (t) => {
-      var testFile = path.join(os.tmpdir(), "glob-stream-test.txt");
-      fs.writeFileSync(testFile, "test");
+      var tmp = os.tmpdir();
 
-      var tmp = deWindows(os.tmpdir());
+      var testFile = path.join(tmp, "glob-stream-test.txt");
+      fs.writeFileSync(testFile, "test");
 
       var expected = [
         {
           cwd: cwd,
-          base: dir + "/fixtures/whatsgoingon/hey/isaidhey/whatsgoingon",
-          path:
-            dir + "/fixtures/whatsgoingon/hey/isaidhey/whatsgoingon/test.txt",
+          base: path.join(dirname, "/fixtures/whatsgoingon/hey/isaidhey/whatsgoingon"),
+          path: path.join(dir, "/fixtures/whatsgoingon/hey/isaidhey/whatsgoingon/test.txt"),
         },
         {
           cwd: cwd,
-          base: dir + "/fixtures",
-          path: dir + "/fixtures/test.coffee",
+          base: path.join(dirname, "/fixtures"),
+          path: path.join(dirname, "/fixtures/test.coffee"),
         },
         {
           cwd: cwd,
-          base: dir + "/fixtures/whatsgoingon",
-          path: dir + "/fixtures/whatsgoingon/test.js",
+          base: path.join(dirname, "/fixtures/whatsgoingon"),
+          path: path.join(dirname, "/fixtures/whatsgoingon/test.js"),
         },
         {
           cwd: cwd,
           base: tmp,
-          path: tmp + "/glob-stream-test.txt",
+          path: path.join(tmp, "/glob-stream-test.txt"),
         },
       ];
 
-      var paths = [
-        dir + "/fixtures/whatsgoingon/hey/isaidhey/whatsgoingon/test.txt",
-        dir + "/fixtures/test.coffee",
-        dir + "/fixtures/whatsgoingon/test.js",
-        tmp + "/glob-stream-*.txt",
+      var globs = [
+        `${dir}/fixtures/whatsgoingon/hey/isaidhey/whatsgoingon/test.txt`,
+        `${dir}/fixtures/test.coffee`,
+        `${dir}/fixtures/whatsgoingon/test.js`,
+        `${deWindows(tmp)}/glob-stream-*.txt`,
       ];
 
       function assertion(pathObjs) {
@@ -455,27 +455,29 @@ function suite(moduleName) {
         t.assert.containsAllEqual(pathObjs, expected);
       }
 
-      await pipeline(globStream(paths), concat(assertion));
+      await pipeline(globStream(globs), concat(assertion));
     });
 
     it("skips directories with invalid permission", async (t) => {
-      var testFile = path.join(os.tmpdir(), "glob-stream-test.txt");
+      var tmp = os.tmpdir();
+
+      var testFile = path.join(tmp, "glob-stream-test.txt");
       fs.writeFileSync(testFile, "test");
 
-      var testDir = path.join(os.tmpdir(), "glob-stream-private-dir");
+      var testDir = path.join(tmp, "glob-stream-private-dir");
       fs.mkdirSync(testDir, { recursive: true, mode: 0o200 });
-
-      var tmp = deWindows(os.tmpdir());
 
       var expected = [
         {
           cwd: cwd,
           base: tmp,
-          path: tmp + "/glob-stream-test.txt",
+          path: path.join(tmp, "/glob-stream-test.txt"),
         },
       ];
 
-      var paths = [tmp + "/glob-stream-*.txt"];
+      var globs = [
+        `${deWindows(tmp)}/glob-stream-*.txt`,
+      ];
 
       function assertion(pathObjs) {
         fs.unlinkSync(testFile);
@@ -484,18 +486,18 @@ function suite(moduleName) {
         t.assert.containsAllEqual(pathObjs, expected);
       }
 
-      await pipeline(globStream(paths), concat(assertion));
+      await pipeline(globStream(globs), concat(assertion));
     });
 
     it("resolves globs when process.chdir() changes the cwd", async (t) => {
-      var prevCwd = process.cwd();
+      var prevCwd = cwd;
       process.chdir("test/fixtures/stuff");
 
       var expected = [
         {
-          cwd: dir + "/fixtures/stuff",
-          base: dir + "/fixtures",
-          path: dir + "/fixtures/test.coffee",
+          cwd: path.join(dirname, "/fixtures/stuff"),
+          base: path.join(dirname, "/fixtures"),
+          path: path.join(dirname, "/fixtures/test.coffee"),
         },
       ];
 
@@ -518,7 +520,7 @@ function suite(moduleName) {
           {
             cwd: cwd,
             base: cwd,
-            path: cwd + "/package.json",
+            path: path.join(cwd, "/package.json"),
           },
         ];
 
@@ -533,9 +535,9 @@ function suite(moduleName) {
     it("removes duplicate objects from the stream using default (path) filter", async (t) => {
       var expected = [
         {
-          cwd: dir,
-          base: dir + "/fixtures",
-          path: dir + "/fixtures/test.coffee",
+          cwd: dirname,
+          base: path.join(dirname, "/fixtures"),
+          path: path.join(dirname, "/fixtures/test.coffee"),
         },
       ];
 
@@ -545,7 +547,7 @@ function suite(moduleName) {
 
       await pipeline(
         globStream(["./fixtures/test.coffee", "./fixtures/*.coffee"], {
-          cwd: dir,
+          cwd: dirname,
         }),
         concat(assertion),
       );
@@ -554,9 +556,9 @@ function suite(moduleName) {
     it("removes duplicate objects from the stream using custom string filter", async (t) => {
       var expected = [
         {
-          cwd: dir,
-          base: dir + "/fixtures/stuff",
-          path: dir + "/fixtures/stuff/run.dmc",
+          cwd: dirname,
+          base: path.join(dirname, "/fixtures/stuff"),
+          path: path.join(dirname, "/fixtures/stuff/run.dmc"),
         },
       ];
 
@@ -566,7 +568,7 @@ function suite(moduleName) {
 
       await pipeline(
         globStream(["./fixtures/stuff/run.dmc", "./fixtures/stuff/test.dmc"], {
-          cwd: dir,
+          cwd: dirname,
           uniqueBy: "base",
         }),
         concat(assertion),
@@ -576,14 +578,14 @@ function suite(moduleName) {
     it("removes duplicate objects from the stream using custom function filter", async (t) => {
       var expected = [
         {
-          cwd: dir,
-          base: dir + "/fixtures/stuff",
-          path: dir + "/fixtures/stuff/run.dmc",
+          cwd: dirname,
+          base: path.join(dirname, "/fixtures/stuff"),
+          path: path.join(dirname, "/fixtures/stuff/run.dmc"),
         },
         {
-          cwd: dir,
-          base: dir + "/fixtures/stuff",
-          path: dir + "/fixtures/stuff/test.dmc",
+          cwd: dirname,
+          base: path.join(dirname, "/fixtures/stuff"),
+          path: path.join(dirname, "/fixtures/stuff/test.dmc"),
         },
       ];
 
@@ -596,7 +598,7 @@ function suite(moduleName) {
       }
 
       await pipeline(
-        globStream("./fixtures/stuff/*.dmc", { cwd: dir, uniqueBy: uniqueBy }),
+        globStream("./fixtures/stuff/*.dmc", { cwd: dirname, uniqueBy: uniqueBy }),
         concat(assertion),
       );
     });
@@ -609,7 +611,7 @@ function suite(moduleName) {
       }
 
       await pipeline(
-        globStream("./fixtures/*swag", { cwd: dir }),
+        globStream("./fixtures/*swag", { cwd: dirname }),
         concat(assertion),
       );
     });
@@ -617,9 +619,9 @@ function suite(moduleName) {
     it("finds dotfiles with dot extglob", async (t) => {
       var expected = [
         {
-          cwd: dir,
-          base: dir + "/fixtures",
-          path: dir + "/fixtures/.swag",
+          cwd: dirname,
+          base: path.join(dirname, "/fixtures"),
+          path: path.join(dirname, "/fixtures/.swag"),
         },
       ];
 
@@ -628,7 +630,7 @@ function suite(moduleName) {
       }
 
       await pipeline(
-        globStream("./fixtures/*(.)swag", { cwd: dir }),
+        globStream("./fixtures/*(.)swag", { cwd: dirname }),
         concat(assertion),
       );
     });
@@ -642,7 +644,7 @@ function suite(moduleName) {
       }
 
       await pipeline(
-        globStream(["./fixtures/*(.)swag", "!./fixtures/**"], { cwd: dir }),
+        globStream(["./fixtures/*(.)swag", "!./fixtures/**"], { cwd: dirname }),
         concat(assertion),
       );
     });
@@ -651,8 +653,8 @@ function suite(moduleName) {
       var expected = [
         {
           cwd: cwd,
-          base: dir + "/fixtures",
-          path: dir + "/fixtures/test.coffee",
+          base: path.join(dirname, "/fixtures"),
+          path: path.join(dirname, "/fixtures/test.coffee"),
         },
       ];
 
@@ -661,7 +663,7 @@ function suite(moduleName) {
       }
 
       await pipeline(
-        globStream(dir + "/fixtures/test.coffee"),
+        globStream(`${dir}/fixtures/test.coffee`),
         concat(assertion),
       );
     });
@@ -669,9 +671,9 @@ function suite(moduleName) {
     it("works with a relative cwd", async (t) => {
       var expected = [
         {
-          cwd: cwd + "/test",
-          base: dir + "/fixtures",
-          path: dir + "/fixtures/test.coffee",
+          cwd: path.join(cwd, "/test"),
+          base: path.join(dirname, "/fixtures"),
+          path: path.join(dirname, "/fixtures/test.coffee"),
         },
       ];
 
@@ -680,8 +682,8 @@ function suite(moduleName) {
       }
 
       await pipeline(
-        globStream(dir + "/fixtures/test.coffee", {
-          cwd: path.relative(process.cwd(), __dirname),
+        globStream(`${dir}/fixtures/test.coffee`, {
+          cwd: path.relative(cwd, dirname),
         }),
         concat(assertion),
       );
@@ -691,14 +693,14 @@ function suite(moduleName) {
       var expected = [
         {
           cwd: cwd,
-          base: dir + "/fixtures/stuff",
-          path: dir + "/fixtures/stuff/run.dmc",
+          base: path.join(dirname, "/fixtures/stuff"),
+          path: path.join(dirname, "/fixtures/stuff/run.dmc"),
         },
       ];
 
       var globs = [
-        dir + "/fixtures/stuff/*.dmc",
-        "!" + dir + "/fixtures/stuff/*test.dmc",
+        `${dir}/fixtures/stuff/*.dmc`,
+        `!${dir}/fixtures/stuff/*test.dmc`,
       ];
 
       function assertion(pathObjs) {
@@ -712,21 +714,21 @@ function suite(moduleName) {
       var expected = [
         {
           cwd: cwd,
-          base: dir + "/fixtures/stuff",
-          path: dir + "/fixtures/stuff/run.dmc",
+          base: path.join(dirname, "/fixtures/stuff"),
+          path: path.join(dirname, "/fixtures/stuff/run.dmc"),
         },
       ];
 
-      var paths = [
-        dir + "/fixtures/stuff/*.dmc",
-        "!" + dir + "/fixtures/stuff/test.dmc",
+      var globs = [
+        `${dir}/fixtures/stuff/*.dmc`,
+        `!${dir}/fixtures/stuff/test.dmc`,
       ];
 
       function assertion(pathObjs) {
         t.assert.containsAllEqual(pathObjs, expected);
       }
 
-      await pipeline(globStream(paths), concat(assertion));
+      await pipeline(globStream(globs), concat(assertion));
     });
 
     it("does not error when a negative glob removes all matches from a positive glob", async (t) => {
@@ -735,7 +737,7 @@ function suite(moduleName) {
       }
 
       await pipeline(
-        globStream(["./fixtures/**/*.js", "!./**/test.js"], { cwd: dir }),
+        globStream(["./fixtures/**/*.js", "!./**/test.js"], { cwd: dirname }),
         concat(assertion),
       );
     });
@@ -753,77 +755,77 @@ function suite(moduleName) {
         t.assert.containsAllEqual(pathObjs, expected);
       }
 
-      await pipeline(globStream(globs, { cwd: dir }), concat(assertion));
+      await pipeline(globStream(globs, { cwd: dirname }), concat(assertion));
     });
 
     it("does not exclude file path after negative glob", async (t) => {
       var expected = [
         {
-          cwd: dir,
-          base: dir + "/fixtures/stuff",
-          path: dir + "/fixtures/stuff/run.dmc",
+          cwd: dirname,
+          base: path.join(dirname, "/fixtures/stuff"),
+          path: path.join(dirname, "/fixtures/stuff/run.dmc"),
         },
         {
-          cwd: dir,
-          base: dir + "/fixtures",
-          path: dir + "/fixtures/test.coffee",
+          cwd: dirname,
+          base: path.join(dirname, "/fixtures"),
+          path: path.join(dirname, "/fixtures/test.coffee"),
         },
       ];
 
-      var paths = [
-        dir + "/fixtures/stuff/*.dmc",
-        "!" + dir + "/fixtures/stuff/test.dmc",
-        dir + "/fixtures/test.coffee",
+      var globs = [
+        `${dir}/fixtures/stuff/*.dmc`,
+        `!${dir}/fixtures/stuff/test.dmc`,
+        `${dir}/fixtures/test.coffee`,
       ];
 
       function assertion(pathObjs) {
         t.assert.containsAllEqual(pathObjs, expected);
       }
 
-      await pipeline(globStream(paths, { cwd: dir }), concat(assertion));
+      await pipeline(globStream(globs, { cwd: dirname }), concat(assertion));
     });
 
     it("does not exclude file path before negative glob", async (t) => {
       var expected = [
         {
-          cwd: dir,
-          base: dir + "/fixtures/stuff",
-          path: dir + "/fixtures/stuff/run.dmc",
+          cwd: dirname,
+          base: path.join(dirname, "/fixtures/stuff"),
+          path: path.join(dirname, "/fixtures/stuff/run.dmc"),
         },
         {
-          cwd: dir,
-          base: dir + "/fixtures",
-          path: dir + "/fixtures/test.coffee",
+          cwd: dirname,
+          base: path.join(dirname, "/fixtures"),
+          path: path.join(dirname, "/fixtures/test.coffee"),
         },
       ];
 
-      var paths = [
-        dir + "/fixtures/stuff/*.dmc",
-        dir + "/fixtures/test.coffee",
-        "!" + dir + "/fixtures/stuff/test.dmc",
+      var globs = [
+        `${dir}/fixtures/stuff/*.dmc`,
+        `${dir}/fixtures/test.coffee`,
+        `!${dir}/fixtures/stuff/test.dmc`,
       ];
 
       function assertion(pathObjs) {
         t.assert.containsAllEqual(pathObjs, expected);
       }
 
-      await pipeline(globStream(paths, { cwd: dir }), concat(assertion));
+      await pipeline(globStream(globs, { cwd: dirname }), concat(assertion));
     });
 
     it("throws on invalid glob argument", function (t) {
-      t.assert.throws(() => globStream(42, { cwd: dir }), {
+      t.assert.throws(() => globStream(42, { cwd: dirname }), {
         message: /Invalid glob .* 0/,
       });
-      t.assert.throws(() => globStream([".", 42], { cwd: dir }), {
+      t.assert.throws(() => globStream([".", 42], { cwd: dirname }), {
         message: /Invalid glob .* 1/,
       });
     });
 
     it("throws on missing positive glob", function (t) {
-      t.assert.throws(() => globStream("!c", { cwd: dir }), {
+      t.assert.throws(() => globStream("!c", { cwd: dirname }), {
         message: /Missing positive glob/,
       });
-      t.assert.throws(() => globStream(["!a", "!b"], { cwd: dir }), {
+      t.assert.throws(() => globStream(["!a", "!b"], { cwd: dirname }), {
         message: /Missing positive glob/,
       });
     });
@@ -841,37 +843,35 @@ function suite(moduleName) {
     it("traverses symlinked directories", async (t) => {
       var expected = [
         {
-          cwd: dir,
-          base: dir + "/fixtures/symlinks",
-          path: dir + "/fixtures/symlinks/file-a.txt",
+          cwd: dirname,
+          base: path.join(dirname, "/fixtures/symlinks"),
+          path: path.join(dirname, "/fixtures/symlinks/file-a.txt"),
         },
         {
-          cwd: dir,
-          base: dir + "/fixtures/symlinks",
-          path:
-            dir +
-            "/fixtures/symlinks/symlink-dest/hey/isaidhey/whatsgoingon/test.txt",
+          cwd: dirname,
+          base: path.join(dirname, "/fixtures/symlinks"),
+          path: path.join(dir, "/fixtures/symlinks/symlink-dest/hey/isaidhey/whatsgoingon/test.txt"),
         },
         {
-          cwd: dir,
-          base: dir + "/fixtures/symlinks",
-          path: dir + "/fixtures/symlinks/folder-a/folder-a-file.txt",
+          cwd: dirname,
+          base: path.join(dirname, "/fixtures/symlinks"),
+          path: path.join(dirname, "/fixtures/symlinks/folder-a/folder-a-file.txt"),
         },
         {
-          cwd: dir,
-          base: dir + "/fixtures/symlinks",
-          path: dir + "/fixtures/symlinks/folder-b/folder-b-file.txt",
+          cwd: dirname,
+          base: path.join(dirname, "/fixtures/symlinks"),
+          path: path.join(dirname, "/fixtures/symlinks/folder-b/folder-b-file.txt"),
         },
         // It should follow these circular symlinks, but not infinitely
         {
-          cwd: dir,
-          base: dir + "/fixtures/symlinks",
-          path: dir + "/fixtures/symlinks/folder-a/link-to-b/folder-b-file.txt",
+          cwd: dirname,
+          base: path.join(dirname, "/fixtures/symlinks"),
+          path: path.join(dirname, "/fixtures/symlinks/folder-a/link-to-b/folder-b-file.txt"),
         },
         {
-          cwd: dir,
-          base: dir + "/fixtures/symlinks",
-          path: dir + "/fixtures/symlinks/folder-b/link-to-a/folder-a-file.txt",
+          cwd: dirname,
+          base: path.join(dirname, "/fixtures/symlinks"),
+          path: path.join(dirname, "/fixtures/symlinks/folder-b/link-to-a/folder-a-file.txt"),
         },
       ];
 
@@ -880,13 +880,13 @@ function suite(moduleName) {
       }
 
       await pipeline(
-        globStream(["./fixtures/symlinks/**/*.txt"], { cwd: dir }),
+        globStream(["./fixtures/symlinks/**/*.txt"], { cwd: dirname }),
         concat(assertion),
       );
     });
 
     it("does not end prematurely", async (t) => {
-      var gs = globStream(["./fixtures/*.js"], { cwd: dir });
+      var gs = globStream(["./fixtures/*.js"], { cwd: dirname });
 
       function assertion(pathObjs) {
         t.assert.strictEqual(pathObjs.length, 0);
@@ -901,13 +901,13 @@ function suite(moduleName) {
   describe("options", () => {
     it("avoids mutation of options", async (t) => {
       var defaultedOpts = {
-        cwd: process.cwd(),
+        cwd: cwd,
         cwdbase: false,
       };
 
       var opts = {};
 
-      var gs = globStream(dir + "/fixtures/stuff/run.dmc", opts);
+      var gs = globStream(`${dir}/fixtures/stuff/run.dmc`, opts);
       t.assert.strictEqual(Object.keys(opts).length, 0);
       t.assert.notDeepStrictEqual(opts, defaultedOpts);
 
@@ -951,9 +951,9 @@ function suite(moduleName) {
       it("accepts a string (in addition to array)", async (t) => {
         var expected = [
           {
-            cwd: dir,
-            base: dir + "/fixtures/stuff",
-            path: dir + "/fixtures/stuff/run.dmc",
+            cwd: dirname,
+            base: path.join(dirname, "/fixtures/stuff"),
+            path: path.join(dirname, "/fixtures/stuff/run.dmc"),
           },
         ];
 
@@ -963,7 +963,7 @@ function suite(moduleName) {
 
         await pipeline(
           globStream("./fixtures/stuff/*.dmc", {
-            cwd: dir,
+            cwd: dirname,
             ignore: "./fixtures/stuff/test.dmc",
           }),
           concat(assertion),
@@ -973,9 +973,9 @@ function suite(moduleName) {
       it("supports the ignore option instead of negation", async (t) => {
         var expected = [
           {
-            cwd: dir,
-            base: dir + "/fixtures/stuff",
-            path: dir + "/fixtures/stuff/run.dmc",
+            cwd: dirname,
+            base: path.join(dirname, "/fixtures/stuff"),
+            path: path.join(dirname, "/fixtures/stuff/run.dmc"),
           },
         ];
 
@@ -985,7 +985,7 @@ function suite(moduleName) {
 
         await pipeline(
           globStream("./fixtures/stuff/*.dmc", {
-            cwd: dir,
+            cwd: dirname,
             ignore: ["./fixtures/stuff/test.dmc"],
           }),
           concat(assertion),
@@ -1002,7 +1002,7 @@ function suite(moduleName) {
 
         await pipeline(
           globStream("./fixtures/*(.)swag", {
-            cwd: dir,
+            cwd: dirname,
             ignore: ["./fixtures/**"],
           }),
           concat(assertion),
@@ -1019,14 +1019,14 @@ function suite(moduleName) {
         }
 
         await pipeline(
-          globStream(globs, { cwd: dir, ignore: ["./fixtures/stuff/run.dmc"] }),
+          globStream(globs, { cwd: dirname, ignore: ["./fixtures/stuff/run.dmc"] }),
           concat(assertion),
         );
       });
     });
 
     it("throws an error if you try to write to it", function (t) {
-      var gs = globStream("notfound", { cwd: dir });
+      var gs = globStream("notfound", { cwd: dirname });
       gs.on("error", () => {});
 
       t.assert.throws(() => gs.write({}));
@@ -1034,7 +1034,7 @@ function suite(moduleName) {
 
     it("does not throw an error if you push to it", async (t) => {
       var stub = {
-        cwd: dir,
+        cwd: dirname,
         base: dir,
         path: dir,
       };
@@ -1042,13 +1042,13 @@ function suite(moduleName) {
       var expected = [
         stub,
         {
-          cwd: dir,
-          base: dir + "/fixtures",
-          path: dir + "/fixtures/test.coffee",
+          cwd: dirname,
+          base: path.join(dirname, "/fixtures"),
+          path: path.join(dirname, "/fixtures/test.coffee"),
         },
       ];
 
-      var gs = globStream("./fixtures/test.coffee", { cwd: dir });
+      var gs = globStream("./fixtures/test.coffee", { cwd: dirname });
 
       gs.push(stub);
 
@@ -1062,9 +1062,9 @@ function suite(moduleName) {
     it("accepts a file path", async (t) => {
       var expected = [
         {
-          cwd: dir,
-          base: dir + "/fixtures",
-          path: dir + "/fixtures/test.coffee",
+          cwd: dirname,
+          base: path.join(dirname, "/fixtures"),
+          path: path.join(dirname, "/fixtures/test.coffee"),
         },
       ];
 
@@ -1073,7 +1073,7 @@ function suite(moduleName) {
       }
 
       await pipeline(
-        globStream("./fixtures/test.coffee", { cwd: dir }),
+        globStream("./fixtures/test.coffee", { cwd: dirname }),
         concat(assertion),
       );
     });
@@ -1081,19 +1081,19 @@ function suite(moduleName) {
     it("accepts a glob", async (t) => {
       var expected = [
         {
-          cwd: dir,
-          base: dir + "/fixtures",
-          path: dir + "/fixtures/has (parens)/test.dmc",
+          cwd: dirname,
+          base: path.join(dirname, "/fixtures"),
+          path: path.join(dirname, "/fixtures/has (parens)/test.dmc"),
         },
         {
-          cwd: dir,
-          base: dir + "/fixtures",
-          path: dir + "/fixtures/stuff/run.dmc",
+          cwd: dirname,
+          base: path.join(dirname, "/fixtures"),
+          path: path.join(dirname, "/fixtures/stuff/run.dmc"),
         },
         {
-          cwd: dir,
-          base: dir + "/fixtures",
-          path: dir + "/fixtures/stuff/test.dmc",
+          cwd: dirname,
+          base: path.join(dirname, "/fixtures"),
+          path: path.join(dirname, "/fixtures/stuff/test.dmc"),
         },
       ];
 
@@ -1102,14 +1102,14 @@ function suite(moduleName) {
       }
 
       await pipeline(
-        globStream("./fixtures/**/*.dmc", { cwd: dir }),
+        globStream("./fixtures/**/*.dmc", { cwd: dirname }),
         concat(assertion),
       );
     });
 
     it("pauses the globber upon backpressure", async (t) => {
       var gs = globStream("./fixtures/**/*.dmc", {
-        cwd: dir,
+        cwd: dirname,
         highWaterMark: 1,
       });
 
@@ -1141,7 +1141,7 @@ function suite(moduleName) {
     it("destroys the stream if walker errors", async (t) => {
       var expectedError = new Error("Stubbed error");
 
-      var gs = globStream("./fixtures/**/*.dmc", { cwd: dir });
+      var gs = globStream("./fixtures/**/*.dmc", { cwd: dirname });
 
       function stubError(dirpath, opts, cb) {
         cb(expectedError);
@@ -1156,7 +1156,7 @@ function suite(moduleName) {
     it("destroys the stream if walker errors when following symlink", async (t) => {
       var expectedError = new Error("Stubbed error");
 
-      var gs = globStream("./fixtures/**/*.dmc", { cwd: dir });
+      var gs = globStream("./fixtures/**/*.dmc", { cwd: dirname });
 
       function stubError(dirpath, cb) {
         cb(expectedError);
@@ -1169,7 +1169,7 @@ function suite(moduleName) {
     });
 
     it("does not emit an error if stream is destroyed without an error", (t, done) => {
-      var gs = globStream("./fixtures/**/*.dmc", { cwd: dir });
+      var gs = globStream("./fixtures/**/*.dmc", { cwd: dirname });
 
       var spy = t.mock.fn(() => {});
 
@@ -1188,7 +1188,7 @@ function suite(moduleName) {
       { timeout: 10000 },
       async (t) => {
         var gs = globStream("./node_modules/**/LICENSE", {
-          cwd: path.resolve(__dirname, "../"),
+          cwd: path.resolve(dirname, "../"),
         });
 
         function assertion(results) {
@@ -1204,7 +1204,7 @@ function suite(moduleName) {
       { timeout: 10000 },
       async (t) => {
         var gs = globStream("./node_modules/*", {
-          cwd: path.resolve(__dirname, "../"),
+          cwd: path.resolve(dirname, "../"),
         });
 
         function assertion(results) {
