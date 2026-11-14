@@ -40,7 +40,7 @@ var dir = deWindows(__dirname);
 
 // For filepaths
 var cwd = process.cwd();
-var dirname = __dirname
+var dirname = __dirname;
 
 function suite(moduleName) {
   var { PassThrough, Transform, Writable } = require(moduleName);
@@ -263,7 +263,10 @@ function suite(moduleName) {
         {
           cwd: base,
           base: base,
-          path: path.join(base, "/whatsgoingon/hey/isaidhey/whatsgoingon/test.txt"),
+          path: path.join(
+            base,
+            "/whatsgoingon/hey/isaidhey/whatsgoingon/test.txt",
+          ),
         },
         {
           cwd: base,
@@ -300,7 +303,10 @@ function suite(moduleName) {
         {
           cwd: base,
           base: base,
-          path: path.join(base, "/whatsgoingon/hey/isaidhey/whatsgoingon/test.txt"),
+          path: path.join(
+            base,
+            "/whatsgoingon/hey/isaidhey/whatsgoingon/test.txt",
+          ),
         },
         {
           cwd: base,
@@ -335,7 +341,10 @@ function suite(moduleName) {
         {
           cwd: dirname,
           base: path.join(dirname, "/fixtures"),
-          path: path.join(dir, "/fixtures/whatsgoingon/hey/isaidhey/whatsgoingon/test.txt"),
+          path: path.join(
+            dir,
+            "/fixtures/whatsgoingon/hey/isaidhey/whatsgoingon/test.txt",
+          ),
         },
         {
           cwd: dirname,
@@ -365,7 +374,10 @@ function suite(moduleName) {
         {
           cwd: dirname,
           base: path.join(dirname, "/fixtures"),
-          path: path.join(dir, "/fixtures/symlinks/symlink-dest/hey/isaidhey/whatsgoingon/test.txt"),
+          path: path.join(
+            dir,
+            "/fixtures/symlinks/symlink-dest/hey/isaidhey/whatsgoingon/test.txt",
+          ),
         },
       ];
 
@@ -392,10 +404,7 @@ function suite(moduleName) {
         fs.mkdirSync(largeDir, { recursive: true });
 
         for (var i = 0; i < 100000; i++) {
-          fs.writeFileSync(
-            path.join(largeDir, `file-${i}.txt`),
-            `test-${i}`,
-          );
+          fs.writeFileSync(path.join(largeDir, `file-${i}.txt`), `test-${i}`);
         }
 
         function assertion(pathObjs) {
@@ -422,8 +431,14 @@ function suite(moduleName) {
       var expected = [
         {
           cwd: cwd,
-          base: path.join(dirname, "/fixtures/whatsgoingon/hey/isaidhey/whatsgoingon"),
-          path: path.join(dir, "/fixtures/whatsgoingon/hey/isaidhey/whatsgoingon/test.txt"),
+          base: path.join(
+            dirname,
+            "/fixtures/whatsgoingon/hey/isaidhey/whatsgoingon",
+          ),
+          path: path.join(
+            dir,
+            "/fixtures/whatsgoingon/hey/isaidhey/whatsgoingon/test.txt",
+          ),
         },
         {
           cwd: cwd,
@@ -475,9 +490,7 @@ function suite(moduleName) {
         },
       ];
 
-      var globs = [
-        `${deWindows(tmp)}/glob-stream-*.txt`,
-      ];
+      var globs = [`${deWindows(tmp)}/glob-stream-*.txt`];
 
       function assertion(pathObjs) {
         fs.unlinkSync(testFile);
@@ -598,7 +611,10 @@ function suite(moduleName) {
       }
 
       await pipeline(
-        globStream("./fixtures/stuff/*.dmc", { cwd: dirname, uniqueBy: uniqueBy }),
+        globStream("./fixtures/stuff/*.dmc", {
+          cwd: dirname,
+          uniqueBy: uniqueBy,
+        }),
         concat(assertion),
       );
     });
@@ -850,28 +866,43 @@ function suite(moduleName) {
         {
           cwd: dirname,
           base: path.join(dirname, "/fixtures/symlinks"),
-          path: path.join(dir, "/fixtures/symlinks/symlink-dest/hey/isaidhey/whatsgoingon/test.txt"),
+          path: path.join(
+            dir,
+            "/fixtures/symlinks/symlink-dest/hey/isaidhey/whatsgoingon/test.txt",
+          ),
         },
         {
           cwd: dirname,
           base: path.join(dirname, "/fixtures/symlinks"),
-          path: path.join(dirname, "/fixtures/symlinks/folder-a/folder-a-file.txt"),
+          path: path.join(
+            dirname,
+            "/fixtures/symlinks/folder-a/folder-a-file.txt",
+          ),
         },
         {
           cwd: dirname,
           base: path.join(dirname, "/fixtures/symlinks"),
-          path: path.join(dirname, "/fixtures/symlinks/folder-b/folder-b-file.txt"),
+          path: path.join(
+            dirname,
+            "/fixtures/symlinks/folder-b/folder-b-file.txt",
+          ),
         },
         // It should follow these circular symlinks, but not infinitely
         {
           cwd: dirname,
           base: path.join(dirname, "/fixtures/symlinks"),
-          path: path.join(dirname, "/fixtures/symlinks/folder-a/link-to-b/folder-b-file.txt"),
+          path: path.join(
+            dirname,
+            "/fixtures/symlinks/folder-a/link-to-b/folder-b-file.txt",
+          ),
         },
         {
           cwd: dirname,
           base: path.join(dirname, "/fixtures/symlinks"),
-          path: path.join(dirname, "/fixtures/symlinks/folder-b/link-to-a/folder-a-file.txt"),
+          path: path.join(
+            dirname,
+            "/fixtures/symlinks/folder-b/link-to-a/folder-a-file.txt",
+          ),
         },
       ];
 
@@ -1019,7 +1050,10 @@ function suite(moduleName) {
         }
 
         await pipeline(
-          globStream(globs, { cwd: dirname, ignore: ["./fixtures/stuff/run.dmc"] }),
+          globStream(globs, {
+            cwd: dirname,
+            ignore: ["./fixtures/stuff/run.dmc"],
+          }),
           concat(assertion),
         );
       });
