@@ -982,21 +982,22 @@ function suite(moduleName) {
 
     describe("cwd", () => {
       it("(win) accepts UNC paths", { skip: !isWin32 }, async (t) => {
+        var namespaced = path.toNamespacedPath(dir);
+
         var expected = [
           {
-            cwd: `//?/${dir}`,
-            base: `//?/${dir}/fixtures`,
-            path: `//?/${dir}/fixtures/test.coffee`,
+            cwd: namespaced,
+            base: path.join(namespaced, "/fixtures"),
+            path: path.join(namespaced, "/fixtures/test.coffee"),
           },
         ];
 
         function assertion(pathObjs) {
-          console.log(pathObjs, expected);
           t.assert.containsAllEqual(pathObjs, expected);
         }
 
         await pipeline(
-          globStream("fixtures/*.coffee", { cwd: `//?//${dir}` }),
+          globStream("fixtures/*.coffee", { cwd: namespaced }),
           concat(assertion),
         );
       });
