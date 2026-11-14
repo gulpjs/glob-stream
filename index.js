@@ -137,12 +137,17 @@ function globStream(globs, opt) {
     for (const glob of globs) {
       const globber = fs.promises.glob(glob, opts);
       const iter = globber[Symbol.asyncIterator]();
-      const parent = globParent(glob, opts);
+
+      // Build the glob parent exactly once for each glob
+      let parent = globParent(glob);
+      if (!path.isAbsolute(parent)) {
+        parent = path.join(opts.cwd, parent);
+      }
 
       for await (const dirent of iter) {
         const filepath = path.join(dirent.parentPath, dirent.name);
 
-        // Extract base path from glob
+        // Decide on the glob's base path
         var basePath = base || parent;
 
         var obj = {
