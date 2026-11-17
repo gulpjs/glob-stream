@@ -28,7 +28,7 @@
     "test": "node --test --experimental-test-coverage --test-reporter=spec --test-reporter-destination=stdout --test-reporter=lcov --test-reporter-destination=test/lcov.info \"test/*.js\""
   },
   "dependencies": {
-    "glob-parent": "gulpjs/glob-parent#135c3af0874aca72724b1456c5f89caa67cf4a63",
+    "glob-parent": "^7.0.0",
     "streamx": "^2.12.5"
   },
   "devDependencies": {
