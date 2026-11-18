@@ -9,8 +9,9 @@ var { isDeepStrictEqual } = require("node:util");
 var { assert, describe, it, getTestContext } = require("node:test");
 var { pipeline } = require("node:stream/promises");
 
-assert.register("containsAllEqual", (actual, expected) => {
-  const t = getTestContext();
+assert.register("containsAllEqual", function (actual, expected) {
+  // Sometimes `getTestContext` can return `undefined` but `this` will be the TestContext
+  const t = getTestContext() ?? this;
 
   t.assert.strictEqual(actual.length, expected.length);
 
@@ -35,6 +36,8 @@ function deWindows(p) {
   return p.replace(/\\/g, "/");
 }
 
+function noop() {}
+
 var isWin32 = os.platform() === "win32";
 
 // For globs
@@ -44,31 +47,8 @@ var dir = deWindows(__dirname);
 var cwd = process.cwd();
 var dirname = __dirname;
 
-function suite(moduleName) {
-  var { PassThrough, Transform, Writable } = require(moduleName);
-
-  function concat(fn, timeout) {
-    var items = [];
-    return new Writable({
-      objectMode: true,
-      write: function (chunk, enc, cb) {
-        if (typeof enc === "function") {
-          cb = enc;
-        }
-        setTimeout(() => {
-          items.push(chunk);
-          cb();
-        }, timeout || 1);
-      },
-      final: function (cb) {
-        if (typeof fn === "function") {
-          fn(items);
-        }
-
-        cb();
-      },
-    });
-  }
+function suite(moduleName, load) {
+  var { PassThrough, concat } = load();
 
   describe(`glob-stream (with ${moduleName})`, () => {
     it("streams a single object when given a directory path", async (t) => {
@@ -1083,40 +1063,6 @@ function suite(moduleName) {
       });
     });
 
-    it("throws an error if you try to write to it", function (t) {
-      var gs = globStream("notfound", { cwd: dirname });
-      gs.on("error", () => {});
-
-      t.assert.throws(() => gs.write({}));
-    });
-
-    it("does not throw an error if you push to it", async (t) => {
-      var stub = {
-        cwd: dirname,
-        base: dir,
-        path: dir,
-      };
-
-      var expected = [
-        stub,
-        {
-          cwd: dirname,
-          base: path.join(dirname, "/fixtures"),
-          path: path.join(dirname, "/fixtures/test.coffee"),
-        },
-      ];
-
-      var gs = globStream("./fixtures/test.coffee", { cwd: dirname });
-
-      gs.push(stub);
-
-      function assertion(pathObjs) {
-        t.assert.containsAllEqual(pathObjs, expected);
-      }
-
-      await pipeline(gs, concat(assertion));
-    });
-
     it("accepts a file path", async (t) => {
       var expected = [
         {
@@ -1165,19 +1111,18 @@ function suite(moduleName) {
       );
     });
 
-    it("does not emit an error if stream is destroyed without an error", (t, done) => {
+    it("does not reject with an error if stream is cancelled", async (t) => {
       var gs = globStream("./fixtures/**/*.dmc", { cwd: dirname });
 
-      var spy = t.mock.fn(() => {});
+      await gs.cancel();
 
-      gs.on("error", spy);
+      var expected = []
 
-      gs.on("close", () => {
-        t.assert.strictEqual(spy.mock.callCount() > 0, false);
-        done();
-      });
+      function assertion(pathObjs) {
+        t.assert.containsAllEqual(pathObjs, expected);
+      }
 
-      gs.destroy();
+      await t.assert.doesNotReject(pipeline(gs, concat(assertion)))
     });
 
     it(
@@ -1214,6 +1159,84 @@ function suite(moduleName) {
   });
 }
 
-suite("stream");
-suite("streamx");
-suite("readable-stream");
+suite("stream", () => {
+  const { PassThrough, Writable } = require("node:stream");
+
+  function concat(fn = noop, timeout = 1) {
+    const items = [];
+    return new Writable({
+      objectMode: true,
+      write(chunk, enc, cb) {
+        setTimeout(() => {
+          items.push(chunk);
+          cb();
+        }, timeout);
+      },
+      final(cb) {
+        fn(items);
+        cb();
+      },
+    });
+  }
+  return { PassThrough, concat };
+});
+suite("streamx", () => {
+  const { PassThrough, Writable } = require("streamx");
+
+  function concat(fn = noop, timeout = 1) {
+    const items = [];
+    return new Writable({
+      write(chunk, cb) {
+        setTimeout(() => {
+          items.push(chunk);
+          cb();
+        }, timeout);
+      },
+      final(cb) {
+        fn(items);
+        cb();
+      },
+    });
+  }
+  return { PassThrough, concat };
+});
+suite("readable-stream", () => {
+  const { PassThrough, Writable } = require("readable-stream");
+
+  function concat(fn = noop, timeout = 1) {
+    fn = fn ?? noop;
+    const items = [];
+    return new Writable({
+      objectMode: true,
+      write(chunk, enc, cb) {
+        setTimeout(() => {
+          items.push(chunk);
+          cb();
+        }, timeout);
+      },
+      final(cb) {
+        fn(items);
+        cb();
+      },
+    });
+  }
+  return { PassThrough, concat };
+});
+suite("web streams", () => {
+  const { TransformStream, WritableStream } = require("node:stream/web");
+
+  function concat(fn = noop, timeout = 1) {
+    const items = [];
+    return new WritableStream({
+      async write(chunk) {
+        await timers.setTimeout(timeout);
+        items.push(chunk);
+      },
+      async close() {
+        fn(items);
+      },
+    });
+  }
+
+  return { PassThrough: TransformStream, concat };
+});

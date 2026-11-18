@@ -2,8 +2,8 @@
 
 var fs = require("node:fs");
 var path = require("node:path");
+var { ReadableStream } = require("node:stream/web");
 
-var { Readable } = require("streamx");
 var globParent = require("glob-parent").default;
 
 function validateGlobs(globs) {
@@ -162,7 +162,7 @@ function globStream(globs, opt) {
     }
   }
 
-  return Readable.from(globber(positiveGlobs, ourOpt));
+  return ReadableStream.from(globber(positiveGlobs, ourOpt));
 }
 
 module.exports = globStream;
