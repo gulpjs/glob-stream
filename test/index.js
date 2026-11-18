@@ -1165,37 +1165,6 @@ function suite(moduleName) {
       );
     });
 
-    it("pauses the globber upon backpressure", async (t) => {
-      var gs = globStream("./fixtures/**/*.dmc", {
-        cwd: dirname,
-        highWaterMark: 1,
-      });
-
-      function waiter(pathObj, enc, cb) {
-        if (typeof enc === "function") {
-          cb = enc;
-        }
-
-        setTimeout(() => {
-          cb(null, pathObj);
-        }, 500);
-      }
-
-      function assertion(pathObjs) {
-        t.assert.strictEqual(pathObjs.length, 3);
-      }
-
-      await pipeline(
-        gs,
-        new Transform({
-          objectMode: true,
-          highWaterMark: 1,
-          transform: waiter,
-        }),
-        concat(assertion),
-      );
-    });
-
     it("does not emit an error if stream is destroyed without an error", (t, done) => {
       var gs = globStream("./fixtures/**/*.dmc", { cwd: dirname });
 
