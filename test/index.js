@@ -1116,13 +1116,13 @@ function suite(moduleName, load) {
 
       await gs.cancel();
 
-      var expected = []
+      var expected = [];
 
       function assertion(pathObjs) {
         t.assert.containsAllEqual(pathObjs, expected);
       }
 
-      await t.assert.doesNotReject(pipeline(gs, concat(assertion)))
+      await t.assert.doesNotReject(pipeline(gs, concat(assertion)));
     });
 
     it(
