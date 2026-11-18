@@ -99,7 +99,6 @@ function globStream(globs, opt) {
       cwd: process.cwd(),
       cwdbase: false,
       uniqueBy: "path",
-      highWaterMark: 16,
       // TODO: deprecate `ignore` option
       ignore: [],
     },
@@ -163,9 +162,7 @@ function globStream(globs, opt) {
     }
   }
 
-  return Readable.from(globber(positiveGlobs, ourOpt), {
-    highWaterMark: ourOpt.highWaterMark,
-  });
+  return Readable.from(globber(positiveGlobs, ourOpt));
 }
 
 module.exports = globStream;
