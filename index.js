@@ -1,5 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
+import { deprecate } from "node:util";
 import { ReadableStream } from "node:stream/web";
 
 import globParent from "glob-parent";
@@ -32,12 +33,12 @@ function isPositiveGlob(glob) {
 
 function validateUniqueBy({ uniqueBy } = {}) {
   if (typeof uniqueBy === "function") {
-    return true;
+    return;
   }
 
   if (typeof uniqueBy === "string") {
     if (uniqueBy === "cwd" || uniqueBy === "base" || uniqueBy === "path") {
-      return true;
+      return;
     } else {
       throw new Error("The `uniqueBy` string must be 'cwd', 'base', or 'path'");
     }
@@ -45,6 +46,14 @@ function validateUniqueBy({ uniqueBy } = {}) {
 
   throw new Error("The `uniqueBy` option must be a string or function");
 }
+
+function isDefined(item) {
+  return item != null;
+}
+const showIgnoreDeprecation = deprecate(
+  () => {},
+  "The `ignore` option is deprecated - use `exclude` instead",
+);
 
 function validateOptions(opts) {
   if (typeof opts.cwd !== "string") {
@@ -63,6 +72,14 @@ function validateOptions(opts) {
 
   if (!Array.isArray(opts.ignore)) {
     throw new Error("The `ignore` option must be a string or array");
+  } else {
+    if (opts.ignore.some(isDefined)) {
+      showIgnoreDeprecation();
+    }
+  }
+
+  if (!Array.isArray(opts.exclude)) {
+    throw new Error("The `exclude` option must be a string or array");
   }
 }
 
@@ -120,6 +137,7 @@ export default function globStream(globs, opt) {
       cwd: process.cwd(),
       cwdbase: false,
       uniqueBy: "path",
+      exclude: [],
       // TODO: deprecate `ignore` option
       ignore: [],
     },
@@ -132,6 +150,9 @@ export default function globStream(globs, opt) {
   // Normalize `ignore` to array
   ourOpt.ignore =
     typeof ourOpt.ignore === "string" ? [ourOpt.ignore] : ourOpt.ignore;
+  // Normalize `exclude` to array
+  ourOpt.exclude =
+    typeof ourOpt.exclude === "string" ? [ourOpt.exclude] : ourOpt.exclude;
 
   validateOptions(ourOpt);
 
@@ -151,8 +172,7 @@ export default function globStream(globs, opt) {
       positiveGlobs.push(globString);
     }
   }
-  // TODO: Support explicit `exclude` option
-  ourOpt.exclude = [...negativeGlobs, ...ourOpt.ignore];
+  ourOpt.exclude = [...negativeGlobs, ...ourOpt.ignore, ...ourOpt.exclude];
 
   const isUnique = uniqueBy(ourOpt.uniqueBy);
 
@@ -179,7 +199,6 @@ export default function globStream(globs, opt) {
           base: path.normalize(basePath),
           path: filepath,
         };
-        // TODO: Add some sort of "stat cache" for performance improvements if stats exist on file
 
         // TODO: Attach to opts so this can be hoisted outside the function?
         const unique = isUnique(obj);
