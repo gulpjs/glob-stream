@@ -16,7 +16,9 @@
   "engines": {
     "node": ">= 26.1.0"
   },
+  "type": "module",
   "main": "./index.js",
+  "exports": "./index.js",
   "files": [
     "index.js",
     "LICENSE"

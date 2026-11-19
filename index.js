@@ -1,10 +1,8 @@
-"use strict";
+import fs from "node:fs/promises";
+import path from "node:path";
+import { ReadableStream } from "node:stream/web";
 
-var fs = require("node:fs");
-var path = require("node:path");
-var { ReadableStream } = require("node:stream/web");
-
-var globParent = require("glob-parent").default;
+import globParent from "glob-parent";
 
 function validateGlobs(globs) {
   var hasPositiveGlob = false;
@@ -86,7 +84,7 @@ function uniqueBy(comparator) {
   }
 }
 
-function globStream(globs, opt) {
+export default function globStream(globs, opt) {
   if (!Array.isArray(globs)) {
     globs = [globs];
   }
@@ -130,7 +128,7 @@ function globStream(globs, opt) {
 
   async function* globber(globs, opts) {
     for (const glob of globs) {
-      const globber = fs.promises.glob(glob, opts);
+      const globber = fs.glob(glob, opts);
       const iter = globber[Symbol.asyncIterator]();
 
       // Build the glob parent exactly once for each glob
@@ -164,5 +162,3 @@ function globStream(globs, opt) {
 
   return ReadableStream.from(globber(positiveGlobs, ourOpt));
 }
-
-module.exports = globStream;
