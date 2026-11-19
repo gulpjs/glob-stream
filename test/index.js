@@ -560,12 +560,39 @@ function suite(moduleName, load) {
         t.assert.containsAllEqual(pathObjs, expected);
       }
 
+      // check uniqueBy cwd - they are the same for this glob set
+      await pipeline(
+        globStream(["./fixtures/stuff/run.dmc", "./fixtures/stuff/test.dmc"], {
+          cwd: dirname,
+          uniqueBy: "cwd",
+        }),
+        concat(assertion),
+      );
+      // check uniqueBy base - they are the same for this glob set
       await pipeline(
         globStream(["./fixtures/stuff/run.dmc", "./fixtures/stuff/test.dmc"], {
           cwd: dirname,
           uniqueBy: "base",
         }),
         concat(assertion),
+      );
+    });
+
+    it("`uniqueBy` with strings only accepts 'cwd', 'base', or 'path'", async (t) => {
+      t.assert.doesNotThrow(
+        () => () => globStream(["*.js"], { cwd: dirname, uniqueBy: "cwd" }),
+      );
+      t.assert.doesNotThrow(
+        () => () => globStream(["*.js"], { cwd: dirname, uniqueBy: "base" }),
+      );
+      t.assert.doesNotThrow(
+        () => () => globStream(["*.js"], { cwd: dirname, uniqueBy: "path" }),
+      );
+      t.assert.throws(
+        () => globStream(["*.js"], { cwd: dirname, uniqueBy: "something" }),
+        {
+          message: "The `uniqueBy` string must be 'cwd', 'base', or 'path'",
+        },
       );
     });
 
