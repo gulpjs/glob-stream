@@ -22,6 +22,10 @@ function validateGlobs(globs) {
   }
 }
 
+function isStatsSymbol(sym) {
+  return sym.description === "stats";
+}
+
 function isNegatedGlob(glob) {
   return glob.startsWith("!");
 }
@@ -156,6 +160,8 @@ export default function globStream(globs, opt) {
 
   const isUnique = uniqueBy(ourOpt.uniqueBy);
 
+  const stats = new WeakMap();
+
   async function* globber(globs, opts) {
     for (const glob of globs) {
       const globber = fs.glob(glob, opts);
@@ -168,6 +174,10 @@ export default function globStream(globs, opt) {
       }
 
       for await (const dirent of globIter) {
+        // Node.js hates this "one weird trick"
+        const internalSymbols = Object.getOwnPropertySymbols(dirent);
+        const statsSymbol = internalSymbols.find(isStatsSymbol);
+
         const filepath = path.join(dirent.parentPath, dirent.name);
 
         // Decide on the glob's base path
@@ -179,7 +189,10 @@ export default function globStream(globs, opt) {
           base: path.normalize(basePath),
           path: filepath,
         };
-        // TODO: Add some sort of "stat cache" for performance improvements if stats exist on file
+
+        if (statsSymbol) {
+          stats.set(obj, dirent[statsSymbol]);
+        }
 
         // TODO: Attach to opts so this can be hoisted outside the function?
         const unique = isUnique(obj);
@@ -190,5 +203,7 @@ export default function globStream(globs, opt) {
     }
   }
 
-  return ReadableStream.from(globber(positiveGlobs, ourOpt));
+  const stream = ReadableStream.from(globber(positiveGlobs, ourOpt));
+  stream.stats = stats;
+  return stream;
 }
