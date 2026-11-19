@@ -13,7 +13,7 @@
 ## Usage
 
 ```js
-var gs = require("glob-stream");
+import gs from "glob-stream";
 
 var readable = gs("./files/**/*.coffee", {/* options */});
 
