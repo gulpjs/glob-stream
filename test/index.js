@@ -36,21 +36,21 @@ function deWindows(p) {
 
 function noop() {}
 
-var isWin32 = os.platform() === "win32";
+const isWin32 = os.platform() === "win32";
 
 // For globs
-var dir = deWindows(import.meta.dirname);
+const dir = deWindows(import.meta.dirname);
 
 // For filepaths
-var cwd = process.cwd();
-var dirname = import.meta.dirname;
+const cwd = process.cwd();
+const dirname = import.meta.dirname;
 
 function suite(moduleName, load) {
   describe(`glob-stream (with ${moduleName})`, async () => {
-    var { PassThrough, concat } = await load();
+    const { PassThrough, concat } = await load();
 
     it("streams a single object when given a directory path", async (t) => {
-      var expected = [
+      const expected = [
         {
           cwd: dirname,
           base: path.join(dirname, "/fixtures"),
@@ -69,7 +69,7 @@ function suite(moduleName, load) {
     });
 
     it("streams a single object when given a file path", async (t) => {
-      var expected = [
+      const expected = [
         {
           cwd: dirname,
           base: path.join(dirname, "/fixtures"),
@@ -88,7 +88,7 @@ function suite(moduleName, load) {
     });
 
     it("streams only objects with directory paths when given a directory glob", async (t) => {
-      var expected = [
+      const expected = [
         {
           cwd: dirname,
           base: path.join(dirname, "/fixtures/whatsgoingon"),
@@ -107,7 +107,7 @@ function suite(moduleName, load) {
     });
 
     it("does not emit an error if glob base directory does not exist", async (t) => {
-      var expected = [];
+      const expected = [];
 
       function assertion(pathObjs) {
         t.assert.containsAllEqual(pathObjs, expected);
@@ -120,7 +120,7 @@ function suite(moduleName, load) {
     });
 
     it("streams only objects with file paths from a non-directory glob", async (t) => {
-      var expected = [
+      const expected = [
         {
           cwd: dirname,
           base: path.join(dirname, "/fixtures"),
@@ -139,9 +139,9 @@ function suite(moduleName, load) {
     });
 
     it("properly handles ( ) in cwd path", async (t) => {
-      var cwd = path.join(dirname, "/fixtures/has (parens)");
+      const cwd = path.join(dirname, "/fixtures/has (parens)");
 
-      var expected = [
+      const expected = [
         {
           cwd: cwd,
           base: cwd,
@@ -157,7 +157,7 @@ function suite(moduleName, load) {
     });
 
     it("sets the correct base when ( ) in glob", async (t) => {
-      var expected = [
+      const expected = [
         {
           cwd: dirname,
           base: path.join(dirname, "/fixtures/has (parens)"),
@@ -176,7 +176,7 @@ function suite(moduleName, load) {
     });
 
     it("finds files in paths that contain ( ) or [ ] when they match the glob", async (t) => {
-      var expected = [
+      const expected = [
         {
           cwd: dirname,
           base: path.join(dirname, "/fixtures"),
@@ -200,9 +200,9 @@ function suite(moduleName, load) {
     });
 
     it("properly handles [ ] in cwd path", async (t) => {
-      var cwd = path.join(dir, "/fixtures/has [brackets]");
+      const cwd = path.join(dir, "/fixtures/has [brackets]");
 
-      var expected = [
+      const expected = [
         {
           cwd: cwd,
           base: cwd,
@@ -219,7 +219,7 @@ function suite(moduleName, load) {
 
     // Node glob does not seem to support `\\[` as an escaped bracket
     it("sets the correct base when [ is escaped by [[] in glob", async (t) => {
-      var expected = [
+      const expected = [
         {
           cwd: dirname,
           base: path.join(dirname, "/fixtures/has [brackets]"),
@@ -238,9 +238,9 @@ function suite(moduleName, load) {
     });
 
     it("emits all objects (unordered) when given multiple paths and specified base", async (t) => {
-      var base = path.join(dir, "/fixtures");
+      const base = path.join(dir, "/fixtures");
 
-      var expected = [
+      const expected = [
         {
           cwd: base,
           base: base,
@@ -261,7 +261,7 @@ function suite(moduleName, load) {
         },
       ];
 
-      var globs = [
+      const globs = [
         "./whatsgoingon/hey/isaidhey/whatsgoingon/test.txt",
         "./test.coffee",
         "./whatsgoingon/test.js",
@@ -278,9 +278,9 @@ function suite(moduleName, load) {
     });
 
     it("emits all objects (unordered) when given multiple paths and cwdbase", async (t) => {
-      var base = path.join(dir, "/fixtures");
+      const base = path.join(dir, "/fixtures");
 
-      var expected = [
+      const expected = [
         {
           cwd: base,
           base: base,
@@ -301,7 +301,7 @@ function suite(moduleName, load) {
         },
       ];
 
-      var globs = [
+      const globs = [
         "./whatsgoingon/hey/isaidhey/whatsgoingon/test.txt",
         "./test.coffee",
         "./whatsgoingon/test.js",
@@ -318,7 +318,7 @@ function suite(moduleName, load) {
     });
 
     it("emits all objects (unordered) when given multiple globs with globstars", async (t) => {
-      var expected = [
+      const expected = [
         {
           cwd: dirname,
           base: path.join(dirname, "/fixtures"),
@@ -362,7 +362,7 @@ function suite(moduleName, load) {
         },
       ];
 
-      var globs = [
+      const globs = [
         "./fixtures/**/test.txt",
         "./fixtures/**/test.coffee",
         "./fixtures/**/test.js",
@@ -381,15 +381,15 @@ function suite(moduleName, load) {
       "does not stack overflow if there are an insane amount of files",
       { skip: process.env.CI !== "true" || os.platform() === "win32" },
       async (t) => {
-        var largeDir = path.join(dir, "fixtures/too-many");
+        const largeDir = path.join(dir, "fixtures/too-many");
         fs.mkdirSync(largeDir, { recursive: true });
 
-        for (var i = 0; i < 100000; i++) {
+        for (let i = 0; i < 100000; i++) {
           fs.writeFileSync(path.join(largeDir, `file-${i}.txt`), `test-${i}`);
         }
 
         function assertion(pathObjs) {
-          for (var i = 0; i < 100000; i++) {
+          for (let i = 0; i < 100000; i++) {
             fs.unlinkSync(path.join(largeDir, `file-${i}.txt`));
           }
           fs.rmdirSync(largeDir);
@@ -397,19 +397,19 @@ function suite(moduleName, load) {
           t.assert.strictEqual(pathObjs.length, 100000);
         }
 
-        var glob = `${deWindows(largeDir)}/*.txt`;
+        const glob = `${deWindows(largeDir)}/*.txt`;
 
         await pipeline(globStream(glob), concat(assertion));
       },
     );
 
     it("emits all objects (unordered) when given multiple absolute paths and no cwd", async (t) => {
-      var tmp = os.tmpdir();
+      const tmp = os.tmpdir();
 
-      var testFile = path.join(tmp, "glob-stream-test.txt");
+      const testFile = path.join(tmp, "glob-stream-test.txt");
       fs.writeFileSync(testFile, "test");
 
-      var expected = [
+      const expected = [
         {
           cwd: cwd,
           base: path.join(
@@ -438,7 +438,7 @@ function suite(moduleName, load) {
         },
       ];
 
-      var globs = [
+      const globs = [
         `${dir}/fixtures/whatsgoingon/hey/isaidhey/whatsgoingon/test.txt`,
         `${dir}/fixtures/test.coffee`,
         `${dir}/fixtures/whatsgoingon/test.js`,
@@ -455,15 +455,15 @@ function suite(moduleName, load) {
     });
 
     it("skips directories with invalid permission", async (t) => {
-      var tmp = os.tmpdir();
+      const tmp = os.tmpdir();
 
-      var testFile = path.join(tmp, "glob-stream-test.txt");
+      const testFile = path.join(tmp, "glob-stream-test.txt");
       fs.writeFileSync(testFile, "test");
 
-      var testDir = path.join(tmp, "glob-stream-private-dir");
+      const testDir = path.join(tmp, "glob-stream-private-dir");
       fs.mkdirSync(testDir, { recursive: true, mode: 0o200 });
 
-      var expected = [
+      const expected = [
         {
           cwd: cwd,
           base: tmp,
@@ -471,7 +471,7 @@ function suite(moduleName, load) {
         },
       ];
 
-      var globs = [`${deWindows(tmp)}/glob-stream-*.txt`];
+      const globs = [`${deWindows(tmp)}/glob-stream-*.txt`];
 
       function assertion(pathObjs) {
         fs.unlinkSync(testFile);
@@ -484,10 +484,10 @@ function suite(moduleName, load) {
     });
 
     it("resolves globs when process.chdir() changes the cwd", async (t) => {
-      var prevCwd = cwd;
+      const prevCwd = cwd;
       process.chdir("test/fixtures/stuff");
 
-      var expected = [
+      const expected = [
         {
           cwd: path.join(dirname, "/fixtures/stuff"),
           base: path.join(dirname, "/fixtures"),
@@ -510,7 +510,7 @@ function suite(moduleName, load) {
       // Extremely short timeout to ensure we aren't traversing node_modules
       { timeout: 20 },
       async (t) => {
-        var expected = [
+        const expected = [
           {
             cwd: cwd,
             base: cwd,
@@ -527,7 +527,7 @@ function suite(moduleName, load) {
     );
 
     it("removes duplicate objects from the stream using default (path) filter", async (t) => {
-      var expected = [
+      const expected = [
         {
           cwd: dirname,
           base: path.join(dirname, "/fixtures"),
@@ -548,7 +548,7 @@ function suite(moduleName, load) {
     });
 
     it("removes duplicate objects from the stream using custom string filter", async (t) => {
-      var expected = [
+      const expected = [
         {
           cwd: dirname,
           base: path.join(dirname, "/fixtures/stuff"),
@@ -597,7 +597,7 @@ function suite(moduleName, load) {
     });
 
     it("removes duplicate objects from the stream using custom function filter", async (t) => {
-      var expected = [
+      const expected = [
         {
           cwd: dirname,
           base: path.join(dirname, "/fixtures/stuff"),
@@ -610,9 +610,9 @@ function suite(moduleName, load) {
         },
       ];
 
-      var uniqueBy = function (data) {
+      function uniqueBy(data) {
         return data.path;
-      };
+      }
 
       function assertion(pathObjs) {
         t.assert.containsAllEqual(pathObjs, expected);
@@ -621,14 +621,14 @@ function suite(moduleName, load) {
       await pipeline(
         globStream("./fixtures/stuff/*.dmc", {
           cwd: dirname,
-          uniqueBy: uniqueBy,
+          uniqueBy,
         }),
         concat(assertion),
       );
     });
 
     it("ignores dotfiles without dot extglob", async (t) => {
-      var expected = [];
+      const expected = [];
 
       function assertion(pathObjs) {
         t.assert.containsAllEqual(pathObjs, expected);
@@ -641,7 +641,7 @@ function suite(moduleName, load) {
     });
 
     it("finds dotfiles with dot extglob", async (t) => {
-      var expected = [
+      const expected = [
         {
           cwd: dirname,
           base: path.join(dirname, "/fixtures"),
@@ -660,7 +660,7 @@ function suite(moduleName, load) {
     });
 
     it("removes dotfiles that match negative globs with dot extglob", async (t) => {
-      var expected = [];
+      const expected = [];
 
       function assertion(pathObjs) {
         t.assert.containsAllEqual(pathObjs, expected);
@@ -673,7 +673,7 @@ function suite(moduleName, load) {
     });
 
     it("works with direct paths and no cwd", async (t) => {
-      var expected = [
+      const expected = [
         {
           cwd: cwd,
           base: path.join(dirname, "/fixtures"),
@@ -692,7 +692,7 @@ function suite(moduleName, load) {
     });
 
     it("works with a relative cwd", async (t) => {
-      var expected = [
+      const expected = [
         {
           cwd: path.join(cwd, "/test"),
           base: path.join(dirname, "/fixtures"),
@@ -713,7 +713,7 @@ function suite(moduleName, load) {
     });
 
     it("supports negative globs", async (t) => {
-      var expected = [
+      const expected = [
         {
           cwd: cwd,
           base: path.join(dirname, "/fixtures/stuff"),
@@ -721,7 +721,7 @@ function suite(moduleName, load) {
         },
       ];
 
-      var globs = [
+      const globs = [
         `${dir}/fixtures/stuff/*.dmc`,
         `!${dir}/fixtures/stuff/*test.dmc`,
       ];
@@ -734,7 +734,7 @@ function suite(moduleName, load) {
     });
 
     it("supports negative file paths", async (t) => {
-      var expected = [
+      const expected = [
         {
           cwd: cwd,
           base: path.join(dirname, "/fixtures/stuff"),
@@ -742,7 +742,7 @@ function suite(moduleName, load) {
         },
       ];
 
-      var globs = [
+      const globs = [
         `${dir}/fixtures/stuff/*.dmc`,
         `!${dir}/fixtures/stuff/test.dmc`,
       ];
@@ -766,9 +766,9 @@ function suite(moduleName, load) {
     });
 
     it("applies all negative globs to each positive glob", async (t) => {
-      var expected = [];
+      const expected = [];
 
-      var globs = [
+      const globs = [
         "./fixtures/stuff/*",
         "!./fixtures/stuff/*.dmc",
         "./fixtures/stuff/*.dmc",
@@ -782,7 +782,7 @@ function suite(moduleName, load) {
     });
 
     it("does not exclude file path after negative glob", async (t) => {
-      var expected = [
+      const expected = [
         {
           cwd: dirname,
           base: path.join(dirname, "/fixtures/stuff"),
@@ -795,7 +795,7 @@ function suite(moduleName, load) {
         },
       ];
 
-      var globs = [
+      const globs = [
         `${dir}/fixtures/stuff/*.dmc`,
         `!${dir}/fixtures/stuff/test.dmc`,
         `${dir}/fixtures/test.coffee`,
@@ -809,7 +809,7 @@ function suite(moduleName, load) {
     });
 
     it("does not exclude file path before negative glob", async (t) => {
-      var expected = [
+      const expected = [
         {
           cwd: dirname,
           base: path.join(dirname, "/fixtures/stuff"),
@@ -822,7 +822,7 @@ function suite(moduleName, load) {
         },
       ];
 
-      var globs = [
+      const globs = [
         `${dir}/fixtures/stuff/*.dmc`,
         `${dir}/fixtures/test.coffee`,
         `!${dir}/fixtures/stuff/test.dmc`,
@@ -864,7 +864,7 @@ function suite(moduleName, load) {
     });
 
     it("traverses symlinked directories", async (t) => {
-      var expected = [
+      const expected = [
         {
           cwd: dirname,
           base: path.join(dirname, "/fixtures/symlinks"),
@@ -924,7 +924,7 @@ function suite(moduleName, load) {
     });
 
     it("does not end prematurely", async (t) => {
-      var gs = globStream(["./fixtures/*.js"], { cwd: dirname });
+      const gs = globStream(["./fixtures/*.js"], { cwd: dirname });
 
       function assertion(pathObjs) {
         t.assert.strictEqual(pathObjs.length, 0);
@@ -937,17 +937,17 @@ function suite(moduleName, load) {
   });
 
   describe("options", async () => {
-    var { concat } = await load();
+    const { concat } = await load();
 
     it("avoids mutation of options", async (t) => {
-      var defaultedOpts = {
+      const defaultedOpts = {
         cwd: cwd,
         cwdbase: false,
       };
 
-      var opts = {};
+      const opts = {};
 
-      var gs = globStream(`${dir}/fixtures/stuff/run.dmc`, opts);
+      const gs = globStream(`${dir}/fixtures/stuff/run.dmc`, opts);
       t.assert.strictEqual(Object.keys(opts).length, 0);
       t.assert.notDeepStrictEqual(opts, defaultedOpts);
 
@@ -989,9 +989,9 @@ function suite(moduleName, load) {
 
     describe("cwd", () => {
       it("(win) accepts UNC paths", { skip: !isWin32 }, async (t) => {
-        var namespaced = path.toNamespacedPath(dir);
+        const namespaced = path.toNamespacedPath(dir);
 
-        var expected = [
+        const expected = [
           {
             cwd: namespaced,
             base: path.join(namespaced, "/fixtures"),
@@ -1012,7 +1012,7 @@ function suite(moduleName, load) {
 
     describe("ignore", () => {
       it("accepts a string (in addition to array)", async (t) => {
-        var expected = [
+        const expected = [
           {
             cwd: dirname,
             base: path.join(dirname, "/fixtures/stuff"),
@@ -1034,7 +1034,7 @@ function suite(moduleName, load) {
       });
 
       it("supports the ignore option instead of negation", async (t) => {
-        var expected = [
+        const expected = [
           {
             cwd: dirname,
             base: path.join(dirname, "/fixtures/stuff"),
@@ -1056,7 +1056,7 @@ function suite(moduleName, load) {
       });
 
       it("supports the ignore option with dot extglob", async (t) => {
-        var expected = [];
+        const expected = [];
 
         function assertion(pathObjs) {
           t.assert.containsAllEqual(pathObjs, expected);
@@ -1072,9 +1072,9 @@ function suite(moduleName, load) {
       });
 
       it("can use both ignore option and negative globs", async (t) => {
-        var expected = [];
+        const expected = [];
 
-        var globs = ["./fixtures/stuff/*.dmc", "!./fixtures/stuff/test.dmc"];
+        const globs = ["./fixtures/stuff/*.dmc", "!./fixtures/stuff/test.dmc"];
 
         function assertion(pathObjs) {
           t.assert.containsAllEqual(pathObjs, expected);
@@ -1091,7 +1091,7 @@ function suite(moduleName, load) {
     });
 
     it("accepts a file path", async (t) => {
-      var expected = [
+      const expected = [
         {
           cwd: dirname,
           base: path.join(dirname, "/fixtures"),
@@ -1110,7 +1110,7 @@ function suite(moduleName, load) {
     });
 
     it("accepts a glob", async (t) => {
-      var expected = [
+      const expected = [
         {
           cwd: dirname,
           base: path.join(dirname, "/fixtures"),
@@ -1139,11 +1139,11 @@ function suite(moduleName, load) {
     });
 
     it("does not reject with an error if stream is cancelled", async (t) => {
-      var gs = globStream("./fixtures/**/*.dmc", { cwd: dirname });
+      const gs = globStream("./fixtures/**/*.dmc", { cwd: dirname });
 
       await gs.cancel();
 
-      var expected = [];
+      const expected = [];
 
       function assertion(pathObjs) {
         t.assert.containsAllEqual(pathObjs, expected);
@@ -1156,7 +1156,7 @@ function suite(moduleName, load) {
       "handles tons of files with double-star glob",
       { timeout: 10000 },
       async (t) => {
-        var gs = globStream("./node_modules/**/LICENSE", {
+        const gs = globStream("./node_modules/**/LICENSE", {
           cwd: path.resolve(dirname, "../"),
         });
 
@@ -1172,7 +1172,7 @@ function suite(moduleName, load) {
       "handles tons of files with single-star glob",
       { timeout: 10000 },
       async (t) => {
-        var gs = globStream("./node_modules/*", {
+        const gs = globStream("./node_modules/*", {
           cwd: path.resolve(dirname, "../"),
         });
 
