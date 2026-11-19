@@ -1,13 +1,13 @@
-"use strict";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+import timers from "node:timers/promises";
+import { AssertionError } from "node:assert";
+import { isDeepStrictEqual } from "node:util";
+import { assert, describe, it, getTestContext } from "node:test";
+import { pipeline } from "node:stream/promises";
 
-var fs = require("node:fs");
-var os = require("node:os");
-var path = require("node:path");
-var timers = require("node:timers/promises");
-var { AssertionError } = require("node:assert");
-var { isDeepStrictEqual } = require("node:util");
-var { assert, describe, it, getTestContext } = require("node:test");
-var { pipeline } = require("node:stream/promises");
+import globStream from "../index.js";
 
 assert.register("containsAllEqual", function (actual, expected) {
   // Sometimes `getTestContext` can return `undefined` but `this` will be the TestContext
@@ -30,8 +30,6 @@ assert.register("containsAllEqual", function (actual, expected) {
   }
 });
 
-var globStream = require("../");
-
 function deWindows(p) {
   return p.replace(/\\/g, "/");
 }
@@ -41,16 +39,16 @@ function noop() {}
 var isWin32 = os.platform() === "win32";
 
 // For globs
-var dir = deWindows(__dirname);
+var dir = deWindows(import.meta.dirname);
 
 // For filepaths
 var cwd = process.cwd();
-var dirname = __dirname;
+var dirname = import.meta.dirname;
 
 function suite(moduleName, load) {
-  var { PassThrough, concat } = load();
+  describe(`glob-stream (with ${moduleName})`, async () => {
+    var { PassThrough, concat } = await load();
 
-  describe(`glob-stream (with ${moduleName})`, () => {
     it("streams a single object when given a directory path", async (t) => {
       var expected = [
         {
@@ -911,7 +909,9 @@ function suite(moduleName, load) {
     });
   });
 
-  describe("options", () => {
+  describe("options", async () => {
+    var { concat } = await load();
+
     it("avoids mutation of options", async (t) => {
       var defaultedOpts = {
         cwd: cwd,
@@ -1159,8 +1159,8 @@ function suite(moduleName, load) {
   });
 }
 
-suite("stream", () => {
-  const { PassThrough, Writable } = require("node:stream");
+suite("stream", async () => {
+  const { PassThrough, Writable } = await import("node:stream");
 
   function concat(fn = noop, timeout = 1) {
     const items = [];
@@ -1180,8 +1180,8 @@ suite("stream", () => {
   }
   return { PassThrough, concat };
 });
-suite("streamx", () => {
-  const { PassThrough, Writable } = require("streamx");
+suite("streamx", async () => {
+  const { PassThrough, Writable } = await import("streamx");
 
   function concat(fn = noop, timeout = 1) {
     const items = [];
@@ -1200,8 +1200,8 @@ suite("streamx", () => {
   }
   return { PassThrough, concat };
 });
-suite("readable-stream", () => {
-  const { PassThrough, Writable } = require("readable-stream");
+suite("readable-stream", async () => {
+  const { PassThrough, Writable } = await import("readable-stream");
 
   function concat(fn = noop, timeout = 1) {
     fn = fn ?? noop;
@@ -1222,8 +1222,8 @@ suite("readable-stream", () => {
   }
   return { PassThrough, concat };
 });
-suite("web streams", () => {
-  const { TransformStream, WritableStream } = require("node:stream/web");
+suite("web streams", async () => {
+  const { TransformStream, WritableStream } = await import("node:stream/web");
 
   function concat(fn = noop, timeout = 1) {
     const items = [];
