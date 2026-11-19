@@ -612,7 +612,7 @@ function suite(moduleName, load) {
 
       function uniqueBy(data) {
         return data.path;
-      };
+      }
 
       function assertion(pathObjs) {
         t.assert.containsAllEqual(pathObjs, expected);
