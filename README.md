@@ -15,9 +15,9 @@
 ```js
 import gs from "glob-stream";
 
-var readable = gs("./files/**/*.coffee", {/* options */});
+const readable = gs("./files/**/*.coffee", {/* options */});
 
-var writable = new WritableStream();
+const writable = new WritableStream();
 
 await readable.pipeTo(writable);
 ```
