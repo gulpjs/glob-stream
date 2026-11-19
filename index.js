@@ -32,6 +32,22 @@ function isPositiveGlob(glob) {
   return !isNegatedGlob(glob);
 }
 
+function validateUniqueBy({ uniqueBy } = {}) {
+  if (typeof uniqueBy === "function") {
+    return true;
+  }
+
+  if (typeof uniqueBy === "string") {
+    if (uniqueBy === "cwd" || uniqueBy === "base" || uniqueBy === "path") {
+      return true;
+    } else {
+      throw new Error("The `uniqueBy` string must be 'cwd', 'base', or 'path'");
+    }
+  }
+
+  throw new Error("The `uniqueBy` option must be a string or function");
+}
+
 function validateOptions(opts) {
   if (typeof opts.cwd !== "string") {
     throw new Error("The `cwd` option must be a string");
@@ -41,12 +57,7 @@ function validateOptions(opts) {
     throw new Error("The `cwdbase` option must be a boolean");
   }
 
-  if (
-    typeof opts.uniqueBy !== "string" &&
-    typeof opts.uniqueBy !== "function"
-  ) {
-    throw new Error("The `uniqueBy` option must be a string or function");
-  }
+  validateUniqueBy(opts);
 
   if (opts.base && typeof opts.base !== "string") {
     throw new Error("The `base` option must be a string if specified");
@@ -61,7 +72,15 @@ function uniqueBy(comparator) {
   var seen = new Set();
 
   if (typeof comparator === "string") {
-    return isUniqueByKey;
+    if (comparator === "cwd") {
+      return isUniqueByCwd;
+    }
+    if (comparator === "base") {
+      return isUniqueByBase;
+    }
+    if (comparator === "path") {
+      return isUniqueByPath;
+    }
   } else {
     return isUniqueByFunc;
   }
@@ -75,8 +94,14 @@ function uniqueBy(comparator) {
     }
   }
 
-  function isUniqueByKey(obj) {
-    return isUnique(obj[comparator]);
+  function isUniqueByCwd(obj) {
+    return isUnique(obj.cwd);
+  }
+  function isUniqueByBase(obj) {
+    return isUnique(obj.base);
+  }
+  function isUniqueByPath(obj) {
+    return isUnique(obj.path);
   }
 
   function isUniqueByFunc(obj) {

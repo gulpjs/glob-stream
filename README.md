@@ -60,9 +60,9 @@ Default: `false`
 
 Filters stream to remove duplicates based on the string property name or the result of function. When using a function, the function receives the streamed data (objects containing `cwd`, `base`, `path` properties) to compare against.
 
-Type: `String` or `Function`
+Type: `"cwd"`, `"base"`, `"path"`, or a `function`
 
-Default: `'path'`
+Default: `"path"`
 
 ## Strict No LLM / No AI Policy
 
