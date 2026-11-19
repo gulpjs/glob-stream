@@ -934,6 +934,45 @@ function suite(moduleName, load) {
 
       await pipeline(gs, new PassThrough(), concat(assertion));
     });
+
+    // Node does not expose the `fs.Stats` directly so we expose a WeakMap of any we see.
+    // This could change between Node.js versions so we are marking this test as `TODO` to avoid
+    // failing the test suite if it fails.
+    // See: https://nodejs.org/docs/latest-v26.x/api/test.html#todo-tests
+    it("provides stats that node provides", { todo: true }, async (t) => {
+      const gs = globStream(
+        ["./fixtures/whatsgoingon/hey/isaidhey/whatsgoingon/test.txt"],
+        { cwd: dirname },
+      );
+
+      const expected = [
+        {
+          cwd: dirname,
+          base: path.join(
+            dirname,
+            "/fixtures/whatsgoingon/hey/isaidhey/whatsgoingon",
+          ),
+          path: path.join(
+            dirname,
+            "/fixtures/whatsgoingon/hey/isaidhey/whatsgoingon/test.txt",
+          ),
+        },
+      ];
+
+      function assertion(pathObjs) {
+        t.assert.containsAllEqual(pathObjs, expected);
+        for (const obj of pathObjs) {
+          t.assert.strictEqual(gs.stats.has(obj), true);
+          const stats = gs.stats.get(obj);
+          t.assert.strictEqual(stats instanceof fs.Stats, true);
+          t.assert.strictEqual(stats.isFile(), true);
+          t.assert.strictEqual(stats.isDirectory(), false);
+          t.assert.strictEqual(stats.isSymbolicLink(), false);
+        }
+      }
+
+      await pipeline(gs, concat(assertion));
+    });
   });
 
   describe("options", async () => {
