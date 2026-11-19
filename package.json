@@ -1,7 +1,7 @@
 {
   "name": "glob-stream",
   "version": "8.0.4",
-  "description": "Readable streamx interface over Node's globbing.",
+  "description": "ReadableStream interface over Node's globbing.",
   "author": "Gulp Team <team@gulpjs.com> (https://gulpjs.com/)",
   "contributors": [
     "Eric Schoffstall <yo@contra.io>",
@@ -28,14 +28,14 @@
     "test": "node --test --experimental-test-coverage --test-reporter=spec --test-reporter-destination=stdout --test-reporter=lcov --test-reporter-destination=test/lcov.info \"test/*.js\""
   },
   "dependencies": {
-    "glob-parent": "^7.0.0",
-    "streamx": "^2.12.5"
+    "glob-parent": "^7.0.0"
   },
   "devDependencies": {
     "eslint": "10.11.0",
     "eslint-config-gulp": "7.0.0",
     "prettier": "3.9.6",
-    "readable-stream": "^3.6.0"
+    "readable-stream": "4.8.0",
+    "streamx": "2.28.1"
   },
   "keywords": [
     "glob",

@@ -8,7 +8,7 @@
 
 [![NPM version][npm-image]][npm-url] [![Downloads][downloads-image]][npm-url] [![Build Status][ci-image]][ci-url] [![Coveralls Status][coveralls-image]][coveralls-url]
 
-[Readable streamx][streamx-url] interface over [Node's globbing][fs-glob-url].
+[ReadableStream] interface over [Node's globbing][fs-glob-url].
 
 ## Usage
 
@@ -17,10 +17,9 @@ var gs = require("glob-stream");
 
 var readable = gs("./files/**/*.coffee", {/* options */});
 
-var writable =
-  /* your WriteableStream */
+var writable = new WritableStream();
 
-  readable.pipe(writable);
+await readable.pipeTo(writable);
 ```
 
 You can pass any combination of glob strings. One caveat is that you cannot **only** pass a negative glob, you must give it at least one positive glob so it knows where to start. If given a non-glob path (also referred to as a singular glob), a maximum of one file will be emitted.
@@ -29,7 +28,7 @@ You can pass any combination of glob strings. One caveat is that you cannot **on
 
 ### `globStream(globs, [options])`
 
-Takes a glob string or an array of glob strings as the first argument and an options object as the second. Returns a stream of objects that contain `cwd`, `base` and `path` properties.
+Takes a glob string or an array of glob strings as the first argument and an options object as the second. Returns a [ReadableStream] of objects that contain `cwd`, `base` and `path` properties.
 
 #### Options
 
@@ -82,7 +81,7 @@ MIT
 <!-- prettier-ignore-start -->
 [fs-glob-url]: https://nodejs.org/docs/latest-v26.x/api/fs.html#fspromisesglobpattern-options
 [glob-parent-url]: https://github.com/gulpjs/glob-parent
-[streamx-url]: https://github.com/streamxorg/streamx#readable-stream
+[ReadableStream]: https://nodejs.org/docs/latest-v26.x/api/webstreams.html#class-readablestream
 <!-- prettier-ignore-end -->
 
 <!-- prettier-ignore-start -->
