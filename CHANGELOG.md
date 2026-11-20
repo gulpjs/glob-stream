@@ -1,5 +1,38 @@
 # Changelog
 
+## [9.0.0](https://github.com/gulpjs/glob-stream/compare/v8.0.4...v9.0.0) (2026-11-20)
+
+
+### ⚠ BREAKING CHANGES
+
+* Convert to ESM ([#172](https://github.com/gulpjs/glob-stream/issues/172))
+* Switch to WHATWG ReadableStream ([#170](https://github.com/gulpjs/glob-stream/issues/170))
+* Remove highWaterMark option ([#168](https://github.com/gulpjs/glob-stream/issues/168))
+* Replace file traversal + `anymatch` with Node's `fs.glob` API ([#155](https://github.com/gulpjs/glob-stream/issues/155))
+* Normalize paths based on the OS ([#165](https://github.com/gulpjs/glob-stream/issues/165))
+* Remove `root` option, absolute globs are from filesystem root ([#160](https://github.com/gulpjs/glob-stream/issues/160))
+* Remove `dot` option, require explicit dot extglob to find dotfiles ([#157](https://github.com/gulpjs/glob-stream/issues/157))
+* No longer error on unmatched singular glob, remove `allowEmpty` option ([#156](https://github.com/gulpjs/glob-stream/issues/156))
+* Normalize repository, dropping Node <26.1.0 ([#151](https://github.com/gulpjs/glob-stream/issues/151))
+
+### Features
+
+* Convert to ESM ([#172](https://github.com/gulpjs/glob-stream/issues/172)) ([4067f83](https://github.com/gulpjs/glob-stream/commit/4067f838bd8f172c09824c3d67680656aa92adab))
+* No longer error on unmatched singular glob, remove `allowEmpty` option ([#156](https://github.com/gulpjs/glob-stream/issues/156)) ([d53b5b4](https://github.com/gulpjs/glob-stream/commit/d53b5b49e7e8dfcfb584ac76195beeb8bdd806d5))
+* Normalize paths based on the OS ([#165](https://github.com/gulpjs/glob-stream/issues/165)) ([7f4c0e6](https://github.com/gulpjs/glob-stream/commit/7f4c0e654ff8d5462c2227d22b003c12cf966c83))
+* Remove `dot` option, require explicit dot extglob to find dotfiles ([#157](https://github.com/gulpjs/glob-stream/issues/157)) ([11b5cc1](https://github.com/gulpjs/glob-stream/commit/11b5cc1e062cdbb2d616a18433531b50235605bd))
+* Remove `root` option, absolute globs are from filesystem root ([#160](https://github.com/gulpjs/glob-stream/issues/160)) ([6f2655c](https://github.com/gulpjs/glob-stream/commit/6f2655c09a4b793b6d40038652155d3757d35298))
+* Replace file traversal + `anymatch` with Node's `fs.glob` API ([#155](https://github.com/gulpjs/glob-stream/issues/155)) ([bd89cdd](https://github.com/gulpjs/glob-stream/commit/bd89cdd57fa189de3bf440315e1a0f018a10a0e2))
+* Restrict allowed `uniqueBy` string options ([#173](https://github.com/gulpjs/glob-stream/issues/173)) ([211fbfa](https://github.com/gulpjs/glob-stream/commit/211fbfa2b2321db4bc9d8426d5ec5343906ec7aa))
+* Support `exclude` option, deprecate `ignore` option ([#177](https://github.com/gulpjs/glob-stream/issues/177)) ([1b173a1](https://github.com/gulpjs/glob-stream/commit/1b173a1ff159ee5db601a3d83bcf89b9c5198ca8))
+* Switch to WHATWG ReadableStream ([#170](https://github.com/gulpjs/glob-stream/issues/170)) ([c51fd0c](https://github.com/gulpjs/glob-stream/commit/c51fd0cf75096621cbf54bcd5a29530be7d198be))
+
+
+### Miscellaneous Chores
+
+* Normalize repository, dropping Node &lt;26.1.0 ([#151](https://github.com/gulpjs/glob-stream/issues/151)) ([1d36d1a](https://github.com/gulpjs/glob-stream/commit/1d36d1a0330378068f1227ed99773aff01b88dd5))
+* Remove highWaterMark option ([#168](https://github.com/gulpjs/glob-stream/issues/168)) ([222f772](https://github.com/gulpjs/glob-stream/commit/222f7721f90da801a3bad6d687b108cfc0cb479e))
+
 ### [8.0.4](https://www.github.com/gulpjs/glob-stream/compare/v8.0.3...v8.0.4) (2026-10-13)
 
 
