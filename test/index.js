@@ -985,6 +985,12 @@ function suite(moduleName, load) {
           message: /must be a string or array/,
         },
       );
+      t.assert.throws(
+        () => globStream("./fixtures/stuff/*.dmc", { exclude: 1234 }),
+        {
+          message: /must be a string or array/,
+        },
+      );
     });
 
     describe("cwd", () => {
@@ -1084,6 +1090,86 @@ function suite(moduleName, load) {
           globStream(globs, {
             cwd: dirname,
             ignore: ["./fixtures/stuff/run.dmc"],
+          }),
+          concat(assertion),
+        );
+      });
+    });
+
+    describe("exclude", () => {
+      it("accepts a string (in addition to array)", async (t) => {
+        const expected = [
+          {
+            cwd: dirname,
+            base: path.join(dirname, "/fixtures/stuff"),
+            path: path.join(dirname, "/fixtures/stuff/run.dmc"),
+          },
+        ];
+
+        function assertion(pathObjs) {
+          t.assert.containsAllEqual(pathObjs, expected);
+        }
+
+        await pipeline(
+          globStream("./fixtures/stuff/*.dmc", {
+            cwd: dirname,
+            exclude: "./fixtures/stuff/test.dmc",
+          }),
+          concat(assertion),
+        );
+      });
+
+      it("supports the exclude option instead of negation", async (t) => {
+        const expected = [
+          {
+            cwd: dirname,
+            base: path.join(dirname, "/fixtures/stuff"),
+            path: path.join(dirname, "/fixtures/stuff/run.dmc"),
+          },
+        ];
+
+        function assertion(pathObjs) {
+          t.assert.containsAllEqual(pathObjs, expected);
+        }
+
+        await pipeline(
+          globStream("./fixtures/stuff/*.dmc", {
+            cwd: dirname,
+            exclude: ["./fixtures/stuff/test.dmc"],
+          }),
+          concat(assertion),
+        );
+      });
+
+      it("supports the exclude option with dot extglob", async (t) => {
+        const expected = [];
+
+        function assertion(pathObjs) {
+          t.assert.containsAllEqual(pathObjs, expected);
+        }
+
+        await pipeline(
+          globStream("./fixtures/*(.)swag", {
+            cwd: dirname,
+            exclude: ["./fixtures/**"],
+          }),
+          concat(assertion),
+        );
+      });
+
+      it("can use both exclude option and negative globs", async (t) => {
+        const expected = [];
+
+        const globs = ["./fixtures/stuff/*.dmc", "!./fixtures/stuff/test.dmc"];
+
+        function assertion(pathObjs) {
+          t.assert.containsAllEqual(pathObjs, expected);
+        }
+
+        await pipeline(
+          globStream(globs, {
+            cwd: dirname,
+            exclude: ["./fixtures/stuff/run.dmc"],
           }),
           concat(assertion),
         );
