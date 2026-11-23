@@ -18,16 +18,21 @@
   },
   "type": "module",
   "main": "./index.js",
+  "types": "./index.d.ts",
   "exports": "./index.js",
   "files": [
     "index.js",
+    "index.d.ts",
+    "index.d.ts.map",
     "LICENSE"
   ],
   "scripts": {
     "format-check": "prettier . --check",
     "format-write": "prettier . --write",
     "lint": "eslint .",
-    "test": "node --test --experimental-test-coverage --test-reporter=spec --test-reporter-destination=stdout --test-reporter=lcov --test-reporter-destination=test/lcov.info \"test/*.js\""
+    "test": "node --test --experimental-test-coverage --test-reporter=spec --test-reporter-destination=stdout --test-reporter=lcov --test-reporter-destination=test/lcov.info \"test/*.js\"",
+    "types-check": "tsc index.js --checkJs --noEmit --types ./node.d.ts",
+    "types-write": "tsc index.js --checkJs --declaration --declarationMap --emitDeclarationOnly --types ./node.d.ts"
   },
   "dependencies": {
     "glob-parent": "^7.0.0"
@@ -37,7 +42,8 @@
     "eslint-config-gulp": "7.0.0",
     "prettier": "3.9.6",
     "readable-stream": "4.8.0",
-    "streamx": "2.28.1"
+    "streamx": "2.28.1",
+    "typescript": "6.0.3"
   },
   "keywords": [
     "glob",
